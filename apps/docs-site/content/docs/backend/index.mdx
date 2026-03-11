@@ -1,0 +1,110 @@
+---
+title: Overview
+description: The Convex backend — how it's organized and what each file does.
+---
+
+## What's in `packages/convex/convex/`
+
+The backend is a **Convex** project that handles authentication, data storage, payments, email, AI, and push notifications. It's shared between the web and mobile apps.
+
+## Architecture
+
+```
+convex/
+  ├─ schema.ts            ← Database tables and indexes
+  ├─ auth.ts              ← Google OAuth + magic link config
+  ├─ auth.config.ts       ← Auth provider registration
+  ├─ users.ts             ← User queries and mutations
+  ├─ teams.ts             ← Team management (CRUD, invites, roles)
+  ├─ payments.ts          ← Checkout, portal, payment queries
+  ├─ plans.ts             ← Plan tiers query
+  ├─ customers.ts         ← Customer lookup (internal)
+  ├─ webhooks.ts          ← Dodo webhook handlers (internal)
+  ├─ dodo.ts              ← Dodo Payments client setup
+  ├─ email.ts             ← Resend email + templates
+  ├─ storage.ts           ← Cloudflare R2 file storage
+  ├─ agent.ts             ← AI agent (threads + generation)
+  ├─ rag.ts               ← RAG (embeddings + search)
+  ├─ streaming.ts         ← Persistent text streaming (AI chat)
+  ├─ pushNotifications.ts ← Push notification mutations
+  ├─ inviteCleanup.ts     ← Cron job: clean expired invites
+  ├─ http.ts              ← HTTP routes (auth, webhooks, streaming)
+  ├─ crons.ts             ← Scheduled jobs
+  ├─ convex.config.ts     ← Component registration
+  └─ lib/                 ← Shared helper functions
+      ├─ users.ts         ← getCurrentUser, isAdmin
+      ├─ teams.ts         ← membership checks, role guards
+      ├─ billing.ts       ← plan resolution, customer upsert
+      ├─ plans.ts         ← plan definitions + product IDs
+      ├─ storage.ts       ← R2 upload/download/delete
+      ├─ pushNotifications.ts ← token management, send helpers
+      ├─ dodoWebhooks.ts  ← webhook event handler config
+      └─ constants.ts     ← APP_NAME, DEFAULT_FROM_EMAIL
+```
+
+## Convex components
+
+The backend uses 7 Convex components, registered in `convex.config.ts`:
+
+| Component | Package | Purpose |
+|-----------|---------|---------|
+| R2 | `@convex-dev/r2` | File storage via Cloudflare R2 |
+| Push Notifications | `@convex-dev/expo-push-notifications` | Expo push notifications |
+| Dodo Payments | `@dodopayments/convex` | Payment processing |
+| Resend | `@convex-dev/resend` | Transactional email |
+| Agent | `@convex-dev/agent` | AI agent with threads |
+| RAG | `@convex-dev/rag` | Vector search + embeddings |
+| Persistent Text Streaming | `@convex-dev/persistent-text-streaming` | AI text streaming |
+
+## Key patterns
+
+### Helper functions in `lib/`
+
+Instead of using `ctx.runQuery` or `ctx.runMutation` within queries/mutations, shared logic lives in `lib/` as plain async functions:
+
+```ts
+// lib/users.ts
+export async function getCurrentUser(ctx: QueryCtx): Promise<Doc<"users"> | null> {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) return null;
+  return await ctx.db.get(userId);
+}
+
+// users.ts (the public query)
+export const current = query({
+  args: {},
+  returns: v.union(userValidator, v.null()),
+  handler: async (ctx) => {
+    return await Users.getCurrentUser(ctx);
+  },
+});
+```
+
+### Auth checks
+
+Every public function checks authentication:
+
+```ts
+const userId = await getAuthUserId(ctx);
+if (!userId) throw new Error("Unauthorized");
+```
+
+### Return validators
+
+Every function declares its return type with `returns:`:
+
+```ts
+export const current = query({
+  args: {},
+  returns: v.union(userValidator, v.null()),  // ← explicit return type
+  handler: async (ctx) => { ... },
+});
+```
+
+### Internal functions
+
+Functions called by cron jobs, webhooks, or other server-side code use `internalMutation` / `internalQuery` / `internalAction`. These can't be called from the client.
+
+## Next steps
+
+Continue with [Schema](/docs/backend/schema) to see the database structure.

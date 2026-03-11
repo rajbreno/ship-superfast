@@ -1,0 +1,18 @@
+# AI Agent
+# Agents organize your AI workflows into units, with message history and vector search built in.
+# Category: Durable Functions
+
+## Install
+- Command: npm install @convex-dev/agent
+
+## Links
+- Directory: https://www.convex.dev/components/agent
+- Markdown: https://www.convex.dev/components/agent/agent.md
+- llms.txt: https://www.convex.dev/components/agent/llms.txt
+- npm: https://www.npmjs.com/package/%40convex-dev%2Fagent
+- GitHub: https://github.com/get-convex/agent
+
+## Details
+- Version: 0.3.2
+- Weekly downloads: 27,012
+- Author: get-convex

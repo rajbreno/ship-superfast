@@ -1,0 +1,112 @@
+---
+title: Dashboard
+description: The protected dashboard — layout, sidebar, auth guard, and overview page.
+---
+
+## Overview
+
+The dashboard is the main area users see after signing in. It lives at `/dashboard` and includes a sidebar, a header, and content pages for profile, team, and billing.
+
+All dashboard pages are protected — unauthenticated users are redirected to `/sign-in`.
+
+## Layout
+
+The dashboard layout (`app/dashboard/layout.tsx`) does three things:
+
+1. **Auth guard** — checks if the user is signed in, redirects to `/sign-in` if not
+2. **Auto team creation** — ensures the user has at least one team on first sign-in
+3. **Sidebar + header** — wraps all dashboard pages with navigation
+
+The provider stack inside the dashboard:
+
+```
+TooltipProvider
+  └─ SidebarProvider
+      └─ TeamProvider       ← active team context
+          ├─ AppSidebar     ← left sidebar
+          └─ SidebarInset
+              ├─ Header     ← page title + theme toggle
+              └─ {children} ← page content
+```
+
+## Sidebar
+
+The sidebar (`components/navigation/app-sidebar.tsx`) has three sections:
+
+### Header — Team switcher
+
+A dropdown at the top showing the active team name and logo. Users can switch between teams they belong to. See [Team](/docs/web/team) for details.
+
+### Content — Navigation links
+
+Links to each dashboard page. Items come from `lib/config.ts`:
+
+```ts
+const NAV_ITEMS = [
+  { title: "Dashboard", href: "/dashboard" },
+  { title: "Team", href: "/dashboard/team" },
+  { title: "Billing", href: "/dashboard/billing" },
+  { title: "Account", href: "/dashboard/profile" },
+];
+```
+
+Each item has an icon from Hugeicons. The active item is highlighted based on the current URL.
+
+### Footer — User menu
+
+Shows the user's avatar, name, and email. Clicking it opens a dropdown with links to Account, Billing, and a "Log out" button.
+
+### Collapsible
+
+The sidebar supports `collapsible="icon"` mode — it can collapse to just icons. On mobile, it opens as a sheet overlay.
+
+## Overview page
+
+The dashboard home page (`app/dashboard/page.tsx`) shows:
+
+### Welcome section
+
+The user's avatar, name, admin badge (if applicable), and the active team name + role.
+
+### Pending invites
+
+If the user has pending team invitations, they appear as an alert with accept/decline buttons. Uses the `IncomingInvites` component.
+
+### Stat cards
+
+Three cards in a grid:
+
+| Card | Shows |
+|------|-------|
+| **Team Plan** | The active team's plan (Free, Pro, or Max) |
+| **Transactions** | Total payment count for the active team |
+| **Auth** | Connection status (Google OAuth) |
+
+All data is fetched in real time from Convex — cards update automatically when data changes.
+
+## Adding a new dashboard page
+
+1. Create `app/dashboard/your-page/page.tsx`
+2. Add an entry to `NAV_ITEMS` in `lib/config.ts`:
+   ```ts
+   { title: "Your Page", href: "/dashboard/your-page" }
+   ```
+3. Add an icon mapping in `app-sidebar.tsx`:
+   ```ts
+   const NAV_ICONS = {
+     // ...existing
+     "/dashboard/your-page": YourIcon,
+   };
+   ```
+
+The new page automatically gets the sidebar, header, and auth protection from the dashboard layout.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `app/dashboard/layout.tsx` | Auth guard, team init, sidebar layout |
+| `app/dashboard/page.tsx` | Dashboard overview (stat cards, invites) |
+| `components/navigation/app-sidebar.tsx` | Sidebar with nav links + user menu |
+| `components/navigation/team-switcher.tsx` | Team selection dropdown |
+| `lib/config.ts` | Navigation items |

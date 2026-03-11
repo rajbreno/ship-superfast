@@ -1,0 +1,145 @@
+---
+title: Installation
+description: Clone the repo, install dependencies, and start developing.
+---
+
+## 1. Clone the repo
+
+```bash
+git clone https://github.com/rajbreno/ship-superfast.git
+cd ship-superfast
+```
+
+## 2. Install dependencies
+
+```bash
+pnpm install
+```
+
+This installs everything — web app, mobile app, backend, shared packages, and docs — in one command. Turborepo and pnpm workspaces handle linking them together.
+
+## 3. Set up Convex
+
+Create a free project at [convex.dev](https://dashboard.convex.dev) if you haven't already, then initialize it locally:
+
+```bash
+cd packages/convex
+npx convex dev
+```
+
+The first time you run this, it will ask you to:
+1. Log in to your Convex account
+2. Create a new project (or link to an existing one)
+
+Once connected, it generates a `.env.local` file with your `CONVEX_URL`. Keep this terminal running — it syncs your backend code to Convex in real time.
+
+## 4. Set up Convex environment variables
+
+Convex environment variables are **not** read from `.env` files. You set them in the Convex dashboard.
+
+Go to [dashboard.convex.dev](https://dashboard.convex.dev) → your project → **Settings → Environment Variables**, and add these:
+
+### Required (auth won't work without these)
+
+| Variable | Value |
+|----------|-------|
+| `AUTH_GOOGLE_ID` | Your Google OAuth Client ID |
+| `AUTH_GOOGLE_SECRET` | Your Google OAuth Client Secret |
+| `SITE_URL` | `http://localhost:3000` (change to your domain in production) |
+
+### Optional (add as you need each feature)
+
+| Variable | Feature | Where to get it |
+|----------|---------|-----------------|
+| `AUTH_RESEND_KEY` | Magic link email sign-in | [resend.com/api-keys](https://resend.com/api-keys) |
+| `AUTH_RESEND_FROM` | Sender email for magic links | A verified email in Resend (default: `onboarding@resend.dev`) |
+| `DODO_PAYMENTS_API_KEY` | Billing & subscriptions | [Dodo Payments dashboard](https://dodopayments.com) |
+| `DODO_PAYMENTS_WEBHOOK_SECRET` | Verify webhook signatures | Dodo webhook settings |
+| `DODO_PAYMENTS_ENVIRONMENT` | `test_mode` or `live_mode` | Set to `test_mode` for development |
+| `R2_TOKEN` | File storage | Cloudflare R2 dashboard |
+| `R2_ACCESS_KEY_ID` | File storage | Cloudflare R2 dashboard |
+| `R2_SECRET_ACCESS_KEY` | File storage | Cloudflare R2 dashboard |
+| `R2_ENDPOINT` | File storage | Cloudflare R2 dashboard |
+| `R2_BUCKET` | File storage | Cloudflare R2 dashboard |
+| `RESEND_API_KEY` | Transactional emails | [resend.com/api-keys](https://resend.com/api-keys) |
+| `OPENAI_API_KEY` | AI Agent + RAG | [platform.openai.com](https://platform.openai.com) |
+| `WEB_ORIGIN` | CORS for AI streaming | `http://localhost:3000` |
+
+## 5. Set up the web app
+
+```bash
+cp apps/web/.env.example apps/web/.env.local
+```
+
+Open `apps/web/.env.local` and set your Convex URL:
+
+```bash
+NEXT_PUBLIC_CONVEX_URL=https://your-project.convex.cloud
+```
+
+You can find this URL in the Convex dashboard or in the `packages/convex/.env.local` file that was generated in step 3.
+
+## 6. Set up the mobile app
+
+```bash
+cp apps/mobile/.env.example apps/mobile/.env.local
+```
+
+Open `apps/mobile/.env.local` and set the same Convex URL:
+
+```bash
+EXPO_PUBLIC_CONVEX_URL=https://your-project.convex.cloud
+```
+
+## 7. Start everything
+
+Open **three terminals** and run:
+
+```bash
+# Terminal 1 — Convex backend (if not already running from step 3)
+cd packages/convex && npx convex dev
+
+# Terminal 2 — Web app
+cd apps/web && pnpm dev
+
+# Terminal 3 — Mobile app
+cd apps/mobile && pnpm dev
+```
+
+Or use the Turborepo shortcut from the root to start web + mobile + docs at once:
+
+```bash
+pnpm dev
+```
+
+Note that `pnpm dev` from the root starts **all apps** simultaneously. You still need Convex running separately in its own terminal (`cd packages/convex && npx convex dev`).
+
+### What you should see
+
+| App | URL |
+|-----|-----|
+| Web | [http://localhost:3000](http://localhost:3000) |
+| Docs | [http://localhost:3001](http://localhost:3001) |
+| Mobile | Scan the QR code in your terminal with Expo Go, or press `i` for iOS simulator / `a` for Android emulator |
+
+## Troubleshooting
+
+### "Module not found" errors
+
+Run `pnpm install` from the root again. Monorepo linking can sometimes get out of sync.
+
+### Convex functions not updating
+
+Make sure `npx convex dev` is running. It watches for file changes and pushes them to your deployment automatically.
+
+### Mobile app can't connect to Convex
+
+Check that `EXPO_PUBLIC_CONVEX_URL` in `apps/mobile/.env.local` matches your Convex URL exactly. Restart the Expo dev server after changing env vars.
+
+### Google sign-in not working
+
+Make sure `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` are set in the **Convex dashboard** (not in a local `.env` file). Also check that your redirect URIs are configured in Google Cloud Console.
+
+## Next steps
+
+Now that everything is running, read [Project Structure](/docs/guide/project-structure) to understand how the codebase is organized.

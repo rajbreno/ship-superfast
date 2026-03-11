@@ -1,0 +1,69 @@
+---
+title: Cron Jobs
+description: Scheduled tasks that run automatically.
+---
+
+## Overview
+
+Cron jobs are defined in `crons.ts` using Convex's `cronJobs()`. Currently there is one scheduled job.
+
+## Configured jobs
+
+### Cleanup expired invites
+
+Runs daily at 03:00 UTC. Removes stale team invites to keep the database clean.
+
+```ts
+const crons = cronJobs();
+
+crons.cron(
+  "cleanup-expired-invites",
+  "0 3 * * *",
+  internal.inviteCleanup.cleanupExpiredInvites,
+);
+```
+
+The cleanup logic in `inviteCleanup.ts`:
+- **Pending invites older than 7 days** — deleted (expired, never accepted)
+- **Accepted/declined invites older than 30 days** — deleted (historical cleanup)
+
+```ts
+export const cleanupExpiredInvites = internalMutation({
+  handler: async (ctx) => {
+    const allInvites = await ctx.db.query("teamInvites").collect();
+
+    for (const invite of allInvites) {
+      const age = Date.now() - invite.createdAt;
+
+      if (invite.status === "pending" && age > 7 * 24 * 60 * 60 * 1000) {
+        await ctx.db.delete(invite._id);
+      } else if (
+        (invite.status === "accepted" || invite.status === "declined") &&
+        age > 30 * 24 * 60 * 60 * 1000
+      ) {
+        await ctx.db.delete(invite._id);
+      }
+    }
+  },
+});
+```
+
+## Adding a new cron job
+
+1. Create your internal function in a new file or existing one
+2. Add a `crons.cron()` or `crons.interval()` call in `crons.ts`:
+
+```ts
+// Run every hour
+crons.interval("my-job", { hours: 1 }, internal.myModule.myFunction);
+
+// Run at specific time (cron syntax)
+crons.cron("my-job", "0 */6 * * *", internal.myModule.myFunction);
+```
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `crons.ts` | Cron job definitions |
+| `inviteCleanup.ts` | Expired invite cleanup logic |

@@ -1,0 +1,106 @@
+---
+title: Billing
+description: Billing screen — subscription plans, checkout, customer portal, and payment history.
+---
+
+## Overview
+
+The billing screen lives at `src/app/(tabs)/billing.tsx`. It shows the team's current plan, available upgrades, and payment history. Billing is tied to the **active team**, not individual users.
+
+All payments go through **Dodo Payments**. There are no in-app purchases — checkout and billing management happen in the **external browser** via `Linking.openURL`.
+
+## What each role sees
+
+| Role | Sees plans | Can upgrade | Can manage billing | Sees history |
+|------|-----------|------------|-------------------|-------------|
+| **Owner** | Yes | Yes | Yes | Yes |
+| **Admin** | Yes | Yes | Yes | Yes |
+| **Member** | No | No | No | Yes (if payments exist) |
+
+Members see a notice saying "Plan upgrades are managed by your team owner or admin."
+
+## Screen sections
+
+### Billing summary
+
+A card showing the team name, current plan badge (Free / Pro / Max), and member count. Owners and admins also see a "Manage Billing" button.
+
+### Plan cards
+
+Each plan card shows:
+- Plan name and price
+- Feature list with checkmarks
+- Action button (Upgrade / Current Plan / Switch)
+
+The button logic depends on your current plan:
+
+| Current plan | Pro card button | Max card button |
+|-------------|----------------|----------------|
+| Free | "Upgrade to Pro" → checkout | "Upgrade to Max" → checkout |
+| Pro | "Current Plan" (disabled) | "Upgrade to Max" → portal |
+| Max | "Switch to Pro" → portal | "Current Plan" (disabled) |
+
+### Checkout flow
+
+For first-time subscribers (upgrading from Free), checkout opens in the external browser:
+
+```ts
+const createCheckout = useAction(api.payments.createCheckout);
+
+const result = await createCheckout({
+  product_cart: [{ product_id: plan.productId, quantity: 1 }],
+  teamId,
+});
+
+// Open Dodo's hosted checkout page in the browser
+await Linking.openURL(result.checkout_url);
+```
+
+After payment, a webhook from Dodo updates the team's plan in the database. The app reflects the change in real time.
+
+### Plan changes (upgrade/downgrade)
+
+For users already on a paid plan, changes go through the Dodo customer portal:
+
+```ts
+const getPortal = useAction(api.payments.getCustomerPortal);
+
+const result = await getPortal({ send_email: false, teamId });
+await Linking.openURL(result.portal_url);
+```
+
+The portal opens in the external browser and handles proration, plan switching, and cancellation.
+
+### Billing history
+
+A list of all payments for the active team. Each payment card shows:
+- Plan badge (Pro / Max)
+- Status badge (Active, Succeeded, Cancelled, Refunded, etc.)
+- Amount (formatted from cents)
+- Date
+
+Status badges use HeroUI Native `Chip` components with appropriate colors:
+
+```ts
+const STATUS_CONFIG = {
+  active:    { label: "Active",    color: "success", variant: "tertiary" },
+  succeeded: { label: "Succeeded", color: "success", variant: "tertiary" },
+  cancelled: { label: "Cancelled", color: "danger",  variant: "tertiary" },
+  refunded:  { label: "Refunded",  color: "default", variant: "tertiary" },
+  // ...more statuses
+};
+```
+
+## Why external browser?
+
+The app opens Dodo checkout and portal URLs in the system browser (`Linking.openURL`) instead of an in-app browser. This approach:
+- Avoids the complexity of in-app purchases and dual billing systems
+- Works on both iOS and Android
+- Keeps a single source of truth for billing (Dodo Payments)
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `src/app/(tabs)/billing.tsx` | Billing screen (plans, checkout, history) |
+| `src/hooks/useActiveTeam.ts` | `useActiveTeam()` — active team context |

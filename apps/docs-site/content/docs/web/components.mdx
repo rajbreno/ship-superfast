@@ -1,0 +1,134 @@
+---
+title: Components
+description: shadcn/ui components, providers, and the cn() utility.
+---
+
+## shadcn/ui
+
+The web app uses [shadcn/ui](https://ui.shadcn.com) for UI components. These are not imported from a package — they live as source files in your project at `components/ui/`. You own the code and can modify it directly.
+
+### Configuration
+
+The shadcn config is in `components.json`:
+
+```json
+{
+  "style": "radix-maia",
+  "rsc": true,
+  "tsx": true,
+  "iconLibrary": "hugeicons",
+  "tailwind": {
+    "css": "app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true
+  }
+}
+```
+
+Key settings:
+- **Style**: `radix-maia` — a modern preset from shadcn
+- **Icons**: [Hugeicons](https://hugeicons.com) (not Lucide) — used throughout the app
+- **RSC**: React Server Components enabled
+- **Registry**: Also includes `@react-bits` for extra components
+
+### Installed components
+
+There are 55 components installed in `components/ui/`:
+
+accordion, alert, alert-dialog, aspect-ratio, avatar, badge, breadcrumb, button, button-group, calendar, card, carousel, chart, checkbox, collapsible, combobox, command, context-menu, dialog, direction, drawer, dropdown-menu, empty, field, hover-card, input, input-group, input-otp, item, kbd, label, menubar, native-select, navigation-menu, pagination, popover, progress, radio-group, resizable, scroll-area, select, separator, sheet, sidebar, skeleton, slider, sonner, spinner, switch, table, tabs, textarea, toggle, toggle-group, tooltip
+
+### Adding new components
+
+```bash
+cd apps/web
+pnpm dlx shadcn@latest add <component-name>
+```
+
+This downloads the component source into `components/ui/`.
+
+## The `cn()` utility
+
+Located at `lib/utils.ts`, this is a helper for merging Tailwind class names:
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+Use it when you need to conditionally combine classes:
+
+```tsx
+<div className={cn("rounded-lg p-4", isActive && "bg-primary text-white")} />
+```
+
+`twMerge` handles conflicts — if two classes target the same property (like `p-4` and `p-6`), the last one wins.
+
+## Providers
+
+The app uses four context providers, all in `components/providers/`:
+
+### ConvexClientProvider
+
+Connects the app to the Convex backend. Wraps the entire app.
+
+```ts
+import { ConvexReactClient, ConvexProvider } from "convex/react";
+import { ConvexAuthProvider } from "@convex-dev/auth/react";
+```
+
+Gives every component access to `useQuery()`, `useMutation()`, and `useAction()` for talking to the backend.
+
+### SessionProvider
+
+Provides the current user and auth state. See [Authentication](/docs/web/authentication) for details.
+
+```ts
+const { currentUser, isSignedIn, isLoading, isAdmin, signOut } = useSession();
+```
+
+### TeamProvider
+
+Manages the active team. The user can be a member of multiple teams and switch between them.
+
+```ts
+const { activeTeam, teams, isLoading, switchTeam } = useTeam();
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `activeTeam` | `Team \| null` | The currently selected team |
+| `teams` | `Team[]` | All teams the user belongs to |
+| `isLoading` | `boolean` | `true` while fetching teams |
+| `switchTeam` | `(teamId) => void` | Switch to a different team |
+
+The active team is persisted in `localStorage` so it survives page refreshes.
+
+### ThemeProvider
+
+Handles light/dark mode. See [Theming](/docs/web/theming) for details.
+
+## Icons
+
+The app uses [Hugeicons](https://hugeicons.com) instead of Lucide. Import icons like this:
+
+```tsx
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Mail01Icon } from "@hugeicons/core-free-icons";
+
+<HugeiconsIcon icon={Mail01Icon} className="h-5 w-5" />
+```
+
+Browse available icons at [hugeicons.com](https://hugeicons.com).
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `components/ui/` | All 55 shadcn/ui components |
+| `components/providers/` | Convex, session, team, theme providers |
+| `components.json` | shadcn/ui configuration |
+| `lib/utils.ts` | `cn()` class name utility |

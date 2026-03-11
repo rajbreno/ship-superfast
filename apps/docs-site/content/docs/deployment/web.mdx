@@ -1,0 +1,56 @@
+---
+title: Web
+description: Deploying the Next.js web app to Vercel.
+---
+
+## Overview
+
+The web app deploys to **Vercel** as a standard Next.js application.
+
+## Steps
+
+### 1. Connect to Vercel
+
+1. Push your repository to GitHub
+2. Go to [vercel.com/new](https://vercel.com/new) and import the repo
+3. Set the **Root Directory** to `apps/web`
+4. Vercel auto-detects Next.js — no build settings needed
+
+### 2. Set environment variables
+
+In the Vercel dashboard, add:
+
+| Variable | Value |
+|----------|-------|
+| `NEXT_PUBLIC_CONVEX_URL` | Your Convex production deployment URL |
+
+This is the only required environment variable. The web app gets everything else from the Convex backend.
+
+### 3. Deploy
+
+Vercel deploys automatically on every push to `main`. For manual deploys:
+
+```bash
+cd apps/web
+pnpm vercel --prod
+```
+
+### 4. Update backend references
+
+After deploying, update the Convex dashboard:
+- Set `SITE_URL` to your Vercel URL (e.g., `https://yourapp.vercel.app`)
+- Add the URL to `ALLOWED_REDIRECT_PREFIXES` in `auth.ts`
+- Add the OAuth redirect URI in Google Cloud Console
+
+## Custom domain
+
+1. Add your domain in Vercel dashboard → Settings → Domains
+2. Update DNS records as instructed
+3. Update `SITE_URL` in Convex dashboard to the custom domain
+4. Update Google OAuth redirect URIs
+
+## Monorepo configuration
+
+Vercel handles Turborepo monorepos automatically. The `apps/web` app imports from `packages/convex` and `packages/shared` — Vercel resolves these workspace dependencies during build.
+
+If you need to customize the build, the `turbo.json` at the root defines the build pipeline.

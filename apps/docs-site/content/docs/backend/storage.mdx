@@ -1,0 +1,63 @@
+---
+title: Storage
+description: File storage via Cloudflare R2.
+---
+
+## Overview
+
+File storage uses `@convex-dev/r2` — a Convex component that wraps Cloudflare R2 for object storage with signed URLs.
+
+## Setup
+
+The R2 component is instantiated in `storage.ts`:
+
+```ts
+import { R2 } from "@convex-dev/r2";
+const r2 = new R2(components.r2);
+```
+
+## Public API
+
+### Client upload
+
+The client upload API exposes two functions for use with `@convex-dev/r2/react`:
+
+```ts
+export const { generateUploadUrl, syncMetadata } = r2.clientApi({
+  checkUpload: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+  },
+});
+```
+
+`checkUpload` runs before every upload to verify the user is authenticated.
+
+### `getFileUrl` (query)
+
+Returns a signed URL for accessing a stored file. Default expiration is 7 days.
+
+```ts
+const url = useQuery(api.storage.getFileUrl, { key: "my-file.png" });
+```
+
+## Helper functions (`lib/storage.ts`)
+
+For server-side file operations (inside actions):
+
+| Function | Description |
+|----------|-------------|
+| `uploadFile(ctx, file, { key, type })` | Upload a file, returns the R2 key |
+| `getSignedUrl(key, expiresIn?)` | Get a signed URL (default 7 days) |
+| `deleteFile(ctx, key)` | Delete a file from R2 |
+
+## Environment variables
+
+R2 credentials are configured in the Convex dashboard. See the `@convex-dev/r2` docs for the required variables (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`).
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `storage.ts` | Client upload API + getFileUrl query |
+| `lib/storage.ts` | Server-side upload/download/delete helpers |

@@ -1,0 +1,19 @@
+{
+  "title": "Web",
+  "description": "Next.js 16 + shadcn/ui",
+  "icon": "BrowserIcon",
+  "root": true,
+  "pages": [
+    "index",
+    "---Setup---",
+    "authentication",
+    "theming",
+    "components",
+    "---Pages---",
+    "landing-page",
+    "dashboard",
+    "profile",
+    "team",
+    "billing"
+  ]
+}

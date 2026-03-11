@@ -1,0 +1,120 @@
+---
+title: Authentication
+description: How sign-in works on the web app — Google OAuth and magic link email.
+---
+
+## How it works
+
+The web app supports two sign-in methods:
+1. **Google OAuth** — one-click sign-in with a Google account
+2. **Magic link email** — enter your email, get a sign-in link in your inbox
+
+Both are powered by `@convex-dev/auth` on the backend. The web app just calls `signIn()` and the library handles the rest (redirects, tokens, sessions).
+
+## The sign-in page
+
+Located at `app/sign-in/page.tsx`, the page has two sections:
+- **Left side** — a background image with branding (hidden on mobile)
+- **Right side** — the sign-in form
+
+### Google sign-in
+
+When a user clicks "Sign in with Google":
+
+```ts
+const { signIn } = useAuthActions();
+
+const handleGoogleSignIn = async () => {
+  await signIn("google", { redirectTo: "/dashboard" });
+};
+```
+
+This opens Google's OAuth consent screen. After the user approves, they're redirected to `/dashboard`. Convex creates or updates their user record automatically.
+
+### Magic link sign-in
+
+When a user submits their email:
+
+```ts
+const handleEmailSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  await signIn("resend", formData);
+  setEmailSent(true);
+};
+```
+
+This sends a sign-in email through Resend. The page shows a "Check your email" message. When the user clicks the link, they're signed in.
+
+Magic link requires `AUTH_RESEND_KEY` and `AUTH_RESEND_FROM` to be set in the Convex dashboard. Without these, only Google sign-in works.
+
+### Auto-redirect
+
+If a user visits `/sign-in` while already signed in, they're redirected to `/dashboard`:
+
+```ts
+const { isSignedIn } = useSession();
+
+useEffect(() => {
+  if (isSignedIn) {
+    router.replace("/dashboard");
+  }
+}, [isSignedIn, router]);
+```
+
+## The auth guard
+
+The dashboard layout (`app/dashboard/layout.tsx`) protects all dashboard pages. If a user isn't signed in, they're redirected to the sign-in page:
+
+```ts
+const { isSignedIn, isLoading } = useSession();
+
+useEffect(() => {
+  if (!isLoading && !isSignedIn) {
+    router.replace("/sign-in");
+  }
+}, [isLoading, isSignedIn, router]);
+```
+
+While loading, a spinner is shown. Once loaded, unauthenticated users are sent to `/sign-in` — they never see the dashboard content.
+
+## `useSession()` hook
+
+This is the main way to access auth state anywhere in the app. It comes from `components/providers/session-provider.tsx`:
+
+```ts
+const { currentUser, isSignedIn, isLoading, isAdmin, signOut } = useSession();
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `currentUser` | `Doc<"users"> \| null` | The full user document, or `null` if not signed in |
+| `isSignedIn` | `boolean` | `true` when signed in |
+| `isLoading` | `boolean` | `true` while fetching the user |
+| `isAdmin` | `boolean` | `true` if the user has the `"admin"` role |
+| `signOut` | `() => void` | Call this to sign out |
+
+## Auto team creation
+
+When a user signs into the dashboard for the first time, the layout automatically creates a personal team for them:
+
+```ts
+const ensureTeam = useMutation(api.teams.ensureTeam);
+
+useEffect(() => {
+  if (isSignedIn) {
+    ensureTeam();
+  }
+}, [isSignedIn, ensureTeam]);
+```
+
+This runs once on sign-in. If the user already has a team, it does nothing.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `app/sign-in/page.tsx` | Sign-in page (Google + magic link) |
+| `app/dashboard/layout.tsx` | Auth guard + auto team creation |
+| `components/providers/session-provider.tsx` | `useSession()` hook |
+| `components/providers/convex-client-provider.tsx` | Convex + ConvexAuth setup |

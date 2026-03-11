@@ -1,0 +1,17 @@
+# RAG
+# Retrieval-Augmented Generation (RAG) for use with your AI products and Agents
+# Category: AI
+
+## Install
+- Command: npm install @convex-dev/rag
+
+## Links
+- Directory: https://www.convex.dev/components/rag
+- Markdown: https://www.convex.dev/components/rag/rag.md
+- llms.txt: https://www.convex.dev/components/rag/llms.txt
+- npm: https://www.npmjs.com/package/%40convex-dev%2Frag
+- GitHub: https://github.com/get-convex/rag
+
+## Details
+- Version: 0.7.1
+- Weekly downloads: 14,583

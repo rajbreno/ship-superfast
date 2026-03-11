@@ -1,0 +1,89 @@
+---
+title: Prerequisites
+description: What you need before setting up the kit.
+---
+
+## Tools to install
+
+You need these on your machine before starting:
+
+| Tool | Version | What it's for |
+|------|---------|---------------|
+| **Node.js** | 20+ | Runs everything — backend, web app, mobile bundler |
+| **pnpm** | 9+ | Package manager (this project uses pnpm, not npm or yarn) |
+| **Git** | any | Clone the repo and track changes |
+
+### Install Node.js
+
+Download from [nodejs.org](https://nodejs.org) or use a version manager like [nvm](https://github.com/nvm-sh/nvm):
+
+```bash
+nvm install 20
+nvm use 20
+```
+
+The repo includes a `.nvmrc` file, so `nvm use` will pick the right version automatically.
+
+### Install pnpm
+
+```bash
+npm install -g pnpm
+```
+
+Or see [pnpm.io/installation](https://pnpm.io/installation) for other methods.
+
+## Accounts you need
+
+The kit connects to several services. You'll need to create free accounts and get API keys for each one you want to use.
+
+### Required
+
+These are needed for the app to run at all:
+
+| Service | What it does | Sign up |
+|---------|-------------|---------|
+| **Convex** | Database + backend | [convex.dev](https://convex.dev) |
+| **Google Cloud** | OAuth sign-in | [console.cloud.google.com](https://console.cloud.google.com) |
+
+### Optional (enable features)
+
+Each of these powers a specific feature. You can skip any you don't need — the app still works without them.
+
+| Service | Feature | Sign up |
+|---------|---------|---------|
+| **Dodo Payments** | Billing, subscriptions, checkout | [dodopayments.com](https://dodopayments.com) |
+| **Cloudflare R2** | File storage (uploads, downloads) | [cloudflare.com](https://www.cloudflare.com) |
+| **Resend** | Transactional emails | [resend.com](https://resend.com) |
+| **OpenAI** | AI Agent + RAG (vector search) | [platform.openai.com](https://platform.openai.com) |
+
+## For mobile development
+
+If you want to run the mobile app on a real device or simulator:
+
+| Platform | What you need |
+|----------|---------------|
+| **iOS** | macOS + Xcode (free from Mac App Store) |
+| **Android** | Android Studio + an emulator or a physical device |
+| **Both** | [Expo Go](https://expo.dev/go) app on your phone for quick testing |
+
+You don't need Xcode or Android Studio if you only want to work on the **web app** or the **backend**.
+
+## Google OAuth setup
+
+Both the web and mobile apps use Google sign-in. Here's how to set it up:
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project (or pick an existing one)
+3. Navigate to **APIs & Services → Credentials**
+4. Click **Create Credentials → OAuth 2.0 Client ID**
+5. For **Application type**, choose **Web application**
+6. Add these **Authorized redirect URIs**:
+   - `http://localhost:3000` (local web dev)
+   - Your production URL when you deploy
+7. Copy the **Client ID** and **Client Secret** — you'll need them in the environment variables step
+
+For mobile, the same OAuth client works — Expo handles the redirect through a web browser session.
+
+## Next steps
+
+Once you have Node.js, pnpm, and at least a Convex + Google account, head to [Installation](/docs/guide/installation).

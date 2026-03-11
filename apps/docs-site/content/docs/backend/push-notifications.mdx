@@ -1,0 +1,69 @@
+---
+title: Push Notifications
+description: Expo push notifications — token management and sending.
+---
+
+## Overview
+
+Push notifications use `@convex-dev/expo-push-notifications`. The backend manages device tokens and provides functions to send notifications to individual users or broadcast to all devices.
+
+## Functions (`pushNotifications.ts`)
+
+### Public mutations
+
+| Function | Description |
+|----------|-------------|
+| `recordDeviceToken` | Save a device's push token (called when permissions granted) |
+| `linkUserDevice` | Link an authenticated user to their device (enables personal notifications) |
+| `unlinkUserDevice` | Unlink user from device (called on sign out) |
+
+### Internal mutations
+
+| Function | Description |
+|----------|-------------|
+| `broadcastNotification` | Send a notification to all registered devices |
+| `sendNotificationToUser` | Send a notification to a specific user's devices |
+
+## How device linking works
+
+```
+1. App launches → recordDeviceToken(deviceId, token)
+   → Stores token in push component + registeredDevices table
+
+2. User signs in → linkUserDevice(deviceId, token)
+   → Associates the device with the user's ID
+
+3. Backend sends notification → sendNotificationToUser(userId, ...)
+   → Finds all devices linked to that user → sends push
+
+4. User signs out → unlinkUserDevice(deviceId)
+   → Removes the user association (device still registered)
+```
+
+## Helper functions (`lib/pushNotifications.ts`)
+
+| Function | Description |
+|----------|-------------|
+| `recordToken(ctx, deviceId, token)` | Register a push token |
+| `linkDevice(ctx, deviceId, token?)` | Link device to current user |
+| `unlinkDevice(ctx, deviceId)` | Unlink device from current user |
+| `sendToDevice(ctx, deviceId, notification)` | Send to one device |
+| `sendToUser(ctx, userId, notification)` | Send to all of a user's devices |
+| `broadcastToAll(ctx, notification)` | Send to all registered devices |
+
+## Notification payload
+
+```ts
+interface NotificationPayload {
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;  // Custom data forwarded to the app
+}
+```
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `pushNotifications.ts` | Public + internal push notification mutations |
+| `lib/pushNotifications.ts` | Token management, send helpers |

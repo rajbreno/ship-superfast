@@ -1,0 +1,128 @@
+---
+title: Billing
+description: Payments, subscriptions, webhooks, and plan management via Dodo Payments.
+---
+
+## Overview
+
+Billing uses **Dodo Payments** as the single payment provider. The backend handles checkout session creation, customer portal access, webhook processing, and plan state management.
+
+## How it fits together
+
+```
+Frontend                    Convex Backend              Dodo Payments
+───────                    ──────────────              ─────────────
+createCheckout action ──→ Dodo API ──→ checkout_url
+                                                    ↓ (user pays)
+                          webhook handler ←──────── POST /dodopayments-webhook
+                          ↓
+                          webhooks.ts (upsert payment/subscription)
+                          ↓
+                          billing.ts (update team plan)
+```
+
+## Dodo client setup (`dodo.ts`)
+
+```ts
+const dodo = new DodoPayments(components.dodopayments, {
+  identify: async (ctx) => {
+    return await ctx.runQuery(internal.customers.identifyCustomer, {});
+  },
+  apiKey: process.env.DODO_PAYMENTS_API_KEY!,
+  environment: process.env.DODO_PAYMENTS_ENVIRONMENT as "test_mode" | "live_mode",
+});
+
+export const { checkout, customerPortal } = dodo.api();
+```
+
+The `identify` function looks up the caller's Dodo customer ID so returning customers share the same billing profile.
+
+## Public actions
+
+### `createCheckout`
+
+Creates a Dodo checkout session. Only team owners and admins can call this. Passes the `teamId` in metadata so webhooks can link payments to the correct team.
+
+### `getCustomerPortal`
+
+Returns a Dodo customer portal URL. Opens in the browser for managing subscriptions, invoices, and cancellations.
+
+## Public queries
+
+| Query | Description |
+|-------|-------------|
+| `getSubscriptionStatus` | Current subscription for a team |
+| `getAllSubscriptions` | All subscriptions for a team |
+| `getPaymentHistory` | All payments for a team (with enriched display names) |
+| `isCustomer` | Whether the current user has a customer record |
+| `getTeamBillingSummary` | Team plan + member count |
+
+## Plan definitions (`lib/plans.ts`)
+
+Plans are defined in a single array. Update the product IDs to match your Dodo dashboard:
+
+```ts
+export const PLANS: PlanDefinition[] = [
+  {
+    tier: "pro",
+    productId: "pdt_0Na80F8DAxolISwHgq98f",  // ← your Dodo product ID
+    name: "Pro",
+    priceDisplay: "$9.90",
+    period: "/mo",
+  },
+  {
+    tier: "max",
+    productId: "pdt_0Na80GkE51ZnB71TzmzM3",
+    name: "Max",
+    priceDisplay: "$19.90",
+    period: "/mo",
+  },
+];
+```
+
+The `PRODUCT_PLAN_MAP` is derived automatically from this array for webhook processing.
+
+## Webhook processing
+
+Webhooks arrive at `POST /dodopayments-webhook` and are handled by `lib/dodoWebhooks.ts`. Each event calls an internal mutation in `webhooks.ts`:
+
+| Event | Handler | Effect |
+|-------|---------|--------|
+| `payment.succeeded` | `handlePaymentEvent` | Create payment record + send confirmation email |
+| `payment.failed` | `handlePaymentEvent` | Record failed payment |
+| `subscription.active` | `handleSubscriptionEvent` | Create subscription + upgrade team plan |
+| `subscription.renewed` | `handleSubscriptionEvent` | Update status to renewed |
+| `subscription.plan_changed` | `handleSubscriptionEvent` | Update plan tier |
+| `subscription.cancelled` | `handleSubscriptionEvent` | Schedule deferred downgrade |
+| `subscription.expired` | `handleSubscriptionEvent` | Downgrade to free |
+| `refund.succeeded` | `handlePaymentStatusEvent` | Mark refunded + downgrade plan |
+| `dispute.*` | `handlePaymentStatusEvent` | Track dispute status |
+
+### Deferred downgrades
+
+When a subscription is cancelled, the user keeps access until the billing period ends. The webhook schedules a `scheduledPlanDowngrade` mutation at the `next_billing_date`. If the user re-subscribes before then, the downgrade is skipped.
+
+### Team resolution
+
+Webhooks include `teamId` in metadata when possible. As a fallback, `resolveTeamIdFromEmail` looks up the user by email and finds their team.
+
+## Environment variables
+
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `DODO_PAYMENTS_API_KEY` | Convex dashboard | Dodo API key |
+| `DODO_PAYMENTS_ENVIRONMENT` | Convex dashboard | `test_mode` or `live_mode` |
+| `DODO_PAYMENTS_WEBHOOK_KEY` | Convex dashboard | Webhook signature verification |
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `dodo.ts` | Dodo client + API setup |
+| `payments.ts` | Checkout, portal, payment queries |
+| `plans.ts` | Plan tier query |
+| `customers.ts` | Customer lookup (internal) |
+| `webhooks.ts` | Webhook mutation handlers |
+| `lib/dodoWebhooks.ts` | Webhook event routing |
+| `lib/billing.ts` | Plan resolution, customer upsert, team plan updates |
+| `lib/plans.ts` | Plan definitions and product IDs |

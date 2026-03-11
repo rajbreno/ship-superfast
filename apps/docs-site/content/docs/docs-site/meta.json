@@ -1,0 +1,7 @@
+{
+  "title": "Docs Site",
+  "description": "Fumadocs documentation site",
+  "icon": "File01Icon",
+  "root": true,
+  "pages": ["index"]
+}

@@ -1,0 +1,122 @@
+---
+title: Landing Page
+description: The public landing page — hero section, tech stack bento, features grid, and CTA.
+---
+
+## Overview
+
+The landing page lives at `app/page.tsx`. It's the first thing visitors see before signing in. If a user is already signed in, they're redirected to `/dashboard` automatically.
+
+The page is built with **Motion** (formerly Framer Motion) for scroll animations and uses shadcn/ui components.
+
+## Page sections
+
+The landing page has five sections, from top to bottom:
+
+### 1. Navigation bar
+
+A sticky header with the app logo, name, a theme toggle, and a sign-in button. When signed in, the button changes to "Dashboard".
+
+### 2. Hero
+
+The main headline area with:
+- **CircularText** — a spinning text ring ("CONVEX BOILERPLATE") with the Convex logo in the center. Speeds up on hover.
+- The app name in large italic serif text (uses `Instrument Serif` font)
+- A subtitle and a "Get Started" CTA button
+- A stats bar showing platform icons (Web, iOS, Android)
+
+### 3. Tech stack bento
+
+A grid of technology cards showing every tool in the stack. Each card has a logo, name, and purpose. The data comes from a `allTech` array defined at the bottom of the file:
+
+```ts
+const allTech: TechItem[] = [
+  { name: "Convex", logo: "/stack-logos/convex.png", purpose: "Realtime Backend", category: "Core" },
+  { name: "Next.js 16", logo: "/stack-logos/next.png", purpose: "Web Framework", category: "Core" },
+  // ... 12 items total
+];
+```
+
+To add or change a technology, edit the `allTech` array. The grid layout adjusts automatically.
+
+### 4. Platforms
+
+Two cards side by side — "Web App" and "Mobile App" — explaining what each platform includes.
+
+### 5. Features grid
+
+Six feature cards in a 3x2 bento grid. Each card has an icon, title, and description. The data comes from a `features` array:
+
+```ts
+const features = [
+  { title: "Authentication", description: "...", icon: FingerPrintIcon },
+  { title: "File Storage", description: "...", icon: CloudUploadIcon },
+  // ... 6 items total
+];
+```
+
+### 6. CTA + Footer
+
+A final call-to-action ("Ready to ship?") and a footer with the copyright and theme toggle.
+
+## Custom components
+
+### `CircularText`
+
+Located at `components/landing/CircularText.tsx`. Renders text in a spinning circle using Motion animations.
+
+Props:
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `text` | `string` | — | The text to display in a circle |
+| `spinDuration` | `number` | `20` | Seconds for one full rotation |
+| `onHover` | `string` | `"speedUp"` | Behavior on hover: `"slowDown"`, `"speedUp"`, `"pause"`, `"goBonkers"` |
+| `children` | `ReactNode` | — | Content rendered in the center of the circle |
+
+### `LogoLoop`
+
+Located at `components/landing/LogoLoop.tsx`. An infinite scrolling logo marquee with smooth animation.
+
+Props:
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `logos` | `LogoItem[]` | — | Array of logo images or React nodes |
+| `speed` | `number` | `120` | Scroll speed in pixels per second |
+| `direction` | `string` | `"left"` | `"left"`, `"right"`, `"up"`, or `"down"` |
+| `pauseOnHover` | `boolean` | `false` | Pause scrolling on hover |
+| `fadeOut` | `boolean` | `false` | Fade edges for a smooth look |
+
+## Animations
+
+All sections use Motion's `whileInView` for scroll-triggered fade-in animations:
+
+```tsx
+<motion.section
+  initial={{ opacity: 0, y: 40 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, margin: "-100px" }}
+  transition={{ duration: 0.6 }}
+>
+```
+
+- `once: true` — animate only the first time the section enters the viewport
+- `margin: "-100px"` — trigger 100px before the section is fully visible
+
+## Customizing
+
+| What to change | Where |
+|----------------|-------|
+| App name | `lib/config.ts` → `APP_NAME` (or `packages/shared/src/constants.ts`) |
+| Hero headline | Directly in the `<h1>` in `app/page.tsx` |
+| Tech stack logos | Add images to `public/stack-logos/` and update `allTech` array |
+| Feature list | Update the `features` array at the bottom of `app/page.tsx` |
+| Background image | Replace `public/login-bg.jpg` |
+| Platform icons | Replace images in `public/` (web.png, appstore.png, playstore.png) |
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `app/page.tsx` | Landing page (all sections + data arrays) |
+| `components/landing/CircularText.tsx` | Spinning text circle component |
+| `components/landing/LogoLoop.tsx` | Infinite scrolling logo marquee |

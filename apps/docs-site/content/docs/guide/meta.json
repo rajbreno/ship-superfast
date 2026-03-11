@@ -1,0 +1,16 @@
+{
+  "title": "Guide",
+  "description": "Getting started with the kit",
+  "icon": "Book02Icon",
+  "root": true,
+  "pages": [
+    "index",
+    "prerequisites",
+    "installation",
+    "project-structure",
+    "environment-variables",
+    "shared-packages",
+    "---Notes---",
+    "billing-and-app-stores"
+  ]
+}

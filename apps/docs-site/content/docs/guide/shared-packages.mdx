@@ -1,0 +1,94 @@
+---
+title: Shared Packages
+description: Types and utilities shared across all apps.
+---
+
+## What is `@repo/shared`?
+
+It's a small TypeScript package at `packages/shared/` that holds types, constants, and utility functions used by both the web and mobile apps. Instead of duplicating these in each app, they live in one place.
+
+## How to import
+
+From any app in the monorepo:
+
+```ts
+import { type UserRole, type TeamRole, getInitials, APP_NAME } from "@repo/shared";
+```
+
+This works because of pnpm workspaces — each app has `"@repo/shared": "workspace:*"` in its `package.json`, which links to the local package automatically.
+
+## Types
+
+Defined in `packages/shared/src/types.ts`:
+
+```ts
+export type UserRole = "user" | "admin";
+
+export type TeamRole = "owner" | "admin" | "member";
+
+export type PlanTier = "free" | "pro" | "max";
+
+export type PaidPlanTier = Exclude<PlanTier, "free">; // "pro" | "max"
+
+export interface User {
+  _id: string;
+  name?: string;
+  email?: string;
+  image?: string;
+  role?: UserRole;
+}
+```
+
+These types match the database schema in `packages/convex/convex/schema.ts`. When you change a role or plan tier in the schema, update these types too so both apps stay in sync.
+
+### Where each type is used
+
+| Type | Used for |
+|------|----------|
+| `UserRole` | Distinguishing regular users from admins (`"user"` or `"admin"`) |
+| `TeamRole` | A user's role within a team (`"owner"`, `"admin"`, or `"member"`) |
+| `PlanTier` | The subscription plan a team is on (`"free"`, `"pro"`, or `"max"`) |
+| `PaidPlanTier` | Same as `PlanTier` but without `"free"` — useful for upgrade flows |
+| `User` | A lightweight user object for display purposes (avatar, name, email) |
+
+## Constants
+
+Defined in `packages/shared/src/constants.ts`:
+
+```ts
+export const APP_NAME = "Ship Superfast";
+```
+
+Used in page titles, email subjects, and anywhere the app name appears. Change it here and it updates everywhere.
+
+The backend also has its own copy in `packages/convex/convex/lib/constants.ts` — keep them in sync.
+
+## Utilities
+
+Defined in `packages/shared/src/utils.ts`:
+
+```ts
+export function getInitials(name?: string): string {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+```
+
+`getInitials("John Doe")` returns `"JD"`. This is used for avatar fallbacks when a user doesn't have a profile picture.
+
+## Adding new shared code
+
+1. Add your type, constant, or function to the right file in `packages/shared/src/`
+2. Re-export it from `packages/shared/src/index.ts`
+3. Import it in any app with `import { ... } from "@repo/shared"`
+
+Only put things here that are truly shared between apps. If something is only used by the web app or only by the backend, keep it in that app instead.
+
+## Next steps
+
+That wraps up the Guide tab. Head to the [Web](/docs/web) tab to learn about the Next.js app.

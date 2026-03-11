@@ -1,0 +1,135 @@
+---
+title: Environment Variables
+description: Every environment variable used in the project, where to set it, and what it does.
+---
+
+This project has three places where environment variables live:
+
+| Location | How to set | Used by |
+|----------|-----------|---------|
+| **Convex dashboard** | Settings → Environment Variables | Backend (`packages/convex/`) |
+| `apps/web/.env.local` | Local file (copy from `.env.example`) | Web app |
+| `apps/mobile/.env.local` | Local file (copy from `.env.example`) | Mobile app |
+
+Convex does **not** read from `.env` files — its variables must be set in the [Convex dashboard](https://dashboard.convex.dev). The `.env.example` file in `packages/convex/` is just for reference.
+
+---
+
+## Web app
+
+Set these in `apps/web/.env.local`:
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `NEXT_PUBLIC_CONVEX_URL` | `https://your-project.convex.cloud` | Your Convex deployment URL. Found in the Convex dashboard or in `packages/convex/.env.local` after running `npx convex dev`. |
+
+That's the only variable the web app needs. Everything else runs through Convex.
+
+---
+
+## Mobile app
+
+Set these in `apps/mobile/.env.local`:
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `EXPO_PUBLIC_CONVEX_URL` | `https://your-project.convex.cloud` | Same Convex URL as the web app. The `EXPO_PUBLIC_` prefix makes it available in Expo's client-side code. |
+
+---
+
+## Convex backend
+
+Set **all** of these in the [Convex dashboard](https://dashboard.convex.dev) → your project → **Settings → Environment Variables**.
+
+### Authentication (required)
+
+These must be set for sign-in to work.
+
+| Variable | Description |
+|----------|-------------|
+| `AUTH_GOOGLE_ID` | Google OAuth Client ID. Get it from [Google Cloud Console](https://console.cloud.google.com) → APIs & Services → Credentials. |
+| `AUTH_GOOGLE_SECRET` | Google OAuth Client Secret. Same place as above. |
+| `SITE_URL` | Your web app URL. Use `http://localhost:3000` during development. This is used to resolve relative redirect paths after sign-in. |
+
+### Magic link email (optional)
+
+Only needed if you want email-based sign-in alongside Google OAuth.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AUTH_RESEND_KEY` | — | Resend API key. Get it from [resend.com/api-keys](https://resend.com/api-keys). |
+| `AUTH_RESEND_FROM` | `onboarding@resend.dev` | The "from" address for magic link emails. Use Resend's default for testing, or verify your own domain. |
+
+### Payments — Dodo Payments (optional)
+
+Only needed if you want billing, subscriptions, and checkout.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DODO_PAYMENTS_API_KEY` | — | Your Dodo Payments API key. |
+| `DODO_PAYMENTS_WEBHOOK_SECRET` | — | Secret for verifying webhook signatures. Found in Dodo's webhook settings. |
+| `DODO_PAYMENTS_ENVIRONMENT` | `test_mode` | Set to `test_mode` for development or `live_mode` for production. |
+
+Dodo webhooks are received at `{CONVEX_SITE_URL}/dodopayments-webhook`. You'll need to configure this URL in your Dodo dashboard.
+
+### File storage — Cloudflare R2 (optional)
+
+Only needed if you want file uploads and downloads.
+
+| Variable | Description |
+|----------|-------------|
+| `R2_TOKEN` | Cloudflare API token with R2 permissions. |
+| `R2_ACCESS_KEY_ID` | R2 access key ID. |
+| `R2_SECRET_ACCESS_KEY` | R2 secret access key. |
+| `R2_ENDPOINT` | R2 endpoint URL (e.g. `https://<account-id>.r2.cloudflarestorage.com`). |
+| `R2_BUCKET` | Name of your R2 bucket. |
+
+### Email — Resend (optional)
+
+For sending transactional emails (welcome emails, team invites, etc.). This is separate from the magic link key above.
+
+| Variable | Description |
+|----------|-------------|
+| `RESEND_API_KEY` | Resend API key for the `@convex-dev/resend` component. Can be the same key as `AUTH_RESEND_KEY` if you want. |
+
+### AI — OpenAI (optional)
+
+Powers the AI Agent, RAG (vector search), and text streaming features.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENAI_API_KEY` | — | Your OpenAI API key from [platform.openai.com](https://platform.openai.com). |
+| `AGENT_MODEL` | `gpt-4o-mini` | The chat model used by the AI Agent. Any OpenAI chat model works. |
+| `RAG_EMBEDDING_MODEL` | `text-embedding-3-small` | The embedding model used for RAG vector search. |
+| `STREAM_MODEL` | `gpt-4o-mini` | The model used for persistent text streaming. |
+
+### CORS (optional)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `WEB_ORIGIN` | `*` (any origin) | The allowed origin for the `/chat-stream` HTTP endpoint. Set to `http://localhost:3000` in development and your production domain in production. |
+
+---
+
+## Quick copy checklist
+
+Here's the minimum to get everything running locally:
+
+```bash
+# Convex dashboard — Environment Variables
+AUTH_GOOGLE_ID=your-google-client-id
+AUTH_GOOGLE_SECRET=your-google-client-secret
+SITE_URL=http://localhost:3000
+
+# apps/web/.env.local
+NEXT_PUBLIC_CONVEX_URL=https://your-project.convex.cloud
+
+# apps/mobile/.env.local
+EXPO_PUBLIC_CONVEX_URL=https://your-project.convex.cloud
+```
+
+Add the optional variables as you enable each feature.
+
+## Next steps
+
+See [Shared Packages](/docs/guide/shared-packages) to understand the types and utilities shared across apps.

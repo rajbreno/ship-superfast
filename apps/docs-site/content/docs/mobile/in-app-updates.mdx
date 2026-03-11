@@ -1,0 +1,86 @@
+---
+title: In-App Updates
+description: How the app checks for native updates on startup.
+---
+
+## Overview
+
+The app automatically checks for native updates when launched. This uses `expo-in-app-updates` to prompt users to update without leaving the app.
+
+Located at `src/hooks/useInAppUpdates.ts`.
+
+## How it works
+
+The `useInAppUpdates` hook runs once on app startup. It behaves differently per platform:
+
+| Platform | Behavior |
+|----------|----------|
+| **Android** | Shows the native Play Store in-app update panel (flexible mode) |
+| **iOS** | Shows an alert with "Update" and "Later" buttons, then opens the App Store modal |
+| **Web / Dev mode** | Skipped entirely |
+
+```ts
+export function useInAppUpdates() {
+  useEffect(() => {
+    // Skip in development and on web
+    if (__DEV__ || Platform.OS === "web") return;
+
+    const checkForUpdates = async () => {
+      const ExpoInAppUpdates = await import("expo-in-app-updates");
+
+      if (Platform.OS === "android") {
+        // Shows the Play Store's native update UI
+        await ExpoInAppUpdates.checkAndStartUpdate(false);
+      } else {
+        // iOS: check first, then prompt
+        const result = await ExpoInAppUpdates.checkForUpdate();
+        if (!result.updateAvailable) return;
+
+        Alert.alert(
+          "Update Available",
+          "A new version is available. Update now?",
+          [
+            { text: "Update", isPreferred: true, onPress: () => {
+              ExpoInAppUpdates.startUpdate();
+            }},
+            { text: "Later" },
+          ],
+        );
+      }
+    };
+
+    checkForUpdates();
+  }, []);
+}
+```
+
+## Why dynamic import?
+
+The hook uses `await import("expo-in-app-updates")` instead of a top-level import. This way the module is only loaded in production builds where it's needed. In development (Expo Go), the import is skipped entirely.
+
+## Usage
+
+The hook is called in the root layout:
+
+```ts
+// src/app/_layout.tsx
+export default function RootLayout() {
+  useInAppUpdates();
+  // ...
+}
+```
+
+No configuration needed — it works automatically once the app is published to the App Store / Play Store.
+
+## Requirements
+
+- A production build (not Expo Go)
+- App must be published to Apple App Store or Google Play Store
+- `expo-in-app-updates` must be installed (included in the template)
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `src/hooks/useInAppUpdates.ts` | Update check hook |
+| `src/app/_layout.tsx` | Calls the hook on startup |

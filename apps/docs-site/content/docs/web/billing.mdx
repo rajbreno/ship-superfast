@@ -1,0 +1,88 @@
+---
+title: Billing
+description: Billing page — subscription plans, checkout, customer portal, and payment history.
+---
+
+## Overview
+
+The billing page lives at `/dashboard/billing` (`app/dashboard/billing/page.tsx`). It shows the team's current plan, available upgrades, and payment history. Billing is tied to the **active team**, not individual users.
+
+All payments go through **Dodo Payments**. There are no in-app purchases — checkout happens on Dodo's hosted page, and webhooks sync the data back to Convex.
+
+## What each role sees
+
+| Role | Sees plans | Can upgrade | Can manage billing | Sees history |
+|------|-----------|------------|-------------------|-------------|
+| **Owner** | Yes | Yes | Yes | Yes |
+| **Admin** | Yes | Yes | Yes | Yes |
+| **Member** | No | No | No | Yes (if payments exist) |
+
+Members see a notice saying "Plan upgrades are managed by your team owner or admin."
+
+## Page sections
+
+### Team billing summary
+
+A card showing the team name, current plan badge (Free / Pro / Max), and member count. Owners and admins also see a "Manage Billing" button that opens the Dodo customer portal.
+
+### Plan cards
+
+Two cards side by side — **Pro** and **Max** — each showing:
+- Plan name and price
+- Feature list with checkmarks
+- Action button (Upgrade / Current Plan / Switch)
+
+The button logic depends on your current plan:
+
+| Current plan | Pro card button | Max card button |
+|-------------|----------------|----------------|
+| Free | "Upgrade to Pro" → checkout | "Upgrade to Max" → checkout |
+| Pro | "Current Plan" (disabled) | "Upgrade to Max" → portal |
+| Max | "Switch to Pro" → portal | "Current Plan" (disabled) |
+
+### Checkout flow
+
+For first-time subscribers (upgrading from Free):
+
+```ts
+const createCheckout = useAction(api.payments.createCheckout);
+
+const result = await createCheckout({
+  product_cart: [{ product_id: plan.productId, quantity: 1 }],
+  returnUrl: window.location.origin + "/dashboard/billing",
+  teamId,
+});
+
+// Redirect to Dodo's hosted checkout page
+window.location.href = result.checkout_url;
+```
+
+After payment, the user is redirected back to `/dashboard/billing`. A webhook from Dodo updates the team's plan in the database.
+
+### Plan changes (upgrade/downgrade)
+
+For users already on a paid plan, changes go through the Dodo customer portal:
+
+```ts
+const getPortal = useAction(api.payments.getCustomerPortal);
+
+const result = await getPortal({ send_email: false, teamId });
+window.open(result.portal_url, "_blank");
+```
+
+The portal handles proration, plan switching, and cancellation.
+
+### Billing history
+
+A table of all payments for the active team:
+- Plan badge
+- Amount (formatted from cents)
+- Date
+- Status badge (Active, Succeeded, Cancelled, Refunded, etc.)
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `app/dashboard/billing/page.tsx` | Billing page (plans, checkout, history) |
+| `components/providers/team-provider.tsx` | `useTeam()` — active team context |

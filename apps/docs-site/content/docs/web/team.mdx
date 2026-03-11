@@ -1,0 +1,91 @@
+---
+title: Team
+description: Team management — members, invites, roles, and the team switcher.
+---
+
+## Overview
+
+The team page lives at `/dashboard/team` (`app/dashboard/team/page.tsx`). It lets users manage their team's members and invitations. What you can do depends on your role.
+
+## Roles
+
+| Role | Can invite | Can remove members | Can change roles | Can rename team |
+|------|-----------|-------------------|-----------------|----------------|
+| **Owner** | Yes | Yes (except self) | Yes | Yes |
+| **Admin** | Yes | Yes (members only) | No | Yes |
+| **Member** | No | No | No | No |
+
+## Page sections
+
+### Incoming invites
+
+If the current user has pending invitations to other teams, they appear at the top with Accept/Decline buttons. This uses the `IncomingInvites` component shared with the dashboard overview page.
+
+### Team header
+
+Shows the team name, your role, and an edit button (owners and admins only). Clicking edit opens a dialog to rename the team:
+
+```ts
+const updateName = useMutation(api.teams.updateTeamName);
+await updateName({ teamId: team._id, name: newName });
+```
+
+### Members table
+
+A table listing all team members with:
+- Avatar, name, and email
+- Role badge (Owner / Admin / Member)
+- Join date
+- Actions dropdown (for users you can manage)
+
+Actions available in the dropdown:
+- **Promote to Admin** — owner only, for members
+- **Demote to Member** — owner only, for admins
+- **Remove from team** — owners can remove anyone, admins can remove members
+
+### Invite dialog
+
+Owners and admins see an "Invite" button that opens a dialog:
+
+```ts
+const inviteMember = useAction(api.teams.inviteMember);
+
+const result = await inviteMember({
+  teamId,
+  email: "user@example.com",
+  role: "member", // or "admin"
+});
+```
+
+The invite is sent as an email via Resend. The invitee can accept or decline from their dashboard.
+
+### Pending invites table
+
+Shows all outstanding invitations with email, role, date sent, and a cancel button. Only visible to owners and admins.
+
+### Danger zone
+
+Non-owners see a "Leave Team" button with a confirmation dialog. Leaving is permanent — you can only rejoin if invited again.
+
+```ts
+const removeMember = useMutation(api.teams.removeMember);
+await removeMember({ teamId, userId: currentUserId });
+```
+
+## Team switcher
+
+The team switcher lives in the sidebar header (`components/navigation/team-switcher.tsx`). It's a dropdown showing all teams the user belongs to, with:
+- Team name and first letter avatar
+- Plan badge (Free / Pro / Max)
+- Checkmark on the active team
+
+Switching teams updates the `TeamProvider` context, which causes all team-aware components (billing, members, etc.) to re-render with the new team's data. The selection is saved to `localStorage`.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `app/dashboard/team/page.tsx` | Team page (members, invites, danger zone) |
+| `components/navigation/team-switcher.tsx` | Sidebar team dropdown |
+| `components/team/incoming-invites.tsx` | Pending invite cards |
+| `components/providers/team-provider.tsx` | `useTeam()` context |

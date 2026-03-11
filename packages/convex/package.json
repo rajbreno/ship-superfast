@@ -1,0 +1,28 @@
+{
+  "name": "@repo/convex",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "convex dev",
+    "deploy": "convex deploy",
+    "codegen": "convex codegen",
+    "check-types": "tsc --project convex/tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@repo/shared": "workspace:*",
+    "@ai-sdk/openai": "^3.0.41",
+    "@convex-dev/agent": "^0.3.2",
+    "@convex-dev/auth": "^0.0.90",
+    "@convex-dev/expo-push-notifications": "^0.3.1",
+    "@convex-dev/persistent-text-streaming": "^0.3.0",
+    "@convex-dev/r2": "^0.9.1",
+    "@convex-dev/rag": "^0.7.1",
+    "@convex-dev/resend": "^0.2.3",
+    "@dodopayments/convex": "^0.2.8",
+    "ai": "^6.0.116",
+    "convex": "^1.31.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2"
+  }
+}

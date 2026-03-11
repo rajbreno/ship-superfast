@@ -1,0 +1,99 @@
+---
+title: Billing & App Stores
+description: Why the kit uses a single billing system and how it handles App Store compliance.
+---
+
+## Payment architecture
+
+This kit uses **Dodo Payments** as the single billing system across web and mobile.
+
+| Platform | Checkout flow | Customer portal |
+|----------|--------------|-----------------|
+| **Web** | Inline redirect to Dodo checkout | Opens in new tab |
+| **Mobile** | Opens Dodo checkout in external browser (`Linking.openURL`) | Opens in external browser |
+
+There is **no In-App Purchase (IAP)** integration. All payments go through Dodo.
+
+## Why no IAP / RevenueCat?
+
+Introducing a second billing system (Apple IAP, Google Play Billing, or RevenueCat) creates a **dual source of truth** problem:
+
+- **Sync conflicts** — A user could have an active Dodo subscription AND an Apple subscription for the same plan. Handling cancellations, renewals, and refunds from two systems hitting the same database is complex and error-prone.
+- **Pricing mismatch** — Apple takes 30% (15% for small businesses). You'd need different pricing or absorb the cost.
+- **Different billing cycles** — Dodo and Apple/Google manage renewals independently with different timing.
+- **Different refund flows** — Apple can issue refunds without immediate notification to your backend.
+- **Two customer portals** — Users wouldn't know where to manage their subscription.
+
+**One billing system = one source of truth = no sync issues.**
+
+## App Store compliance
+
+### Apple App Store
+
+Apple requires IAP for **digital goods consumed within the app**. However:
+
+- **SaaS / web services** where the mobile app is a companion are generally exempt. You're selling access to a service, not in-app content.
+- **Purchases in an external browser** (via `Linking.openURL`) are treated differently than in-app purchases. Apple is more lenient when the transaction happens outside the app.
+- **Reader app exception** — Apps that let users access previously purchased content (like Netflix, Spotify, Kindle) don't need IAP.
+
+**Current approach:** The mobile billing page shows plan status and billing history. Upgrade/checkout buttons open Dodo in the external browser. This is compliant for most SaaS use cases.
+
+**If Apple rejects your app:**
+
+Add a `Platform.OS` check to hide upgrade buttons on iOS:
+
+```tsx
+import { Platform } from "react-native";
+
+// In your billing page
+{Platform.OS !== "ios" && isOwnerOrAdmin && plans.length > 0 && (
+  <PlansSection plans={plans} currentPlan={currentPlan} teamId={teamId} />
+)}
+```
+
+This shows a read-only billing status on iOS. Users go to the web to upgrade.
+
+### Google Play Store
+
+Google allows third-party payment systems opened in an external browser. **No action needed.**
+
+## How it works
+
+### Web
+
+1. User sees plan cards with pricing
+2. Clicks "Upgrade" → `createCheckout` action → redirects to Dodo checkout URL
+3. Dodo webhook → Convex backend → updates `teams.plan`
+4. "Manage Billing" → opens Dodo customer portal in new tab
+
+### Mobile
+
+1. User sees plan cards with pricing
+2. Taps "Upgrade" → `createCheckout` action → opens Dodo checkout in external browser via `Linking.openURL`
+3. Dodo webhook → Convex backend → updates `teams.plan` (same as web)
+4. "Manage Billing" → opens Dodo customer portal in external browser
+5. User returns to app → Convex reactive queries automatically reflect the updated plan
+
+### Shared backend
+
+Both platforms use the exact same Convex actions and queries:
+
+| Function | Purpose |
+|----------|---------|
+| `createCheckout` | Creates a Dodo checkout session (owner/admin only) |
+| `getCustomerPortal` | Gets Dodo customer portal URL (owner/admin only) |
+| `getTeamBillingSummary` | Returns team plan and member count |
+| `getPaymentHistory` | Returns all transactions for the team |
+| `getPlans` | Returns available plan tiers with pricing |
+
+## Adding IAP in the future
+
+If you decide to add IAP later (e.g., for apps where the core value is consumed in-app):
+
+1. Use **RevenueCat** as the IAP abstraction layer
+2. Set up RevenueCat webhooks → your Convex backend
+3. Both Dodo and RevenueCat webhooks should write to the **same `teams.plan` field**
+4. Add conflict resolution logic (e.g., highest active plan wins)
+5. Consider different product IDs for web vs mobile to avoid overlap
+
+This is significantly more complex. Only do it if Apple explicitly requires it for your app category.

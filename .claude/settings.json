@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "mcp__gws__*",
+      "mcp__rube__*",
+      "mcp__exa__*",
+      "mcp__heroui-native__*",
+      "mcp__shadcn__*",
+      "mcp__Sanity__*",
+      "mcp__dodo-knowledge__*",
+      "mcp__dodopayments__*",
+      "mcp__resend__*"
+    ]
+  }
+}

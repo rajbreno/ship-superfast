@@ -1,0 +1,90 @@
+---
+title: Authentication
+description: How auth is configured on the backend — Google OAuth, magic link, and redirect handling.
+---
+
+## Overview
+
+Authentication uses `@convex-dev/auth` with two providers:
+1. **Google OAuth** — sign in with a Google account
+2. **Resend (magic link)** — sign in via email link
+
+Both are configured in `auth.ts`.
+
+## Auth setup
+
+```ts
+import Google from "@auth/core/providers/google";
+import Resend from "@auth/core/providers/resend";
+import { convexAuth } from "@convex-dev/auth/server";
+
+export const { auth, signIn, signOut, store } = convexAuth({
+  providers: [Google, Resend({ ... })],
+  callbacks: { redirect({ redirectTo }) { ... } },
+});
+```
+
+### Google OAuth
+
+Uses the standard `@auth/core/providers/google` provider. Requires `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` in the Convex dashboard.
+
+### Magic link (Resend)
+
+Sends a sign-in email using the Resend API directly (not the Convex Resend component). The email uses a custom HTML template from `emailLayout()`.
+
+Requires `AUTH_RESEND_KEY` and `AUTH_RESEND_FROM` in the Convex dashboard.
+
+## Redirect handling
+
+The `callbacks.redirect` function handles three cases:
+
+| Redirect type | Example | Behavior |
+|--------------|---------|----------|
+| Relative path | `/dashboard` | Prepends `SITE_URL` |
+| Allowed prefix | `exp://`, `myapp://`, `http://localhost` | Passes through |
+| Everything else | | Throws an error |
+
+For production, add your domain to `ALLOWED_REDIRECT_PREFIXES` and update the app scheme from `myapp://` to match your `app.json`.
+
+## Auth config
+
+`auth.config.ts` registers the Convex site as an auth provider:
+
+```ts
+export default {
+  providers: [
+    {
+      domain: process.env.CONVEX_SITE_URL,
+      applicationID: "convex",
+    },
+  ],
+};
+```
+
+## HTTP routes
+
+Auth routes are registered in `http.ts`:
+
+```ts
+auth.addHttpRoutes(http);
+```
+
+This adds all the OAuth callback and token endpoints that `@convex-dev/auth` needs.
+
+## Environment variables
+
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `AUTH_GOOGLE_ID` | Convex dashboard | Google OAuth client ID |
+| `AUTH_GOOGLE_SECRET` | Convex dashboard | Google OAuth client secret |
+| `AUTH_RESEND_KEY` | Convex dashboard | Resend API key |
+| `AUTH_RESEND_FROM` | Convex dashboard | Sender email for magic links |
+| `SITE_URL` | Convex dashboard | Base URL for resolving redirects |
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `auth.ts` | Provider config, redirect callbacks, magic link email |
+| `auth.config.ts` | Auth provider registration |
+| `http.ts` | Registers auth HTTP routes |

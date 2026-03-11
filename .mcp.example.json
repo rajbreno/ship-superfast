@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
+    },
+    "heroui-native": {
+      "command": "npx",
+      "args": ["-y", "@heroui/native-mcp@latest"]
+    },
+    "dodo-knowledge": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote@latest", "https://knowledge.dodopayments.com/mcp"]
+    },
+    "dodopayments": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote@latest", "https://mcp.dodopayments.com/sse"]
+    },
+    "resend": {
+      "command": "npx",
+      "args": ["-y", "resend-mcp"],
+      "env": {
+        "RESEND_API_KEY": ""
+      }
+    }
+  }
+}

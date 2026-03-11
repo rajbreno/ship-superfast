@@ -1,0 +1,122 @@
+---
+title: Schema
+description: The database schema — all tables, fields, and indexes.
+---
+
+## Overview
+
+The schema is defined in `schema.ts` using `defineSchema` and `defineTable`. It includes auth tables from `@convex-dev/auth` plus custom tables for users, teams, payments, and subscriptions.
+
+## Tables
+
+### users
+
+Extended from `@convex-dev/auth`'s default user table with a custom `role` field.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `string?` | Display name |
+| `image` | `string?` | Avatar URL (from Google OAuth) |
+| `email` | `string?` | Email address |
+| `role` | `"user" \| "admin"?` | App-level role (not team role) |
+
+**Index**: `by_email` — look up users by email.
+
+### teams
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `string` | Team name |
+| `ownerId` | `Id<"users">` | The team creator |
+| `plan` | `"free" \| "pro" \| "max"?` | Current billing plan |
+| `createdAt` | `number` | Creation timestamp |
+
+**Index**: `by_ownerId` — find teams owned by a user.
+
+### teamMembers
+
+Join table connecting users to teams with roles.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `teamId` | `Id<"teams">` | The team |
+| `userId` | `Id<"users">` | The user |
+| `role` | `"owner" \| "admin" \| "member"` | Team role |
+| `joinedAt` | `number` | When they joined |
+
+**Indexes**: `by_userId`, `by_teamId_and_userId` (compound).
+
+### teamInvites
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `teamId` | `Id<"teams">` | The team |
+| `email` | `string` | Invitee's email |
+| `role` | `"admin" \| "member"` | Role they'll get |
+| `invitedBy` | `Id<"users">` | Who sent the invite |
+| `status` | `"pending" \| "accepted" \| "declined"` | Current state |
+| `createdAt` | `number` | When it was sent |
+
+**Indexes**: `by_teamId`, `by_email`.
+
+### customers
+
+Maps users to Dodo Payments customer IDs.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `authId` | `string?` | Convex auth identity |
+| `dodoCustomerId` | `string` | Dodo customer ID |
+| `email` | `string` | Customer email |
+
+**Indexes**: `by_authId`, `by_email`, `by_dodoCustomerId`.
+
+### payments
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `paymentId` | `string` | Dodo payment ID |
+| `businessId` | `string` | Dodo business ID |
+| `customerEmail` | `string` | Payer's email |
+| `productName` | `string?` | Product name from Dodo |
+| `amount` | `number` | Amount in cents |
+| `currency` | `string` | e.g., "USD" |
+| `status` | `string` | Payment status |
+| `webhookPayload` | `string` | Raw webhook JSON |
+| `teamId` | `Id<"teams">?` | Linked team |
+| `createdAt` | `number` | Timestamp |
+
+**Indexes**: `by_paymentId`, `by_customerEmail`, `by_teamId`.
+
+### subscriptions
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `subscriptionId` | `string` | Dodo subscription ID |
+| `businessId` | `string` | Dodo business ID |
+| `customerEmail` | `string` | Subscriber's email |
+| `planName` | `string?` | Plan display name |
+| `status` | `string` | Subscription status |
+| `webhookPayload` | `string` | Raw webhook JSON |
+| `teamId` | `Id<"teams">?` | Linked team |
+| `createdAt` | `number` | Timestamp |
+
+**Indexes**: `by_subscriptionId`, `by_customerEmail`, `by_teamId`.
+
+### registeredDevices
+
+Tracks push notification tokens.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `deviceId` | `string` | Unique device identifier |
+| `userId` | `Id<"users">?` | Linked user (for personal notifications) |
+| `registeredAt` | `number` | When the token was registered |
+
+**Indexes**: `by_deviceId`, `by_userId`.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `schema.ts` | Database schema definition |

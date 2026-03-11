@@ -1,0 +1,77 @@
+---
+title: RAG
+description: Retrieval-Augmented Generation — vector search and document embeddings.
+---
+
+## Overview
+
+RAG (Retrieval-Augmented Generation) uses `@convex-dev/rag` — a Convex component for embedding documents and searching them with vector similarity. Located at `rag.ts`.
+
+## Setup
+
+```ts
+import { RAG } from "@convex-dev/rag";
+import { openai } from "@ai-sdk/openai";
+
+const embeddingModel = process.env.RAG_EMBEDDING_MODEL ?? "text-embedding-3-small";
+
+export const rag = new RAG(components.rag, {
+  textEmbeddingModel: openai.embedding(embeddingModel),
+  embeddingDimension: 1536,
+});
+```
+
+## Functions
+
+### `addDocument` (internal action)
+
+Adds a document to the knowledge base. Internal-only to prevent data poisoning from the client.
+
+```ts
+// Called from other server-side code
+await ctx.runAction(internal.rag.addDocument, {
+  text: "Your document content here",
+  namespace: "global",
+});
+```
+
+### `search` (action)
+
+Searches the knowledge base using vector similarity. Returns matching results and a combined text.
+
+```ts
+const search = useAction(api.rag.search);
+const { results, text } = await search({
+  query: "How do I reset my password?",
+  namespace: "global",
+});
+```
+
+### `askQuestion` (action)
+
+Combines RAG search with AI generation — retrieves relevant context and generates an answer.
+
+```ts
+const askQuestion = useAction(api.rag.askQuestion);
+const { answer, context } = await askQuestion({
+  prompt: "How do I reset my password?",
+});
+```
+
+## Namespaces
+
+Documents can be organized into namespaces (e.g., `"global"`, `"docs"`, `"faq"`). Searches are scoped to a namespace.
+
+## Environment variables
+
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `RAG_EMBEDDING_MODEL` | Convex dashboard | Embedding model (default: `text-embedding-3-small`) |
+| `OPENAI_API_KEY` | Convex dashboard | OpenAI API key |
+| `AGENT_MODEL` | Convex dashboard | Chat model for `askQuestion` |
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `rag.ts` | RAG setup, addDocument, search, askQuestion |

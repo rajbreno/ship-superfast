@@ -1,0 +1,21 @@
+{
+  "title": "Mobile",
+  "description": "Expo 54 + HeroUI Native",
+  "icon": "SmartPhone01Icon",
+  "root": true,
+  "pages": [
+    "index",
+    "---Setup---",
+    "authentication",
+    "onboarding",
+    "theming",
+    "---Screens---",
+    "home",
+    "profile",
+    "team",
+    "billing",
+    "---Platform Features---",
+    "push-notifications",
+    "in-app-updates"
+  ]
+}

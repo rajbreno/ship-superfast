@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Ship Superfast",
+    "slug": "ship-superfast",
+    "version": "1.0.0",
+    "scheme": "shipsuperfast",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "icon": "./src/assets/appicon.png",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.app",
+      "icon": "./src/assets/appicon.png"
+    },
+    "android": {
+      "package": "com.yourcompany.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/appicon.png",
+        "backgroundColor": "#F55A00"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F55A00",
+          "image": "./src/assets/brand-logo.png",
+          "imageWidth": 200,
+          "dark": {
+            "backgroundColor": "#F55A00",
+            "image": "./src/assets/brand-logo.png"
+          }
+        }
+      ],
+      "expo-notifications"
+    ]
+  }
+}

@@ -1,0 +1,118 @@
+---
+title: Docs Site
+description: The documentation site — built with Fumadocs and Next.js.
+---
+
+## Overview
+
+The docs site lives at `apps/docs-site/`. It's a **Next.js 16** app powered by **Fumadocs** — a documentation framework that turns MDX files into a full docs site with sidebar navigation, search, and dark mode.
+
+It runs on port **3001** in development (`pnpm dev` from `apps/docs-site/`).
+
+## How it works
+
+```
+content/docs/          ← MDX files (your documentation)
+  ├─ guide/            ← Guide tab
+  ├─ web/              ← Web tab
+  ├─ mobile/           ← Mobile tab
+  ├─ backend/          ← Backend tab (planned)
+  └─ deployment/       ← Deployment tab (planned)
+
+source.config.ts       ← Points Fumadocs at content/docs/
+lib/source.ts          ← Creates the page tree from MDX files
+app/docs/layout.tsx    ← Docs layout with sidebar
+app/docs/[[...slug]]/page.tsx ← Renders each doc page
+```
+
+### Content → Page flow
+
+1. You write an MDX file in `content/docs/` (e.g., `guide/installation.mdx`)
+2. `source.config.ts` tells Fumadocs to scan `content/docs/`
+3. `lib/source.ts` builds a page tree from all MDX files
+4. The catch-all route `app/docs/[[...slug]]/page.tsx` renders the matching page
+
+### Sidebar tabs
+
+The sidebar has a tab switcher (Guide, Web, Mobile, etc.). Each tab is a folder with `"root": true` in its `meta.json`:
+
+```json
+{
+  "title": "Guide",
+  "description": "Getting started with the kit",
+  "root": true,
+  "pages": ["index", "prerequisites", "installation"]
+}
+```
+
+The `pages` array controls ordering. Items not listed are hidden from the sidebar.
+
+### Separators
+
+You can add section headings in the sidebar using `---Label---` in the `pages` array:
+
+```json
+{
+  "pages": [
+    "index",
+    "---Setup---",
+    "authentication",
+    "theming",
+    "---Screens---",
+    "home",
+    "profile"
+  ]
+}
+```
+
+## Adding a new page
+
+1. Create an MDX file in the appropriate tab folder:
+
+```mdx
+---
+title: My Page
+description: What this page covers.
+---
+
+## Content here
+```
+
+2. Add it to the `pages` array in that folder's `meta.json`:
+
+```json
+{
+  "pages": ["index", "existing-page", "my-page"]
+}
+```
+
+The page is now live at `/docs/{tab}/my-page`.
+
+## Search
+
+Full-text search is built in via an API route at `app/api/search/route.ts`:
+
+```ts
+import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+
+export const { GET } = createFromSource(source, {
+  language: 'english',
+});
+```
+
+No external search service needed — it indexes all MDX content automatically.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `content/docs/` | All MDX documentation files |
+| `content/docs/meta.json` | Root tab ordering |
+| `source.config.ts` | Fumadocs content directory config |
+| `lib/source.ts` | Page tree loader |
+| `lib/layout.shared.tsx` | Shared layout options (site title) |
+| `app/docs/layout.tsx` | Docs layout with sidebar |
+| `app/docs/[[...slug]]/page.tsx` | Doc page renderer |
+| `app/api/search/route.ts` | Search API endpoint |
+| `app/page.tsx` | Root redirect → `/docs/guide` |

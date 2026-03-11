@@ -1,0 +1,196 @@
+# Docs
+
+- Framework: The docs framework
+  - **Introduction**
+
+  - [Quick Start](/docs): Getting Started with Fumadocs
+  - [What is Fumadocs](/docs/what-is-fumadocs): Introducing Fumadocs, a docs framework that you can break.
+  - [Comparisons](/docs/comparisons): How is Fumadocs different from other existing frameworks?
+  - Manual Installation: undefined
+    - [Manual Installation](/docs/manual-installation): Add Fumadocs to existing projects.
+    - [Next.js](/docs/manual-installation/next): Setup Fumadocs on Next.js.
+    - [React Router](/docs/manual-installation/react-router): Setup Fumadocs on React Router.
+    - [Tanstack Start](/docs/manual-installation/tanstack-start): Setup Fumadocs on Tanstack Start.
+    - [Waku](/docs/manual-installation/waku): Setup Fumadocs on Waku.
+  - Guides: undefined
+    - [Guides](/docs/guides): Useful guides for extending Fumadocs.
+    - [Access Control](/docs/guides/access-control): Limit the access of content.
+    - [Export EPUB](/docs/guides/export-epub): Export your documentation to EPUB format for e-readers
+    - [Export PDF](/docs/guides/export-pdf): Export docs pages as PDF documents
+    - [RSS Feed](/docs/guides/rss): Generate a RSS feed for your docs/blog.
+  - **Writing**
+
+  - [Page Slugs & Page Tree](/docs/page-conventions): A shared convention for organizing your documents
+  - Markdown: undefined
+    - [Markdown](/docs/markdown): How to write documents
+    - [Math](/docs/markdown/math): Writing math equations in Markdown/MDX.
+    - [Mermaid](/docs/markdown/mermaid): Rendering diagrams in your docs
+    - [Twoslash](/docs/markdown/twoslash): Use Typescript Twoslash in your docs
+  - **Configurations**
+
+  - [Navigation](/docs/navigation): Configure navigation in your Fumadocs app.
+  - Deploying: undefined
+    - [Deploying](/docs/deploying): Deploy your Fumadocs app
+    - [Static Build](/docs/deploying/static): Output static website with Fumadocs.
+  - Internationalization: undefined
+    - [Internationalization](/docs/internationalization): Support multiple languages in your documentation
+    - [Next.js](/docs/internationalization/next): Support i18n routing on your Next.js + Fumadocs app
+    - [React Router](/docs/internationalization/react-router): Support i18n routing on your React Router + Fumadocs app.
+    - [Tanstack Start](/docs/internationalization/tanstack-start): Support i18n routing on your Tanstack Start + Fumadocs app.
+  - Search: undefined
+    - [Search](/docs/search): Implement document search in your docs
+    - [Orama (default)](/docs/search/orama): The default search engine powered by Orama.
+    - [Algolia](/docs/search/algolia): Using Algolia with Fumadocs UI.
+    - [FlexSearch](/docs/search/flexsearch): A fast & minimal search engine.
+    - [Mixedbread](/docs/search/mixedbread): Using Mixedbread with Fumadocs UI.
+    - [Orama Cloud](/docs/search/orama-cloud): Using Orama Cloud with Fumadocs UI.
+    - [Typesense](/docs/search/typesense): Using Typesense with Fumadocs UI.
+    - [Custom Search](/docs/search/custom): For other search solutions.
+  - **Integrations**
+
+  - [Feedback](/docs/integrations/feedback): Receive feedback from your users
+  - [AI & LLMs](/docs/integrations/llms): Integrate AI functionality to Fumadocs.
+  - [Validate Links](/docs/integrations/validate-links): Ensure your links are correct.
+  - Content Generators: undefined
+    - [Obsidian](/docs/integrations/obsidian): Render your Obsidian vaults in Fumadocs.
+    - [Python](/docs/integrations/python): Generate docs from Python
+    - [Typescript](/docs/integrations/typescript): Generate docs from Typescript definitions
+  - Content Source: undefined
+    - [Content Source](/docs/integrations/content): Integrate different content sources with Fumadocs.
+    - [Build Your Own](/docs/integrations/content/custom): Build your own content source for Fumadocs.
+    - [MDX Remote](/docs/integrations/content/mdx-remote): Compiled Markdown/MDX content on demand.
+  - OG Image Generation: undefined
+    - [OG Image Generation](/docs/integrations/og): Generate dynamic preview image for docs pages
+    - [next/og](/docs/integrations/og/next): Usage with Next.js Metadata API.
+    - [Takumi](/docs/integrations/og/takumi): Integrate Takumi for framework agnostic and fast metadata image generation.
+  - OpenAPI: undefined
+    - [OpenAPI](/docs/integrations/openapi): Generating docs for OpenAPI schema
+    - [<APIPage />](/docs/integrations/openapi/api-page): The component for rendering OpenAPI docs content
+    - [generateFiles()](/docs/integrations/openapi/generate-files): Generate pages from OpenAPI schema.
+    - [createOpenAPI()](/docs/integrations/openapi/server): The OpenAPI server instance.
+  - Story: undefined
+    - [Story](/docs/integrations/story): Display components with controls.
+    - [Next.js](/docs/integrations/story/next): Configure Fumadocs Story on Next.js.
+    - [Vite](/docs/integrations/story/vite): Configure Fumadocs Story for Vite-based frameworks.
+- Fumadocs UI: The default theme
+  - **Introduction**
+
+  - [Overview](/docs/ui): The default theme of Fumadocs
+  - [Component Library](/docs/ui/component-library): The underlying headless component library.
+  - [Themes](/docs/ui/theme): Add Theme to Fumadocs UI
+  - **References**
+
+  - [Search UI](/docs/ui/search): The UI for document search
+  - Components: undefined
+    - [Components](/docs/ui/components): Additional components to improve your docs
+    - [Accordion](/docs/ui/components/accordion): Add Accordions to your documentation
+    - [Auto Type Table](/docs/ui/components/auto-type-table): Auto-generated type table
+    - [Banner](/docs/ui/components/banner): Add a banner to your site
+    - [Code Block](/docs/ui/components/codeblock): Displaying Shiki highlighted code blocks
+    - [Code Block (Dynamic)](/docs/ui/components/dynamic-codeblock): A codeblock that also highlights code
+    - [Files](/docs/ui/components/files): Display file structure in your documentation
+    - [GitHub Info](/docs/ui/components/github-info): Display your GitHub repository information
+    - [Graph View](/docs/ui/components/graph-view): A graph of all pages.
+    - [Zoomable Image](/docs/ui/components/image-zoom): Allow zoom-in images in your documentation
+    - [Inline TOC](/docs/ui/components/inline-toc): Add Inline TOC into your documentation
+    - [Steps](/docs/ui/components/steps): Adding steps to your docs
+    - [Tabs](/docs/ui/components/tabs): A Tabs component built with Radix UI, with additional features such as persistent and shared value.
+    - [Type Table](/docs/ui/components/type-table): A table for documenting types
+  - Layouts: undefined
+    - [Layouts](/docs/ui/layouts): A list of layout components.
+    - **Configurations**
+
+    - [Layout Links](/docs/ui/layouts/links): Navigation configurations on all layouts.
+    - [Navbar](/docs/ui/layouts/nav): Navbar/header configurations.
+    - **Components**
+
+    - [Docs Layout](/docs/ui/layouts/docs): The layout of documentation
+    - [Flux Layout](/docs/ui/layouts/flux): An aggressively minimal layout for docs
+    - [Home Layout](/docs/ui/layouts/home-layout): Shared layout for other pages
+    - [Notebook Layout](/docs/ui/layouts/notebook): A compact version of Docs Layout
+    - [Docs Page](/docs/ui/layouts/page): A page in your documentation
+    - [Root Provider](/docs/ui/layouts/root-provider): The context provider of Fumadocs UI.
+- Fumadocs Core: The headless library
+  - **Guide**
+
+  - [Introduction](/docs/headless): Getting started with core library
+  - Search: undefined
+    - [Search](/docs/headless/search): Configure Search in Fumadocs
+    - [Algolia Search](/docs/headless/search/algolia): Integrate Algolia Search with Fumadocs
+    - [FlexSearch](/docs/headless/search/flexsearch): Fast & minimal document search
+    - [Mixedbread](/docs/headless/search/mixedbread): Integrate Mixedbread Search with Fumadocs
+    - [Orama Cloud](/docs/headless/search/orama-cloud): Integrate with Orama Cloud
+    - [Built-in Search](/docs/headless/search/orama): Built-in document search of Fumadocs
+    - [Trieve Search](/docs/headless/search/trieve): Integrate Trieve Search with Fumadocs
+    - [Typesense Search](/docs/headless/search/typesense): Integrate Typesense Search with Fumadocs
+  - **API References**
+
+  - [Page Tree](/docs/headless/page-tree): The structure of page tree.
+  - Internationalization: undefined
+    - [Configuration](/docs/headless/internationalization/config): Shared i18n configuration
+    - [Middleware](/docs/headless/internationalization/middleware): Next.js proxy for implementing i18n routing
+  - Components: undefined
+    - [Components](/docs/headless/components): Blocks for your docs
+    - [Breadcrumb](/docs/headless/components/breadcrumb): The navigation component at the top of the screen
+    - [Link](/docs/headless/components/link): A Link component that handles external links
+    - [TOC](/docs/headless/components/toc): Table of Contents
+  - Utilities: undefined
+    - [Utilities](/docs/headless/utils): Utilities to provide extra functionality to your docs
+    - [Get TOC](/docs/headless/utils/get-toc): Parse Table of contents from markdown/mdx content
+    - [Last Modified Time](/docs/headless/utils/git-last-edit): Get the last edit time of a file in Github repository
+    - [Negotiation](/docs/headless/utils/negotiation): Tiny wrapper for negotiation features.
+    - [Page Tree Utils](/docs/headless/utils/page-tree): Common utilities to interact with page tree.
+  - MDX Plugins: undefined
+    - [MDX Plugins](/docs/headless/mdx): Useful remark & rehype plugins for your docs.
+    - [Headings](/docs/headless/mdx/headings): Process headings from your document
+    - [Package Install](/docs/headless/mdx/install): Generate code blocks for installing packages
+    - [Rehype Code](/docs/headless/mdx/rehype-code): Code syntax highlighter
+    - [Remark Admonition](/docs/headless/mdx/remark-admonition): Use Admonition in Fumadocs
+    - [Remark Image](/docs/headless/mdx/remark-image): Adding size attributes to images.
+    - [Remark Files](/docs/headless/mdx/remark-mdx-files): Generate files from codeblocks.
+    - [Remark NPM](/docs/headless/mdx/remark-npm): Generate code blocks for package managers
+    - [Remark TS to JS](/docs/headless/mdx/remark-ts2js): A remark plugin to transform TypeScript codeblocks into two tabs of codeblock with its JavaScript variant.
+    - [Remark Structure](/docs/headless/mdx/structure): Extract information from your documents, useful for implementing document search
+  - **Sources**
+
+  - Loader API: undefined
+    - [Loader API](/docs/headless/source-api): Turn content sources into a unified interface
+    - [Loader Plugins](/docs/headless/source-api/plugins): Extend Loader API
+    - [Source](/docs/headless/source-api/source): Setup sources for Loader API
+  - [Page Slugs & Page Tree](/docs/headless/page-conventions): Customise generated page slugs and page tree.
+  - [Content Collections](/docs/headless/content-collections): Use Content Collections for Fumadocs
+- Fumadocs MDX: The official content source
+  - **Guide**
+
+  - [Getting Started](/docs/mdx): Introducing Fumadocs MDX, the official content source of Fumadocs.
+  - [Performance](/docs/mdx/performance): The performance of Fumadocs MDX
+  - Accessing Collections: undefined
+    - [Accessing Collections](/docs/mdx/entry): Access collection outputs from entry files.
+    - [Browser Entry](/docs/mdx/entry/browser): Access collections from browser/client environment.
+    - [Dynamic Entry](/docs/mdx/entry/dynamic): Accessing your collections with on-demand compilation.
+    - [Import MDX Files](/docs/mdx/entry/import): Importing MDX files directly.
+    - [Server Entry](/docs/mdx/entry/server): Accessing collection outputs from server.
+  - **Integrations**
+
+  - [Next.js](/docs/mdx/next): Use Fumadocs MDX with Next.js
+  - [Vite](/docs/mdx/vite): Use Fumadocs MDX with Vite
+  - Runtime Loader: undefined
+    - [Runtime Loader](/docs/mdx/loader): Fumadocs MDX loader integration.
+    - [Bun](/docs/mdx/loader/bun): Access content in Bun.
+    - [Node.js](/docs/mdx/loader/node): Access content in Node.js runtime.
+  - **Configuration**
+
+  - [Collections](/docs/mdx/collections): Collection of content data for your app
+  - [Global Options](/docs/mdx/global): Customise Fumadocs MDX
+  - [MDX Presets](/docs/mdx/mdx): Customise the default configurations for MDX processor.
+  - **Features**
+
+  - [Include](/docs/mdx/include): Reuse content from other files.
+  - [Last Modified Time](/docs/mdx/last-modified): Output the last modified time of a document
+  - [Lazy Loading](/docs/mdx/async): Configure lazy loading on collection outputs.
+  - [Generate Types](/docs/mdx/typegen): Generate types without running dev/build server
+  - [Workspace](/docs/mdx/workspace): Use Fumadocs MDX in multiple workspace.
+- Fumadocs CLI: CLI tools for docs & automation
+  - [User Guide](/docs/cli): The CLI tool that automates setups and installs components.
+  - [create-fumadocs-app](/docs/cli/create-fumadocs-app): The CLI to create new Fumadocs apps
+  - [Fumapress](/docs/cli/press): A light tool to view Markdown files.

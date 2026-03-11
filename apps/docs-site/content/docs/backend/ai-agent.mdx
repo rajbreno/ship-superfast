@@ -1,0 +1,67 @@
+---
+title: AI Agent
+description: Conversational AI agent with thread management.
+---
+
+## Overview
+
+The AI agent uses `@convex-dev/agent` — a Convex component that provides threaded conversations with language models. Located at `agent.ts`.
+
+## Setup
+
+```ts
+import { Agent } from "@convex-dev/agent";
+import { openai } from "@ai-sdk/openai";
+
+const agentModel = process.env.AGENT_MODEL ?? "gpt-4o-mini";
+
+export const supportAgent = new Agent(components.agent, {
+  name: "Support Agent",
+  languageModel: openai.chat(agentModel),
+  instructions: "You are a helpful assistant.",
+});
+```
+
+## Public actions
+
+### `createThread`
+
+Creates a new conversation thread and generates an initial response.
+
+```ts
+const createThread = useAction(api.agent.createThread);
+const { threadId, text } = await createThread({ prompt: "Hello!" });
+```
+
+### `continueThread`
+
+Continues an existing thread with a new message.
+
+```ts
+const continueThread = useAction(api.agent.continueThread);
+const response = await continueThread({
+  threadId: "...",
+  prompt: "Tell me more",
+});
+```
+
+Threads are scoped to the authenticated user — a user can only continue their own threads.
+
+## Customization
+
+To change the AI model, set `AGENT_MODEL` in the Convex dashboard (e.g., `gpt-4o`, `gpt-4o-mini`).
+
+To change the agent's behavior, update the `instructions` string in the `Agent` constructor.
+
+## Environment variables
+
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `AGENT_MODEL` | Convex dashboard | OpenAI model name (default: `gpt-4o-mini`) |
+| `OPENAI_API_KEY` | Convex dashboard | OpenAI API key |
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `agent.ts` | Agent setup, createThread, continueThread |

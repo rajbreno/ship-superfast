@@ -1,0 +1,85 @@
+---
+title: Overview
+description: The Next.js 16 web app — how it's built and how the pieces fit together.
+---
+
+## What's in `apps/web/`
+
+The web app is a **Next.js 16** website with:
+- A public **landing page**
+- A **sign-in page** (Google OAuth)
+- A protected **dashboard** with profile, team management, and billing pages
+- **shadcn/ui** components (55 installed)
+- **Tailwind v4** for styling
+- **Light and dark** themes
+
+## Pages
+
+| Route | What it shows |
+|-------|--------------|
+| `/` | Landing page — hero section, feature cards, animated logos |
+| `/sign-in` | Google OAuth sign-in |
+| `/dashboard` | Dashboard overview (protected — must be signed in) |
+| `/dashboard/profile` | User profile — avatar, name, email, role |
+| `/dashboard/team` | Team management — members, invites, role assignment |
+| `/dashboard/billing` | Billing — subscription status, payment history, upgrade |
+
+## Provider stack
+
+The root layout (`app/layout.tsx`) wraps the entire app in providers. Here's the order, from outermost to innermost:
+
+```
+ConvexClientProvider     ← Connects to Convex backend
+  └─ SessionProvider     ← Provides current user, auth state, signOut
+      └─ ThemeProvider   ← Light/dark mode via next-themes
+          └─ {children}  ← Your pages
+```
+
+Every page in the app can use these hooks:
+- `useSession()` — get the current user, check if signed in, sign out
+- `useQuery()` / `useMutation()` — read and write data through Convex
+- `useTheme()` — toggle light/dark mode
+
+## Navigation
+
+Dashboard pages share a sidebar layout defined in `app/dashboard/layout.tsx`. The sidebar items are configured in `lib/config.ts`:
+
+```ts
+export const NAV_ITEMS = [
+  { title: "Dashboard", href: "/dashboard" },
+  { title: "Team", href: "/dashboard/team" },
+  { title: "Billing", href: "/dashboard/billing" },
+  { title: "Account", href: "/dashboard/profile" },
+];
+```
+
+To add a new dashboard page, create a folder in `app/dashboard/` with a `page.tsx` and add an entry to `NAV_ITEMS`.
+
+## Fonts
+
+The app loads four Google Fonts in the root layout:
+
+| Font | CSS Variable | Usage |
+|------|-------------|-------|
+| Inter | `--font-sans` | Default body text |
+| Inria Serif | `--font-serif` | Serif accent text |
+| Instrument Serif | `--font-instrument-serif` | Landing page headings |
+| Geist Mono | `--font-mono` | Code blocks |
+
+## Key files
+
+| File | What it does |
+|------|-------------|
+| `app/layout.tsx` | Root layout — fonts, providers, toaster |
+| `app/page.tsx` | Landing page |
+| `app/sign-in/page.tsx` | Sign-in page |
+| `app/dashboard/layout.tsx` | Dashboard layout — auth guard + sidebar |
+| `lib/config.ts` | App name, navigation items |
+| `lib/utils.ts` | `cn()` helper for merging class names |
+| `app/globals.css` | Theme colors |
+| `components/providers/` | Convex, session, team, and theme providers |
+| `components/ui/` | All shadcn/ui components |
+
+## Next steps
+
+Continue with [Authentication](/docs/web/authentication) to see how sign-in works.

@@ -1,0 +1,43 @@
+---
+title: Push Notifications
+description: How push notifications are set up with Expo and Convex.
+---
+
+## Overview
+
+Push notifications use `@convex-dev/expo-push-notifications` — a Convex component that handles token registration, sending, and delivery tracking.
+
+The mobile app registers for push notifications on launch. The backend can then send notifications to specific users or teams.
+
+## How it works
+
+1. The app requests notification permissions from the user
+2. Expo generates a push token for the device
+3. The token is sent to the Convex backend and stored in the database
+4. When the backend needs to notify a user, it sends a push via Expo's push service
+5. The notification appears on the user's device even when the app is closed
+
+## Setup requirements
+
+Push notifications require a **development build** — they don't work in Expo Go.
+
+You'll need:
+- An Apple Developer account (for iOS)
+- A Google Firebase project (for Android — Expo configures this automatically with EAS)
+
+## Configuration
+
+The push notification component is configured in the Convex backend at `packages/convex/convex/`. Refer to the [Backend > Push Notifications](/docs/backend/push-notifications) section for the backend setup.
+
+On the mobile side, the key steps are:
+1. Request permissions using `expo-notifications`
+2. Get the Expo push token
+3. Send the token to the Convex backend for storage
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `packages/convex/convex/` | Backend push notification handlers |
+
+See the [Convex push notification component docs](https://github.com/get-convex/expo-push-notifications) for the full API.

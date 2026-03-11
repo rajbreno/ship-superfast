@@ -1,0 +1,83 @@
+---
+title: Home
+description: The Home tab — welcome header, pending invites, and stat cards.
+---
+
+## Overview
+
+The Home screen is the first thing users see after signing in. It lives at `src/app/(tabs)/index.tsx`.
+
+## What it shows
+
+### Welcome header
+
+The user's avatar, first name, and their active team name + role:
+
+```tsx
+<Avatar size="lg" alt={currentUser?.name ?? "User avatar"}>
+  {currentUser?.image ? (
+    <Avatar.Image source={{ uri: currentUser.image }} />
+  ) : null}
+  <Avatar.Fallback>
+    {getInitials(currentUser?.name ?? "?")}
+  </Avatar.Fallback>
+</Avatar>
+```
+
+The avatar uses the Google profile picture if available, otherwise shows initials using `getInitials()` from `@repo/shared`.
+
+### Pending invites
+
+If the user has pending team invitations, they appear in a card at the top with Accept and Decline buttons:
+
+```ts
+const myInvites = useQuery(api.teams.getMyPendingInvites);
+const acceptInvite = useMutation(api.teams.acceptInvite);
+const declineInvite = useMutation(api.teams.declineInvite);
+```
+
+Each invite shows the team name, who invited them, and the role they'd join as.
+
+### Stat cards
+
+Three cards in a vertical stack:
+
+| Card | Shows | Icon |
+|------|-------|------|
+| **Team Plan** | The active team's plan (Free, Pro, or Max) | `UserGroupIcon` |
+| **Transactions** | Total payment count for the active team | `Invoice02Icon` |
+| **Auth** | Connection status ("Connected") | `FingerPrintIcon` |
+
+All data is fetched in real time from Convex — cards update automatically when data changes.
+
+## Auto team creation
+
+On first sign-in, the Home screen automatically creates a personal team:
+
+```ts
+const ensureTeam = useMutation(api.teams.ensureTeam);
+
+useEffect(() => {
+  if (isSignedIn) {
+    ensureTeam().catch(() => {});
+  }
+}, [isSignedIn, ensureTeam]);
+```
+
+This is the same behavior as the web dashboard — every user gets at least one team.
+
+## Data flow
+
+```
+useSession()                      → currentUser (avatar, name)
+useQuery(api.teams.getMyTeam)     → active team (name, role, plan)
+useQuery(api.teams.getMyPendingInvites) → pending invites
+useQuery(api.payments.getPaymentHistory) → transaction count
+```
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `src/app/(tabs)/index.tsx` | Home screen |
+| `src/providers/SessionProvider.tsx` | `useSession()` provides `currentUser` |

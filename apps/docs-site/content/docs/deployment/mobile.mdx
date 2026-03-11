@@ -1,0 +1,111 @@
+---
+title: Mobile
+description: Building and submitting the Expo app to App Store and Play Store.
+---
+
+## Overview
+
+The mobile app is built and submitted using **EAS Build** and **EAS Submit** from Expo.
+
+## Prerequisites
+
+- [Expo account](https://expo.dev/signup)
+- Apple Developer account ($99/year) for iOS
+- Google Play Developer account ($25 one-time) for Android
+- EAS CLI installed: `pnpm add -g eas-cli`
+
+## Steps
+
+### 1. Configure EAS
+
+From `apps/mobile/`:
+
+```bash
+eas build:configure
+```
+
+This creates an `eas.json` file with build profiles. The default profiles (development, preview, production) work for most cases.
+
+### 2. Set environment variables
+
+In your `apps/mobile/.env.local`:
+
+```bash
+EXPO_PUBLIC_CONVEX_URL=https://your-production.convex.cloud
+```
+
+Or set it in your EAS build profile in `eas.json`:
+
+```json
+{
+  "build": {
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_CONVEX_URL": "https://your-production.convex.cloud"
+      }
+    }
+  }
+}
+```
+
+### 3. Update app.json
+
+Before building, update `app.json` with your app details:
+- `name` — Your app's display name
+- `slug` — URL-friendly name (used by Expo)
+- `scheme` — Deep link scheme (e.g., `yourapp`). Must match `ALLOWED_REDIRECT_PREFIXES` in `auth.ts`
+- `ios.bundleIdentifier` — e.g., `com.yourcompany.yourapp`
+- `android.package` — e.g., `com.yourcompany.yourapp`
+
+### 4. Build for production
+
+```bash
+# iOS
+eas build --platform ios --profile production
+
+# Android
+eas build --platform android --profile production
+
+# Both
+eas build --platform all --profile production
+```
+
+Builds run on Expo's cloud servers. You'll get a download link when done.
+
+### 5. Submit to stores
+
+```bash
+# iOS — uploads to App Store Connect
+eas submit --platform ios
+
+# Android — uploads to Google Play Console
+eas submit --platform android
+```
+
+Follow the prompts to connect your developer accounts.
+
+### 6. Configure push notifications
+
+For iOS push notifications, you need an APNs key:
+1. Generate in Apple Developer portal → Keys → APNs
+2. Upload to Expo: `eas credentials`
+
+For Android, Firebase Cloud Messaging is configured automatically by EAS.
+
+## Development builds
+
+For testing on a physical device with native modules (push notifications, in-app updates):
+
+```bash
+eas build --platform ios --profile development
+```
+
+Install the resulting build on your device, then run:
+
+```bash
+npx expo start --dev-client
+```
+
+## App Store guidelines
+
+See [Billing & App Stores](/docs/guide/billing-and-app-stores) for details on payment compliance with Apple and Google.

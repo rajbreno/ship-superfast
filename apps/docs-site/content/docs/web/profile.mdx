@@ -1,0 +1,46 @@
+---
+title: Profile
+description: The user profile page — view and edit your name, email, and avatar.
+---
+
+## Overview
+
+The profile page lives at `/dashboard/profile` (`app/dashboard/profile/page.tsx`). It shows the current user's info and lets them edit their display name.
+
+## What it shows
+
+A single card with:
+- **Avatar** — Google profile picture, or initials fallback using `getInitials()` from `@repo/shared`
+- **Name** — display name (editable)
+- **Email** — from Google OAuth (read-only)
+- **Member since** — account creation date
+
+## Editing the name
+
+Clicking the edit icon opens a dialog:
+
+```ts
+const updateProfile = useMutation(api.users.updateProfile);
+
+async function handleSave() {
+  await updateProfile({ name: name.trim() || undefined });
+}
+```
+
+This calls the `users.updateProfile` mutation on the backend, which updates the `name` field on the user document. The change is reflected immediately across all pages (dashboard, sidebar, etc.) because Convex queries are real-time.
+
+## Data flow
+
+```
+useSession() → currentUser → display name, email, avatar, role
+useMutation(api.users.updateProfile) → updates name in database
+```
+
+No page reload needed — Convex's reactive queries push the updated user to all connected components automatically.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `app/dashboard/profile/page.tsx` | Profile page |
+| `components/providers/session-provider.tsx` | `useSession()` provides `currentUser` |

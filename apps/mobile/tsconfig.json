@@ -1,0 +1,12 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "src/uniwind-types.d.ts",
+    "../../packages/convex/convex/_generated/**/*.ts"
+  ]
+}

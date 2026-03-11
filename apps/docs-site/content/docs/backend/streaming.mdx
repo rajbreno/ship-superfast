@@ -1,0 +1,87 @@
+---
+title: Streaming
+description: Persistent text streaming for AI chat responses.
+---
+
+## Overview
+
+Text streaming uses `@convex-dev/persistent-text-streaming` — a Convex component that streams AI responses in real time and persists them in the database. Located at `streaming.ts`.
+
+Unlike regular streaming (lost on disconnect), persistent streaming saves every chunk to Convex so the client can reconnect and pick up where it left off.
+
+## Setup
+
+```ts
+import { PersistentTextStreaming } from "@convex-dev/persistent-text-streaming";
+
+const persistentTextStreaming = new PersistentTextStreaming(
+  components.persistentTextStreaming,
+);
+```
+
+## Functions
+
+### `createStream` (mutation)
+
+Creates a new stream. Call this before starting a chat request.
+
+```ts
+const createStream = useMutation(api.streaming.createStream);
+const streamId = await createStream();
+```
+
+### `getStreamBody` (query)
+
+Subscribes to a stream's content. Returns the accumulated text and status (`"streaming"` or `"done"`). This is a reactive query — it updates automatically as new chunks arrive.
+
+```ts
+const stream = useQuery(api.streaming.getStreamBody, { streamId });
+// stream.text — the response so far
+// stream.status — "streaming" or "done"
+```
+
+### `streamChat` (HTTP action)
+
+The actual streaming endpoint. Receives messages, calls OpenAI, and appends chunks to the stream:
+
+```ts
+const response = await persistentTextStreaming.stream(
+  ctx, request, streamId,
+  async (_ctx, _request, _streamId, append) => {
+    const result = streamText({
+      model: openai(streamModel),
+      system: body.system ?? "You are a helpful assistant.",
+      messages: body.messages,
+    });
+    for await (const chunk of result.textStream) {
+      if (chunk) await append(chunk);
+    }
+  },
+);
+```
+
+## HTTP routes
+
+The streaming endpoint is registered in `http.ts`:
+
+```ts
+http.route({ path: "/chat-stream", method: "POST", handler: streamChat });
+http.route({ path: "/chat-stream", method: "OPTIONS", handler: chatStreamOptions });
+```
+
+The OPTIONS handler provides CORS headers for cross-origin requests from the web app.
+
+## Environment variables
+
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `STREAM_MODEL` | Convex dashboard | OpenAI model (default: `gpt-4o-mini`) |
+| `OPENAI_API_KEY` | Convex dashboard | OpenAI API key |
+| `WEB_ORIGIN` | Convex dashboard | Allowed CORS origin |
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `streaming.ts` | Stream CRUD + HTTP streaming handler |
+| `http.ts` | Registers `/chat-stream` routes |

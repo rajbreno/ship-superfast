@@ -1,0 +1,424 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { motion } from "motion/react";
+import { Button } from "@/components/ui/button";
+import { useSession } from "@/components/providers/session-provider";
+import { ModeToggle } from "@/components/navigation/mode-toggle";
+import { APP_NAME } from "@/lib/config";
+import { HugeiconsIcon } from "@hugeicons/react";
+import CircularText from "@/components/landing/CircularText";
+import {
+  FingerPrintIcon,
+  CloudUploadIcon,
+  CreditCardIcon,
+  Mail01Icon,
+  AiChat02Icon,
+  Notification01Icon,
+  ArrowRight01Icon,
+  SmartPhone01Icon,
+  BrowserIcon,
+} from "@hugeicons/core-free-icons";
+
+export default function LandingPage() {
+  const { isSignedIn, isLoading } = useSession();
+  const router = useRouter();
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace("/dashboard");
+    }
+  }, [isSignedIn, router]);
+
+  if (isLoading || isSignedIn) {
+    return null;
+  }
+
+  const ctaHref = isSignedIn ? "/dashboard" : "/sign-in";
+
+  return (
+    <div className="flex min-h-svh flex-col">
+      {/* ── Nav ── */}
+      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logos/brand logo.png" alt={APP_NAME} className="h-8 w-auto object-contain" />
+            <span className="text-xl font-semibold">{APP_NAME}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <ModeToggle />
+            <Button asChild size="sm">
+              <Link href={ctaHref}>
+                {isSignedIn ? "Dashboard" : "Sign In"}
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Hero ── */}
+      <section className="mx-auto flex w-full max-w-6xl flex-col items-center px-6 pt-28 pb-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center"
+        >
+          <CircularText
+            text="CONVEX · BOILERPLATE · "
+            spinDuration={15}
+            onHover="speedUp"
+            className="!w-[120px] !h-[120px] !text-foreground !text-sm sm:!w-[140px] sm:!h-[140px]"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/stack-logos/convex-icon-logo.png"
+              alt="Convex"
+              className="h-10 w-10 sm:h-12 sm:w-12"
+            />
+          </CircularText>
+          <h1 className="mt-8 max-w-4xl text-center font-[family-name:var(--font-instrument-serif)] text-5xl italic tracking-tight text-primary sm:text-6xl lg:text-7xl xl:text-8xl">
+            Ship Superfast
+          </h1>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="mt-6 max-w-2xl text-center text-lg text-muted-foreground"
+        >
+          Build and ship cross-platform apps with Convex, Next.js, and Expo.
+          Auth, payments, storage, and AI all wired up.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-10 flex items-center gap-4"
+        >
+          <Button asChild size="lg">
+            <Link href={ctaHref}>
+              Get Started
+              <HugeiconsIcon
+                icon={ArrowRight01Icon}
+                className="ml-2 h-4 w-4"
+              />
+            </Link>
+          </Button>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.45 }}
+          className="mt-16 w-full overflow-hidden rounded-2xl border bg-card"
+        >
+          <div className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0">
+            <div className="flex flex-col items-center gap-1 py-8">
+              <span className="text-2xl font-bold sm:text-3xl">0 → Prod</span>
+              <span className="text-sm text-muted-foreground">Superfast</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 py-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/web.png" alt="Web" className="h-10 w-10 object-contain" />
+              <span className="text-sm text-muted-foreground">Web</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 py-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/appstore.png" alt="App Store" className="h-10 w-10 rounded-lg object-contain" />
+              <span className="text-sm text-muted-foreground">iOS</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 py-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/playstore.png" alt="Play Store" className="h-10 w-10 rounded-lg object-contain" />
+              <span className="text-sm text-muted-foreground">Android</span>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ── Stack Bento ── */}
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+        className="mx-auto w-full max-w-6xl px-6 py-24"
+      >
+        <div className="mb-14 text-center">
+          <h2 className="text-4xl font-semibold tracking-tight">The Stack</h2>
+          <p className="mt-3 text-lg text-muted-foreground">
+            Every technology in the kit and what it powers.
+          </p>
+        </div>
+
+        {/* Border-divided bento */}
+        <div className="overflow-hidden rounded-3xl border bg-card">
+          {/* Row 1 — Core big three */}
+          <div className="grid grid-cols-1 divide-x-0 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <BentoTech tech={allTech[0]} tall />
+            <BentoTech tech={allTech[1]} tall />
+            <BentoTech tech={allTech[2]} tall />
+          </div>
+
+          {/* Row 2 — Core + AI */}
+          <div className="grid grid-cols-1 divide-x-0 divide-y border-t sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <BentoTech tech={allTech[3]} />
+            <BentoTech tech={allTech[4]} />
+            <BentoTech tech={allTech[5]} />
+          </div>
+
+          {/* Row 3 — UI layer */}
+          <div className="grid grid-cols-1 divide-x-0 divide-y border-t sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <BentoTech tech={allTech[6]} />
+            <BentoTech tech={allTech[7]} />
+            <BentoTech tech={allTech[8]} />
+          </div>
+
+          {/* Row 4 — Integrations */}
+          <div className="grid grid-cols-1 divide-x-0 divide-y border-t sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <BentoTech tech={allTech[9]} />
+            <BentoTech tech={allTech[10]} />
+            <BentoTech tech={allTech[11]} />
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ── Platforms ── */}
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+        className="mx-auto w-full max-w-6xl px-6 py-24"
+      >
+        <div className="mb-14 text-center">
+          <h2 className="text-4xl font-semibold tracking-tight">
+            One codebase, two platforms
+          </h2>
+          <p className="mt-3 text-lg text-muted-foreground">
+            Ship a web app and a mobile app from the same project.
+          </p>
+        </div>
+
+        <div className="overflow-hidden rounded-3xl border bg-card">
+          <div className="grid grid-cols-1 divide-x-0 divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+            {/* Web */}
+            <div className="flex flex-col gap-5 p-10 sm:p-14 transition-colors duration-200 hover:bg-muted/50">
+              <HugeiconsIcon icon={BrowserIcon} strokeWidth={1} className="h-12 w-12 text-primary" />
+              <div>
+                <p className="text-xl font-semibold">Web App</p>
+                <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                  Next.js 16 with shadcn/ui and Tailwind v4. Server components, app router, and dark mode out of the box.
+                </p>
+              </div>
+            </div>
+
+            {/* Mobile */}
+            <div className="flex flex-col gap-5 p-10 sm:p-14 transition-colors duration-200 hover:bg-muted/50">
+              <HugeiconsIcon icon={SmartPhone01Icon} strokeWidth={1} className="h-12 w-12 text-primary" />
+              <div>
+                <p className="text-xl font-semibold">Mobile App</p>
+                <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                  Expo 54 with HeroUI Native and Uniwind. iOS and Android from a single codebase with native performance.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ── Features ── */}
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+        className="mx-auto w-full max-w-6xl px-6 py-24"
+      >
+        <div className="mb-14 text-center">
+          <h2 className="text-4xl font-semibold tracking-tight">
+            Everything you need
+          </h2>
+          <p className="mt-3 text-lg text-muted-foreground">
+            Six production integrations, all wired up and ready to go.
+          </p>
+        </div>
+
+        <div className="overflow-hidden rounded-3xl border bg-card">
+          {/* Row 1 */}
+          <div className="grid grid-cols-1 divide-x-0 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <BentoFeature f={features[0]} />
+            <BentoFeature f={features[1]} />
+            <BentoFeature f={features[2]} />
+          </div>
+
+          {/* Row 2 */}
+          <div className="grid grid-cols-1 divide-x-0 divide-y border-t sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <BentoFeature f={features[3]} />
+            <BentoFeature f={features[4]} />
+            <BentoFeature f={features[5]} />
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ── CTA ── */}
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+        className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 py-20 text-center"
+      >
+        <h2 className="text-3xl font-semibold">Ready to ship?</h2>
+        <p className="max-w-md text-lg text-muted-foreground">
+          Start building your web and mobile app today.
+        </p>
+        <Button asChild size="lg">
+          <Link href={ctaHref}>
+            Get Started
+            <HugeiconsIcon
+              icon={ArrowRight01Icon}
+              className="ml-2 h-4 w-4"
+            />
+          </Link>
+        </Button>
+      </motion.section>
+
+      {/* ── Footer ── */}
+      <footer className="border-t">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 text-sm text-muted-foreground">
+          <span>
+            &copy; {new Date().getFullYear()} {APP_NAME}. All rights reserved.
+          </span>
+          <ModeToggle />
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// ── Bento cells ────────────────────────────────────────────────────
+
+type TechItem = {
+  name: string;
+  logo: string;
+  purpose: string;
+  category: string;
+};
+
+function BentoTech({
+  tech,
+  tall,
+}: {
+  tech: TechItem;
+  tall?: boolean;
+}) {
+  return (
+    <div
+      className={`group flex items-center gap-6 transition-colors duration-200 hover:bg-muted/50 ${tall ? "py-16" : "py-12"} px-10`}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={tech.logo}
+        alt={tech.name}
+        className="h-14 w-14 shrink-0 rounded-lg object-contain transition-transform duration-300 group-hover:scale-110 dark:h-12 dark:w-12"
+        loading="lazy"
+      />
+      <div>
+        <p className="text-lg font-semibold">{tech.name}</p>
+        <p className="mt-0.5 text-base text-muted-foreground">{tech.purpose}</p>
+      </div>
+    </div>
+  );
+}
+
+type Feature = (typeof features)[number];
+
+function BentoFeature({
+  f,
+  tall,
+}: {
+  f: Feature;
+  tall?: boolean;
+}) {
+  return (
+    <div
+      className={`group flex flex-col gap-4 transition-colors duration-200 hover:bg-muted/50 ${tall ? "p-10 sm:p-12" : "p-8 sm:p-10"}`}
+    >
+      <HugeiconsIcon
+        icon={f.icon}
+        strokeWidth={1}
+        className="h-10 w-10 text-primary"
+      />
+      <div>
+        <p className={`font-semibold ${tall ? "text-xl" : "text-lg"}`}>
+          {f.title}
+        </p>
+        <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+          {f.description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Data ───────────────────────────────────────────────────────────
+
+const allTech: TechItem[] = [
+  { name: "Convex", logo: "/stack-logos/convex.png", purpose: "Realtime Backend", category: "Core" },
+  { name: "Next.js 16", logo: "/stack-logos/next.png", purpose: "Web Framework", category: "Core" },
+  { name: "Expo 54", logo: "/stack-logos/expo.png", purpose: "Mobile Framework", category: "Core" },
+  { name: "Turborepo", logo: "/stack-logos/turbo.png", purpose: "Monorepo Build", category: "Core" },
+  { name: "TypeScript", logo: "/stack-logos/type.png", purpose: "Type Safety", category: "Core" },
+  { name: "AI Agent Toolkit", logo: "/stack-logos/convex.png", purpose: "Powered by Vercel AI SDK", category: "Integration" },
+  { name: "shadcn/ui", logo: "/stack-logos/shadcn.png", purpose: "Web Components", category: "UI" },
+  { name: "HeroUI Native", logo: "/stack-logos/herouinative.png", purpose: "Mobile Components", category: "UI" },
+  { name: "Tailwind v4", logo: "/stack-logos/tailwind.png", purpose: "Styling", category: "UI" },
+  { name: "Cloudflare R2", logo: "/stack-logos/cloudflare.png", purpose: "File Storage", category: "Integration" },
+  { name: "Dodo Payments", logo: "/stack-logos/dodo.png", purpose: "Payments", category: "Integration" },
+  { name: "Resend", logo: "/stack-logos/resend.png", purpose: "Email", category: "Integration" },
+];
+
+const features = [
+  {
+    title: "Authentication",
+    description:
+      "Google OAuth and magic link on web and mobile with role-based access.",
+    icon: FingerPrintIcon,
+  },
+  {
+    title: "File Storage",
+    description:
+      "Upload files with signed URLs and global edge delivery via R2.",
+    icon: CloudUploadIcon,
+  },
+  {
+    title: "Payments",
+    description:
+      "Checkout, subscriptions, and customer portal via Dodo Payments.",
+    icon: CreditCardIcon,
+  },
+  {
+    title: "Email",
+    description:
+      "Transactional emails via Resend with delivery guarantees.",
+    icon: Mail01Icon,
+  },
+  {
+    title: "AI Agents",
+    description:
+      "AI agents with tool calling, RAG, and real-time streaming.",
+    icon: AiChat02Icon,
+  },
+  {
+    title: "Push Notifications",
+    description:
+      "Native push for iOS and Android with user targeting and broadcast.",
+    icon: Notification01Icon,
+  },
+];

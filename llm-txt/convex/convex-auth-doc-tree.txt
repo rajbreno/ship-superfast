@@ -1,0 +1,64 @@
+# Convex Auth Documentation Tree Structure
+# Generated from: https://github.com/get-convex/convex-auth/tree/main/docs/pages
+
+## Instructions for AI Assistant:
+
+When the user asks about searching or finding information in Convex Auth documentation:
+1. Look into this file to find relevant documentation paths
+2. Use this URL format to fetch the actual .mdx content:
+   https://raw.githubusercontent.com/get-convex/convex-auth/main/{path}
+
+Example:
+- Path in this file: docs/pages/setup/react.mdx
+- Fetch URL: https://raw.githubusercontent.com/get-convex/convex-auth/main/docs/pages/setup/react.mdx
+
+## File Tree:
+
+docs/pages
+docs/pages/_app.mdx
+docs/pages/_meta.json
+docs/pages/advanced.mdx
+docs/pages/api_reference
+docs/pages/api_reference.mdx
+docs/pages/api_reference/_meta.json
+docs/pages/api_reference/nextjs
+docs/pages/api_reference/nextjs.mdx
+docs/pages/api_reference/nextjs/_meta.json
+docs/pages/api_reference/nextjs/server.mdx
+docs/pages/api_reference/providers
+docs/pages/api_reference/providers/_meta.json
+docs/pages/api_reference/providers/Anonymous.mdx
+docs/pages/api_reference/providers/ConvexCredentials.mdx
+docs/pages/api_reference/providers/Email.mdx
+docs/pages/api_reference/providers/Password.mdx
+docs/pages/api_reference/providers/Phone.mdx
+docs/pages/api_reference/react.mdx
+docs/pages/api_reference/server.mdx
+docs/pages/authz
+docs/pages/authz.mdx
+docs/pages/authz/_meta.json
+docs/pages/authz/nextjs.mdx
+docs/pages/config
+docs/pages/config.mdx
+docs/pages/config/_meta.json
+docs/pages/config/anonymous.mdx
+docs/pages/config/email.mdx
+docs/pages/config/oauth
+docs/pages/config/oauth.mdx
+docs/pages/config/oauth/_meta.json
+docs/pages/config/oauth/apple.mdx
+docs/pages/config/oauth/github.mdx
+docs/pages/config/oauth/google.mdx
+docs/pages/config/otps.mdx
+docs/pages/config/passwords.mdx
+docs/pages/debugging.mdx
+docs/pages/faq.mdx
+docs/pages/global.css
+docs/pages/index.mdx
+docs/pages/production.mdx
+docs/pages/security.mdx
+docs/pages/setup
+docs/pages/setup.mdx
+docs/pages/setup/_meta.json
+docs/pages/setup/manual.mdx
+docs/pages/setup/schema.mdx

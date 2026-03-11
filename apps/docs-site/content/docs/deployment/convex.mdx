@@ -1,0 +1,86 @@
+---
+title: Convex
+description: Deploying the Convex backend to production.
+---
+
+## Overview
+
+The Convex backend deploys to **Convex Cloud**. You'll create a production deployment, set environment variables, and deploy your functions.
+
+## Steps
+
+### 1. Create a production deployment
+
+From the `packages/convex/` directory:
+
+```bash
+npx convex deploy
+```
+
+This pushes your schema, functions, and cron jobs to the production deployment. If you haven't created one yet, the CLI will prompt you.
+
+### 2. Set environment variables
+
+In the [Convex dashboard](https://dashboard.convex.dev), go to your production deployment and set these variables:
+
+**Auth:**
+- `AUTH_GOOGLE_ID` — Google OAuth client ID
+- `AUTH_GOOGLE_SECRET` — Google OAuth client secret
+- `AUTH_RESEND_KEY` — Resend API key
+- `AUTH_RESEND_FROM` — Verified sender email (e.g., `noreply@yourapp.com`)
+- `SITE_URL` — Your production web URL (e.g., `https://yourapp.com`)
+
+**Payments:**
+- `DODO_PAYMENTS_API_KEY` — Dodo API key
+- `DODO_PAYMENTS_ENVIRONMENT` — `live_mode`
+- `DODO_PAYMENTS_WEBHOOK_KEY` — Webhook signature key
+
+**Storage:**
+- `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`
+
+**AI (optional):**
+- `OPENAI_API_KEY` — OpenAI API key
+- `AGENT_MODEL` — Chat model (default: `gpt-4o-mini`)
+- `STREAM_MODEL` — Streaming model (default: `gpt-4o-mini`)
+- `RAG_EMBEDDING_MODEL` — Embedding model (default: `text-embedding-3-small`)
+
+### 3. Configure webhooks
+
+In your Dodo Payments dashboard, set the webhook URL to:
+
+```
+https://<your-convex-deployment>.convex.site/dodopayments-webhook
+```
+
+You can find your deployment URL in the Convex dashboard under "HTTP Actions".
+
+### 4. Update auth redirects
+
+In `auth.ts`, add your production domain to `ALLOWED_REDIRECT_PREFIXES`:
+
+```ts
+const ALLOWED_REDIRECT_PREFIXES = [
+  "exp://",
+  "yourapp://",              // Your mobile app scheme
+  "http://localhost",
+  "https://yourapp.com",     // Your production web domain
+];
+```
+
+Also update `SITE_URL` to your production URL.
+
+### 5. Update Google OAuth
+
+In the Google Cloud Console, add your production URLs to the authorized redirect URIs:
+- `https://<your-convex-deployment>.convex.site/api/auth/callback/google`
+
+## Re-deploying
+
+After making changes to backend code:
+
+```bash
+cd packages/convex
+npx convex deploy
+```
+
+This is a zero-downtime deployment — functions are swapped atomically.

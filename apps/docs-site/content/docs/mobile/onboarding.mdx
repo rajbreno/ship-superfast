@@ -1,0 +1,116 @@
+---
+title: Onboarding
+description: The 3-slide onboarding flow shown on first launch.
+---
+
+## Overview
+
+The onboarding screen is a horizontal paging `FlatList` with 3 slides. It only shows on **first launch** — once completed (or skipped), it never appears again.
+
+Located at `src/app/(onboarding)/index.tsx`.
+
+## The 3 slides
+
+| Slide | Title | Content |
+|-------|-------|---------|
+| 1. Welcome | "Ship Superfast" | Brand logo + tagline describing what the kit includes |
+| 2. Stack | "The Stack" | Card listing all 9 technologies with logos (Convex, Expo, Turborepo, etc.) |
+| 3. Features | "Everything Built In" | Grid of 6 feature cards with icons (Auth, Storage, Payments, Email, AI, Push) |
+
+## How it works
+
+### FlatList paging
+
+The slides are rendered in a horizontal `FlatList` with `pagingEnabled`. Each slide takes the full screen width:
+
+```ts
+const slideIds: SlideId[] = ["welcome", "stack", "features"];
+
+<FlatList
+  data={slideIds}
+  horizontal
+  pagingEnabled
+  showsHorizontalScrollIndicator={false}
+/>
+```
+
+### Animated dots
+
+Below the slides, animated dots show which slide is active. The active dot expands to 24px wide, while inactive dots are 8px:
+
+```ts
+function Dot({ active }: { active: boolean }) {
+  const style = useAnimatedStyle(() => ({
+    width: withTiming(active ? 24 : 8, { duration: 300 }),
+    opacity: withTiming(active ? 1 : 0.35, { duration: 300 }),
+  }));
+
+  return (
+    <Animated.View className="h-2 rounded-full bg-accent" style={style} />
+  );
+}
+```
+
+### Continue / Get Started button
+
+A fixed button at the bottom advances to the next slide. On the last slide, it changes to "Get Started" with a fade animation:
+
+```ts
+const handleNext = () => {
+  if (activeIndex < slideIds.length - 1) {
+    flatListRef.current?.scrollToIndex({ index: activeIndex + 1 });
+  } else {
+    completeOnboarding();
+  }
+};
+```
+
+### Skip button
+
+Every slide has a "Skip" button in the top-right corner that jumps straight to sign-in.
+
+## Persistence
+
+Onboarding completion is saved to `AsyncStorage`:
+
+```ts
+export const ONBOARDING_KEY = "hasSeenOnboarding";
+
+const completeOnboarding = async () => {
+  await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+  router.replace("/(auth)/sign-in");
+};
+```
+
+The root layout reads this value on startup to decide whether to show onboarding:
+
+```ts
+const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
+
+useEffect(() => {
+  AsyncStorage.getItem(ONBOARDING_KEY).then((value) => {
+    setHasSeenOnboarding(value === "true");
+  });
+}, []);
+
+const showOnboarding = !hasSeenOnboarding && !isSignedIn;
+```
+
+## Animations
+
+Each slide uses `react-native-reanimated` entry animations:
+- **Welcome**: Logo fades down, text fades up
+- **Stack**: Title fades down, card fades up with delay
+- **Features**: Title fades down, feature cards stagger in one by one
+
+```ts
+<Animated.View entering={FadeInUp.duration(400).delay(150 + i * 70)}>
+```
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `src/app/(onboarding)/index.tsx` | Onboarding slides + completion logic |
+| `src/app/(onboarding)/_layout.tsx` | Onboarding layout (no header) |
+| `src/app/_layout.tsx` | Reads `ONBOARDING_KEY` to control guard |

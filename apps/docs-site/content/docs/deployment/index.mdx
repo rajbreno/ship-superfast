@@ -1,0 +1,41 @@
+---
+title: Overview
+description: Deploying the kit — what goes where and in what order.
+---
+
+## Deployment targets
+
+| App | Hosting | URL |
+|-----|---------|-----|
+| **Web** | Vercel | `yourapp.com` |
+| **Mobile** | App Store + Play Store | via EAS Build |
+| **Convex** | Convex Cloud | `*.convex.cloud` |
+| **Docs** | Vercel (or any Next.js host) | `docs.yourapp.com` |
+
+## Deployment order
+
+Deploy in this order to avoid missing dependencies:
+
+1. **Convex** — the backend must be live first (both apps depend on it)
+2. **Web** — deploy to Vercel, set environment variables
+3. **Mobile** — build with EAS, submit to stores
+4. **Docs** — deploy separately (no backend dependency)
+
+## Environment checklist
+
+Before deploying, make sure you have:
+
+- [ ] Convex production deployment created (`npx convex deploy`)
+- [ ] Google OAuth credentials (production redirect URIs)
+- [ ] Dodo Payments API key + webhook URL configured
+- [ ] Resend API key + verified sender domain
+- [ ] R2 bucket + credentials (if using file storage)
+- [ ] OpenAI API key (if using AI features)
+- [ ] `SITE_URL` set to your production web URL
+- [ ] `ALLOWED_REDIRECT_PREFIXES` in `auth.ts` updated with your production domain and app scheme
+
+## Next steps
+
+- [Convex](/docs/deployment/convex) — deploy the backend
+- [Web](/docs/deployment/web) — deploy to Vercel
+- [Mobile](/docs/deployment/mobile) — build and submit to app stores

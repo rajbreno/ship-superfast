@@ -1,0 +1,56 @@
+---
+title: Users
+description: User queries, mutations, and helper functions.
+---
+
+## Overview
+
+User functions live in `users.ts` with shared logic in `lib/users.ts`. They handle fetching the current user, checking admin status, and updating profiles.
+
+## Public functions
+
+### `current` (query)
+
+Returns the current authenticated user, or `null` if not signed in.
+
+```ts
+const user = useQuery(api.users.current);
+```
+
+### `getCurrentWithRole` (query)
+
+Returns the current user along with their admin status. Used by the `SessionProvider` on both web and mobile.
+
+```ts
+const { user, isAdmin } = useQuery(api.users.getCurrentWithRole);
+```
+
+### `isAdmin` (query)
+
+Returns `true` if the current user has `role: "admin"`.
+
+### `updateProfile` (mutation)
+
+Updates the current user's display name.
+
+```ts
+const updateProfile = useMutation(api.users.updateProfile);
+await updateProfile({ name: "New Name" });
+```
+
+## Helper functions (`lib/users.ts`)
+
+| Function | Returns | Description |
+|----------|---------|-------------|
+| `getCurrentUser(ctx)` | `Doc<"users"> \| null` | Get the authenticated user |
+| `getUserById(ctx, userId)` | `Doc<"users"> \| null` | Get any user by ID |
+| `isAdmin(ctx)` | `boolean` | Check if current user is admin |
+
+These are imported as `* as Users` and called from query/mutation handlers.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `users.ts` | Public user queries and mutations |
+| `lib/users.ts` | Shared helper functions |

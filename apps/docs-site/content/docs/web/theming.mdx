@@ -1,0 +1,129 @@
+---
+title: Theming
+description: How colors, dark mode, and fonts work in the web app.
+---
+
+## How it works
+
+The web app uses **Tailwind v4** with **CSS custom properties** (variables) for theming. All colors are defined in `app/globals.css` as variables like `--primary`, `--background`, etc. Tailwind maps these to utility classes like `bg-primary`, `text-muted-foreground`.
+
+Light and dark themes are separate sets of the same variables — switching themes just swaps which set is active.
+
+## Theme file
+
+All theme colors live in `app/globals.css`. The file has three parts:
+
+### 1. Light theme (`:root`)
+
+```css
+:root {
+  --radius: 0.65rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --primary: oklch(0.646 0.222 41.116);
+  --primary-foreground: oklch(0.98 0.016 73.684);
+  /* ... more colors */
+}
+```
+
+### 2. Dark theme (`.dark`)
+
+```css
+.dark {
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+  --primary: oklch(0.705 0.213 47.604);
+  --primary-foreground: oklch(0.98 0.016 73.684);
+  /* ... more colors */
+}
+```
+
+### 3. Tailwind theme mapping (`@theme inline`)
+
+This block tells Tailwind to use the CSS variables as color values:
+
+```css
+@theme inline {
+  --color-primary: var(--primary);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  /* ... maps all variables to Tailwind */
+}
+```
+
+## Color tokens
+
+These are the main color tokens you'll use. Every shadcn/ui component uses them automatically.
+
+| Token | What it's for |
+|-------|--------------|
+| `background` / `foreground` | Page background and default text |
+| `primary` / `primary-foreground` | Buttons, links, active states |
+| `secondary` / `secondary-foreground` | Secondary buttons, less emphasis |
+| `muted` / `muted-foreground` | Disabled states, helper text |
+| `accent` / `accent-foreground` | Highlighted items, hover states |
+| `destructive` | Delete buttons, error states |
+| `card` / `card-foreground` | Card backgrounds |
+| `popover` / `popover-foreground` | Dropdowns, tooltips |
+| `border` | Border color |
+| `input` | Input field borders |
+| `ring` | Focus ring color |
+| `sidebar-*` | Sidebar-specific colors |
+| `chart-1` through `chart-5` | Chart/graph colors |
+
+## Changing the brand color
+
+To change the primary color, update `--primary` in both `:root` (light) and `.dark` (dark) in `app/globals.css`.
+
+Colors use the **OKLCH** format. You can pick colors at [oklch.com](https://oklch.com).
+
+The current primary is a warm orange:
+- Light: `oklch(0.646 0.222 41.116)`
+- Dark: `oklch(0.705 0.213 47.604)` (slightly brighter for contrast)
+
+## Dark mode
+
+Dark mode uses [next-themes](https://github.com/pacocoursey/next-themes). The provider is in `components/providers/theme-provider.tsx`:
+
+```ts
+<NextThemesProvider
+  attribute="class"       // adds "dark" class to <html>
+  defaultTheme="light"    // starts in light mode
+  enableSystem             // respects OS preference
+  disableTransitionOnChange // no flash when switching
+/>
+```
+
+### Theme toggle button
+
+The `ModeToggle` component (`components/navigation/mode-toggle.tsx`) is a button that switches between light and dark. It appears in the navbar and footer.
+
+### Keyboard shortcut
+
+Press **D** on your keyboard to toggle dark mode (when not typing in an input field). This is handled by the `ThemeHotkey` component inside the theme provider.
+
+## Fonts
+
+Four Google Fonts are loaded in `app/layout.tsx`:
+
+| Font | Variable | Usage |
+|------|----------|-------|
+| Inter | `--font-sans` | Body text (default) |
+| Inria Serif | `--font-serif` | Serif accent text |
+| Instrument Serif | `--font-instrument-serif` | Landing page hero heading |
+| Geist Mono | `--font-mono` | Code blocks |
+
+Use them in Tailwind with `font-sans`, `font-serif`, or `font-mono`. For Instrument Serif, use the CSS variable directly:
+
+```tsx
+<h1 className="font-[family-name:var(--font-instrument-serif)]">
+```
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `app/globals.css` | All color tokens (light + dark) |
+| `components/providers/theme-provider.tsx` | Dark mode provider + keyboard shortcut |
+| `components/navigation/mode-toggle.tsx` | Theme toggle button |
+| `app/layout.tsx` | Font loading |

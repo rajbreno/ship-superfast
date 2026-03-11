@@ -1,0 +1,26 @@
+{
+  "title": "Backend",
+  "description": "Convex backend",
+  "icon": "Database01Icon",
+  "root": true,
+  "pages": [
+    "index",
+    "schema",
+    "---Core---",
+    "authentication",
+    "users",
+    "teams",
+    "---Features---",
+    "billing",
+    "storage",
+    "email",
+    "---AI---",
+    "ai-agent",
+    "rag",
+    "streaming",
+    "---Infrastructure---",
+    "push-notifications",
+    "http-routes",
+    "cron-jobs"
+  ]
+}

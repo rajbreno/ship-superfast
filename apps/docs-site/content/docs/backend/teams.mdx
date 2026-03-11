@@ -1,0 +1,94 @@
+---
+title: Teams
+description: Team management — creation, members, invites, and role enforcement.
+---
+
+## Overview
+
+Team functions live in `teams.ts` with shared logic in `lib/teams.ts`. Teams are the core organizational unit — billing, members, and permissions are all scoped to a team.
+
+## Public queries
+
+| Function | Args | Returns | Description |
+|----------|------|---------|-------------|
+| `getMyTeam` | — | team or `null` | Get the caller's primary team (prefers owned) |
+| `getMyTeams` | — | team array | Get all teams the caller belongs to |
+| `getTeamById` | `teamId` | team or `null` | Get a specific team (must be a member) |
+| `getTeamMembers` | `teamId` | member array | List all members with user info |
+| `getPendingInvites` | `teamId` | invite array | List pending invites (owner/admin only) |
+| `getMyPendingInvites` | — | invite array | Get invites sent to the current user's email |
+
+## Public mutations
+
+### `ensureTeam`
+
+Auto-creates a personal team on first sign-in. If the user already owns a team, returns its ID. Called from the dashboard layout (web) and home screen (mobile).
+
+```ts
+const ensureTeam = useMutation(api.teams.ensureTeam);
+useEffect(() => {
+  if (isSignedIn) ensureTeam();
+}, [isSignedIn]);
+```
+
+### `removeMember`
+
+Removes a member from a team. Permission logic:
+- **Self-removal**: allowed for non-owners (leaving the team)
+- **Owner**: can remove anyone except themselves
+- **Admin**: can remove members only (not other admins)
+
+### `changeMemberRole`
+
+Owner-only. Changes a member's role between `"admin"` and `"member"`. Cannot change the owner's role or your own.
+
+### `acceptInvite` / `declineInvite`
+
+Accept or decline a pending team invitation. Validates that the invite matches the caller's email and is still pending.
+
+### `cancelInvite`
+
+Owner/admin only. Deletes a pending invite.
+
+### `updateTeamName`
+
+Owner/admin only. Updates the team name (max 50 characters).
+
+### `transferOwnership`
+
+Owner only. Transfers ownership to another team member. The old owner becomes an admin.
+
+## Invite action
+
+### `inviteMember` (action)
+
+Creates an invite and sends a notification email via Resend. This is an `action` (not a mutation) because it makes an external HTTP call to send the email.
+
+The invite creation happens in an `internalMutation` (`validateAndCreateInvite`) for atomicity — it validates permissions, checks for duplicates, and inserts the invite in a single transaction.
+
+```ts
+const inviteMember = useAction(api.teams.inviteMember);
+const result = await inviteMember({
+  teamId,
+  email: "user@example.com",
+  role: "member",
+});
+```
+
+## Helper functions (`lib/teams.ts`)
+
+| Function | Description |
+|----------|-------------|
+| `getTeamById(ctx, teamId)` | Get a team document |
+| `getTeamMembership(ctx, teamId, userId)` | Get a user's membership |
+| `requireTeamMembership(ctx, teamId, userId)` | Throws if not a member |
+| `requireTeamRole(ctx, teamId, userId, roles)` | Throws if wrong role |
+| `getTeamMembers(ctx, teamId)` | List members with user docs |
+| `getUserTeams(ctx, userId)` | List all teams for a user |
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `teams.ts` | Public queries, mutations, invite action |
+| `lib/teams.ts` | Membership checks, role guards |

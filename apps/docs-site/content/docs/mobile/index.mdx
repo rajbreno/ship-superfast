@@ -1,0 +1,97 @@
+---
+title: Overview
+description: The Expo 54 mobile app — how it's built and how the pieces fit together.
+---
+
+## What's in `apps/mobile/`
+
+The mobile app is an **Expo 54** React Native app with:
+- A 3-slide **onboarding** flow (first launch only)
+- A **sign-in** screen (Google OAuth + magic link email)
+- A **tab bar** with Home, Team, Billing, and Profile screens
+- **HeroUI Native** components (compound component pattern)
+- **Uniwind** — Tailwind v4 for React Native
+- **Light and dark** themes (follows system)
+
+## Screens
+
+| Screen | What it shows |
+|--------|--------------|
+| Onboarding | 3 swipeable slides — welcome, tech stack, features |
+| Sign In | Google OAuth + magic link email |
+| Home | Welcome message, pending invites, stat cards |
+| Team | Members list, invites, role management, team switching |
+| Billing | Current plan, upgrade options, payment history |
+| Profile | Avatar, name (editable), email, sign out |
+
+## Provider stack
+
+The root layout (`src/app/_layout.tsx`) wraps the entire app in providers:
+
+```
+GestureHandlerRootView       ← Required by react-native-reanimated
+  └─ SafeAreaProvider        ← Safe area insets for notches
+      └─ HeroUINativeProvider ← HeroUI Native theme + components
+          └─ ErrorBoundary   ← Catches unhandled JS errors
+              └─ ConvexProvider        ← Connects to Convex backend
+                  └─ ConvexAuthProvider ← Auth tokens via SecureStore
+                      └─ ForegroundRecoveryProvider ← Reconnects after background
+                          └─ SessionProvider ← Current user + auth state
+```
+
+Every screen can use these hooks:
+- `useSession()` — get the current user, check if signed in, sign out
+- `useQuery()` / `useMutation()` — read and write data through Convex
+- `useActiveTeam()` — get the active team, switch teams
+- `useThemeColor()` — get resolved theme colors from HeroUI Native
+
+## Navigation
+
+The app uses **Expo Router** with `Stack.Protected` guards to control what the user sees:
+
+```
+Stack
+  ├─ (onboarding)  ← shows when: first launch + not signed in
+  ├─ (auth)        ← shows when: onboarding done + not signed in
+  └─ (tabs)        ← shows when: signed in
+      ├─ Home
+      ├─ Team
+      ├─ Billing
+      └─ Profile
+```
+
+The guards work by checking two things:
+1. **Has the user seen onboarding?** — stored in AsyncStorage
+2. **Is the user signed in?** — from `useSession()`
+
+## Auth token storage
+
+On mobile, auth tokens are stored in **SecureStore** (encrypted device storage) instead of cookies:
+
+```ts
+const secureStorage = {
+  getItem: (key: string) => SecureStore.getItemAsync(key),
+  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+};
+```
+
+This is passed to `ConvexAuthProvider` so tokens persist across app restarts securely.
+
+## Key files
+
+| File | What it does |
+|------|-------------|
+| `src/app/_layout.tsx` | Root layout — providers, navigation guards |
+| `src/app/(auth)/sign-in.tsx` | Sign-in screen |
+| `src/app/(onboarding)/index.tsx` | Onboarding slides |
+| `src/app/(tabs)/_layout.tsx` | Tab bar + active team context |
+| `src/providers/SessionProvider.tsx` | `useSession()` hook |
+| `src/hooks/useActiveTeam.ts` | Active team context + AsyncStorage |
+| `src/global.css` | Theme colors (accent, radius, shadows) |
+| `src/components/ErrorBoundary.tsx` | Error boundary with retry |
+| `src/components/SplashScreenController.tsx` | Splash screen timing |
+
+## Next steps
+
+Continue with [Authentication](/docs/mobile/authentication) to see how sign-in works on mobile.

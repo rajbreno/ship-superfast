@@ -1,0 +1,143 @@
+---
+title: Authentication
+description: How sign-in works on mobile — Google OAuth and magic link email.
+---
+
+## How it works
+
+The mobile app supports two sign-in methods:
+1. **Google OAuth** — opens a browser window for Google sign-in
+2. **Magic link email** — enter your email, get a sign-in link
+
+Both use `@convex-dev/auth` on the backend — the same as the web app. The difference is how the mobile app handles redirects and token storage.
+
+## The sign-in screen
+
+Located at `src/app/(auth)/sign-in.tsx`. It shows a centered card with the brand logo, a Google sign-in button, a separator, and an email input.
+
+All elements animate in with `react-native-reanimated`:
+- Logo fades down
+- Title fades down with a delay
+- Buttons fade up
+
+### Google sign-in
+
+When the user taps "Sign in with Google":
+
+```ts
+import { makeRedirectUri } from "expo-auth-session";
+import { openAuthSessionAsync } from "expo-web-browser";
+
+const redirectTo = makeRedirectUri();
+
+const handleGoogleSignIn = async () => {
+  // 1. Start the OAuth flow — get the redirect URL
+  const { redirect } = await signIn("google", { redirectTo });
+
+  // 2. Open the browser for Google consent
+  const result = await openAuthSessionAsync(
+    redirect!.toString(),
+    redirectTo,
+  );
+
+  // 3. Extract the code and complete sign-in
+  if (result.type === "success") {
+    const code = new URL(result.url).searchParams.get("code");
+    if (code) {
+      await signIn("google", { code });
+    }
+  }
+};
+```
+
+The flow:
+1. Call `signIn("google", { redirectTo })` to get a Google OAuth URL
+2. Open that URL in a system browser via `openAuthSessionAsync`
+3. The user signs in with Google, gets redirected back to the app
+4. Extract the authorization code from the redirect URL
+5. Call `signIn("google", { code })` to exchange the code for a session
+
+After sign-in, the user is navigated to the tabs screen.
+
+### Magic link sign-in
+
+When the user submits their email:
+
+```ts
+const handleEmailSignIn = async () => {
+  await signIn("resend", { email: email.trim() });
+  setEmailSent(true);
+};
+```
+
+The screen swaps to a "Check your email" card with a mail icon and a "Use a different email" button.
+
+Magic link requires `AUTH_RESEND_KEY` and `AUTH_RESEND_FROM` in the Convex dashboard. Without these, only Google sign-in works.
+
+### Loading states
+
+Both buttons disable while a sign-in attempt is in progress. A `Spinner` replaces the button label during loading to prevent double-taps.
+
+## Token storage
+
+On mobile, auth tokens are stored in **SecureStore** (encrypted device storage):
+
+```ts
+import * as SecureStore from "expo-secure-store";
+
+const secureStorage = {
+  getItem: (key: string) => SecureStore.getItemAsync(key),
+  setItem: (key: string, value: string) =>
+    SecureStore.setItemAsync(key, value),
+  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+};
+```
+
+This storage adapter is passed to `ConvexAuthProvider` in the root layout. Tokens are encrypted at the OS level and persist across app restarts.
+
+## Navigation guards
+
+The root layout uses `Stack.Protected` to control navigation based on auth state:
+
+```ts
+const showOnboarding = !hasSeenOnboarding && !isSignedIn;
+const showAuth = hasSeenOnboarding && !isSignedIn;
+
+<Stack.Protected guard={showOnboarding}>
+  <Stack.Screen name="(onboarding)" />
+</Stack.Protected>
+
+<Stack.Protected guard={showAuth}>
+  <Stack.Screen name="(auth)" />
+</Stack.Protected>
+
+<Stack.Protected guard={!showOnboarding && !showAuth}>
+  <Stack.Screen name="(tabs)" />
+</Stack.Protected>
+```
+
+Only one guard is `true` at a time, so the user always sees exactly one group of screens.
+
+## `useSession()` hook
+
+Same API as the web app. Located at `src/providers/SessionProvider.tsx`:
+
+```ts
+const { currentUser, isSignedIn, isLoading, isAdmin, signOut } = useSession();
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `currentUser` | `Doc<"users"> \| null` | The full user document, or `null` |
+| `isSignedIn` | `boolean` | `true` when signed in |
+| `isLoading` | `boolean` | `true` while fetching the user |
+| `isAdmin` | `boolean` | `true` if the user has the `"admin"` role |
+| `signOut` | `() => void` | Call this to sign out |
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `src/app/(auth)/sign-in.tsx` | Sign-in screen (Google + magic link) |
+| `src/app/_layout.tsx` | Navigation guards + SecureStore setup |
+| `src/providers/SessionProvider.tsx` | `useSession()` hook |

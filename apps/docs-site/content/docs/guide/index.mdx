@@ -1,0 +1,87 @@
+---
+title: Introduction
+description: What is Ship Superfast and what's inside it.
+---
+
+## What is this?
+
+Ship Superfast is a **ready-to-use starter** for building full-stack apps. It gives you a **web app**, a **mobile app**, and a **backend** — all in one project, all wired together.
+
+You don't have to set up authentication, payments, teams, file storage, or email from scratch. It's already done. Just clone, add your API keys, and start building your actual product.
+
+## What's inside
+
+The project is a **monorepo** — one repository with multiple apps that share code.
+
+```
+ship-superfast/
+├── apps/
+│   ├── web/          ← Next.js website + dashboard
+│   ├── mobile/       ← Expo mobile app (iOS + Android)
+│   └── docs/         ← This documentation site
+│
+├── packages/
+│   ├── convex/       ← Backend (database, auth, API)
+│   └── shared/       ← Types and utilities shared by all apps
+```
+
+- **`apps/web/`** — A Next.js 16 website with a landing page and a full dashboard (profile, teams, billing). Uses shadcn/ui components and Tailwind v4.
+
+- **`apps/mobile/`** — An Expo 54 app for iOS and Android. Uses HeroUI Native components and Uniwind (Tailwind for React Native). Has the same features as web — profile, teams, billing.
+
+- **`packages/convex/`** — The backend, powered by Convex. This is where your database, authentication, API functions, webhooks, and all server-side logic lives. Both apps connect to this same backend.
+
+- **`packages/shared/`** — TypeScript types and small utilities that both apps use (like `UserRole`, `TeamRole`, and `getInitials()`).
+
+## Features included
+
+| Feature | How it works |
+|---------|-------------|
+| **Authentication** | Google OAuth sign-in on both web and mobile, powered by `@convex-dev/auth` |
+| **Teams** | Create teams, invite members by email, assign roles (owner / admin / member) |
+| **Billing** | Subscriptions and one-time payments via Dodo Payments, with webhook handling |
+| **File Storage** | Upload and download files using Cloudflare R2 via `@convex-dev/r2` |
+| **Email** | Send transactional emails through Resend via `@convex-dev/resend` |
+| **AI Agent** | Thread-based AI conversations via `@convex-dev/agent` |
+| **RAG** | Vector search and document embeddings via `@convex-dev/rag` |
+| **Streaming** | Real-time AI text streaming via `@convex-dev/persistent-text-streaming` |
+| **Push Notifications** | Mobile push notifications via `@convex-dev/expo-push-notifications` |
+
+## Tech stack
+
+| Layer | Technology |
+|-------|-----------|
+| Monorepo | Turborepo + pnpm |
+| Web | Next.js 16 + shadcn/ui + Tailwind v4 |
+| Mobile | Expo 54 + Expo Router + HeroUI Native + Uniwind |
+| Backend | Convex |
+| Auth | `@convex-dev/auth` (Google OAuth) |
+| Payments | `@dodopayments/convex` |
+| Storage | `@convex-dev/r2` (Cloudflare R2) |
+| Email | `@convex-dev/resend` |
+| AI | `@convex-dev/agent` + `@convex-dev/rag` + `@convex-dev/persistent-text-streaming` |
+| Push | `@convex-dev/expo-push-notifications` |
+
+## How the apps connect
+
+Both apps talk to the **same Convex backend**. There's no REST API to build or maintain — Convex gives you real-time queries, mutations, and actions that both apps call directly.
+
+```
+┌──────────┐     ┌──────────────┐     ┌──────────────┐
+│  Web App │────▶│              │◀────│  Mobile App  │
+│ (Next.js)│     │    Convex    │     │   (Expo)     │
+└──────────┘     │   Backend    │     └──────────────┘
+                 │              │
+                 │  • Database  │
+                 │  • Auth      │
+                 │  • Webhooks  │
+                 │  • Storage   │
+                 │  • AI/RAG    │
+                 └──────────────┘
+```
+
+Both apps share the same users, teams, and data. A user who signs in on web sees the same teams and billing status on mobile.
+
+## Next steps
+
+Head to [Prerequisites](/docs/guide/prerequisites) to see what you need before getting started.

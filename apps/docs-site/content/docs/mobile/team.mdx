@@ -1,0 +1,156 @@
+---
+title: Team
+description: Team management — members, invites, roles, and the team switcher.
+---
+
+## Overview
+
+The Team screen lets users manage their team's members and invitations. Located at `src/app/(tabs)/team.tsx`. What you can do depends on your role.
+
+## Roles
+
+| Role | Can invite | Can remove members | Can change roles | Can rename team |
+|------|-----------|-------------------|-----------------|----------------|
+| **Owner** | Yes | Yes (except self) | Yes | Yes |
+| **Admin** | Yes | Yes (members only) | No | Yes |
+| **Member** | No | No | No | No |
+
+## Screen sections
+
+### Incoming invites
+
+If the user has pending invitations to other teams, they appear at the top in a card with Accept and Decline buttons:
+
+```ts
+const myInvites = useQuery(api.teams.getMyPendingInvites);
+const acceptInvite = useMutation(api.teams.acceptInvite);
+const declineInvite = useMutation(api.teams.declineInvite);
+```
+
+### Team header
+
+A card showing the team name, role badge, and an edit button (owners and admins only). It also shows a "Switch Team" button if the user belongs to multiple teams.
+
+#### Renaming the team
+
+Tapping the edit icon opens a `BottomSheet`:
+
+```ts
+const updateName = useMutation(api.teams.updateTeamName);
+await updateName({ teamId: team._id, name: nameValue.trim() });
+```
+
+#### Switching teams
+
+Tapping "Switch Team" opens a `BottomSheet` with a `ListGroup` of all teams. Each item shows the team name, role, and plan. The active team has a checkmark:
+
+```ts
+const { activeTeam, allTeams, switchTeam } = useActiveTeam();
+
+// In the list:
+<ListGroup.Item onPress={() => {
+  onSwitchTeam(t._id);
+  setSwitchOpen(false);
+}}>
+```
+
+### Members list
+
+A `ListGroup` listing all team members with:
+- Avatar (image or initials)
+- Name + "(you)" label for the current user
+- Role + email in the description
+
+For manageable members, a `Menu` popup appears with actions:
+
+```tsx
+<Menu>
+  <Menu.Trigger asChild>
+    <Button isIconOnly variant="ghost" size="sm">
+      <HugeiconsIcon icon={MoreHorizontalIcon} />
+    </Button>
+  </Menu.Trigger>
+  <Menu.Portal>
+    <Menu.Overlay />
+    <Menu.Content presentation="popover" width={220}>
+      {/* Promote / Demote / Remove options */}
+    </Menu.Content>
+  </Menu.Portal>
+</Menu>
+```
+
+Available actions in the menu:
+- **Promote to Admin** — owner only, for members
+- **Demote to Member** — owner only, for admins
+- **Remove from team** — owners can remove anyone, admins can remove members
+
+### Invite sheet
+
+Owners and admins see a "+" button in the members header. Tapping it opens a `BottomSheet` with:
+- Email input
+- Role selector (two `Chip` components — Member / Admin)
+- Description text explaining the role
+- Send Invite button
+
+```ts
+const inviteMember = useAction(api.teams.inviteMember);
+
+const result = await inviteMember({
+  teamId,
+  email: email.trim(),
+  role, // "member" or "admin"
+});
+```
+
+The invite is sent as an email via Resend.
+
+### Pending invites
+
+A `ListGroup` showing outstanding invitations with email, role, date sent, and a Cancel button. Only visible to owners and admins.
+
+### Danger zone
+
+Non-owners see a "Leave Team" card with a `Dialog` confirmation:
+
+```tsx
+<Dialog isOpen={confirmOpen} onOpenChange={setConfirmOpen}>
+  <Dialog.Trigger asChild>
+    <Button variant="danger">Leave Team</Button>
+  </Dialog.Trigger>
+  <Dialog.Portal>
+    <Dialog.Overlay />
+    <Dialog.Content>
+      <Dialog.Title>Leave this team?</Dialog.Title>
+      <Dialog.Description>
+        You will lose access to this team...
+      </Dialog.Description>
+      {/* Cancel + Leave buttons */}
+    </Dialog.Content>
+  </Dialog.Portal>
+</Dialog>
+```
+
+Leaving is permanent — you can only rejoin if invited again.
+
+## Active team context
+
+The active team is managed by `useActiveTeam()` from `src/hooks/useActiveTeam.ts`. It's provided at the tab layout level:
+
+```tsx
+// In (tabs)/_layout.tsx:
+const activeTeamValue = useActiveTeamValue();
+
+<ActiveTeamContext.Provider value={activeTeamValue}>
+  <Tabs>...</Tabs>
+</ActiveTeamContext.Provider>
+```
+
+The selected team is saved to `AsyncStorage` so it persists across app restarts.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `src/app/(tabs)/team.tsx` | Team screen (members, invites, danger zone) |
+| `src/hooks/useActiveTeam.ts` | Active team context + persistence |
+| `src/app/(tabs)/_layout.tsx` | Provides `ActiveTeamContext` to all tabs |

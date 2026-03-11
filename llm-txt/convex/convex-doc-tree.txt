@@ -1,0 +1,276 @@
+# Convex Documentation Tree Structure
+# Generated from: https://github.com/get-convex/convex-backend/tree/main/npm-packages/docs/docs
+
+## Instructions for AI Assistant:
+
+When the user asks about searching or finding information in Convex documentation:
+1. Look into this file to find relevant documentation paths
+2. Use this URL format to fetch the actual .mdx content:
+   https://raw.githubusercontent.com/get-convex/convex-backend/main/npm-packages/docs/docs/{path}
+
+Example:
+- Path in this file: agents/getting-started.mdx
+- Fetch URL: https://raw.githubusercontent.com/get-convex/convex-backend/main/npm-packages/docs/docs/agents/getting-started.mdx
+
+## File Tree:
+
+npm-packages/docs/docs/
+├── _betaAdmonition.mdx
+├── _betaContactUsAdmonition.mdx
+├── _convexValues.mdx
+├── _proFeatureUpsell.mdx
+├── agents/
+│   ├── agent-usage.mdx
+│   ├── context.mdx
+│   ├── debugging.mdx
+│   ├── files.mdx
+│   ├── getting-started.mdx
+│   ├── human-agents.mdx
+│   ├── messages.mdx
+│   ├── playground.mdx
+│   ├── rag.mdx
+│   ├── rate-limiting.mdx
+│   ├── streaming.mdx
+│   ├── threads.mdx
+│   ├── tools.mdx
+│   ├── usage-tracking.mdx
+│   └── workflows.mdx
+├── agents.mdx
+├── ai/
+│   ├── convex-mcp-server.mdx
+│   ├── using-cursor.mdx
+│   ├── using-github-copilot.mdx
+│   └── using-windsurf.mdx
+├── ai.mdx
+├── arch.png
+├── auth/
+│   ├── _under_the_hood.mdx
+│   ├── advanced/
+│   │   ├── _category_.json
+│   │   ├── custom-auth.mdx
+│   │   └── custom-jwt.mdx
+│   ├── auth0.mdx
+│   ├── authkit/
+│   │   ├── _auth_config_ts.mdx
+│   │   ├── _category_.json
+│   │   ├── add-to-app.mdx
+│   │   ├── auto-provision.mdx
+│   │   ├── index.mdx
+│   │   └── troubleshooting.md
+│   ├── clerk.mdx
+│   ├── convex-auth.mdx
+│   ├── database-auth.mdx
+│   ├── debug.mdx
+│   └── functions-auth.mdx
+├── auth.mdx
+├── chef.mdx
+├── cli/
+│   ├── background-agents.mdx
+│   ├── deploy-key-types.mdx
+│   └── local-deployments-for-dev.mdx
+├── cli.md
+├── client/
+│   ├── android/
+│   │   └── data-types.md
+│   ├── android.md
+│   ├── javascript/
+│   │   ├── bun.mdx
+│   │   ├── node.mdx
+│   │   └── script-tag.mdx
+│   ├── javascript.mdx
+│   ├── nextjs/
+│   │   ├── app-router/
+│   │   │   ├── _category_.json
+│   │   │   ├── index.mdx
+│   │   │   └── server-rendering.mdx
+│   │   └── pages-router/
+│   │       ├── _category_.json
+│   │       ├── index.mdx
+│   │       └── quickstart-nextjs-pages-router.mdx
+│   ├── open-api.mdx
+│   ├── python.md
+│   ├── react/
+│   │   ├── optimistic-updates.mdx
+│   │   └── project-setup.md
+│   ├── react-native.mdx
+│   ├── react.mdx
+│   ├── rust.md
+│   ├── svelte.md
+│   ├── swift/
+│   │   └── data-types.md
+│   ├── swift.md
+│   ├── tanstack/
+│   │   ├── tanstack-query/
+│   │   │   ├── _category_.json
+│   │   │   └── index.mdx
+│   │   └── tanstack-start/
+│   │       ├── _category_.json
+│   │       ├── clerk.mdx
+│   │       └── index.mdx
+│   ├── vue/
+│   │   └── nuxt.md
+│   └── vue.md
+├── client-server.svg
+├── components/
+│   ├── authoring.mdx
+│   ├── understanding.mdx
+│   └── using.mdx
+├── components.mdx
+├── cspell.json
+├── dashboard/
+│   ├── deployments/
+│   │   ├── data.md
+│   │   ├── deployments.md
+│   │   ├── files.md
+│   │   ├── functions.md
+│   │   ├── health.md
+│   │   ├── history.md
+│   │   ├── logs.md
+│   │   ├── schedules.md
+│   │   └── settings.md
+│   ├── projects.md
+│   └── teams/
+│       ├── sso.md
+│       └── teams.md
+├── dashboard.md
+├── database/
+│   ├── advanced/
+│   │   ├── _category_.json
+│   │   ├── occ.md
+│   │   ├── schema-philosophy.md
+│   │   └── system-tables.mdx
+│   ├── backup-restore.mdx
+│   ├── document-ids.mdx
+│   ├── import-export/
+│   │   ├── export.mdx
+│   │   ├── import-export.mdx
+│   │   └── import.mdx
+│   ├── pagination.mdx
+│   ├── reading-data/
+│   │   ├── filters.mdx
+│   │   ├── indexes/
+│   │   │   ├── indexes-and-query-perf.md
+│   │   │   └── indexes.md
+│   │   └── reading-data.mdx
+│   ├── schemas.mdx
+│   ├── types.md
+│   └── writing-data.mdx
+├── database.mdx
+├── deployment-api.mdx
+├── deployment-platform-api.mdx
+├── error.mdx
+├── eslint.mdx
+├── file-storage/
+│   ├── delete-files.mdx
+│   ├── file-metadata.mdx
+│   ├── serve-files.mdx
+│   ├── store-files.mdx
+│   └── upload-files.mdx
+├── file-storage.mdx
+├── functions/
+│   ├── actions.mdx
+│   ├── bundling.mdx
+│   ├── debugging.mdx
+│   ├── error-handling/
+│   │   ├── application-errors.mdx
+│   │   └── error-handling.mdx
+│   ├── http-actions.mdx
+│   ├── internal-functions.mdx
+│   ├── mutation-functions.mdx
+│   ├── query-functions.mdx
+│   ├── runtimes.mdx
+│   └── validation.mdx
+├── functions.mdx
+├── generated-api/
+│   ├── _category_.json
+│   ├── api.md
+│   ├── data-model.md
+│   ├── index.md
+│   └── server.md
+├── home.mdx
+├── http-api/
+│   ├── _category_.json
+│   └── index.md
+├── management-api.mdx
+├── npm-packages/
+│   └── docs/
+│       └── docs/
+├── platform-apis/
+│   ├── embedded-dashboard.mdx
+│   └── oauth-applications.mdx
+├── platform-apis.mdx
+├── production/
+│   ├── _category_.json
+│   ├── contact.md
+│   ├── environment-variables.mdx
+│   ├── hosting/
+│   │   ├── custom.mdx
+│   │   ├── hosting.mdx
+│   │   ├── netlify.mdx
+│   │   ├── preview-deployments.mdx
+│   │   └── vercel.mdx
+│   ├── integrations/
+│   │   ├── exception-reporting.mdx
+│   │   ├── integrations.mdx
+│   │   ├── log-streams/
+│   │   │   ├── legacy-event-schema.mdx
+│   │   │   └── log-streams.mdx
+│   │   └── streaming-import-export.md
+│   ├── multiple-repos.mdx
+│   ├── networking.mdx
+│   ├── pause-deployment.mdx
+│   ├── project-configuration.mdx
+│   ├── regions.mdx
+│   └── state/
+│       ├── limits.mdx
+│       └── state.mdx
+├── production.mdx
+├── quickstart/
+│   ├── android.mdx
+│   ├── bun.mdx
+│   ├── nextjs.mdx
+│   ├── nodejs.mdx
+│   ├── nuxt.mdx
+│   ├── python.mdx
+│   ├── react-native.mdx
+│   ├── react.mdx
+│   ├── remix.mdx
+│   ├── rust.mdx
+│   ├── script-tag.mdx
+│   ├── svelte.mdx
+│   ├── swift.mdx
+│   ├── tanstack-start.mdx
+│   └── vue.mdx
+├── quickstarts.mdx
+├── realtime.mdx
+├── scheduling/
+│   ├── cron-jobs.mdx
+│   └── scheduled-functions.mdx
+├── scheduling.mdx
+├── search/
+│   ├── text-search.mdx
+│   └── vector-search.mdx
+├── search.mdx
+├── self-hosting.mdx
+├── streaming-export-api.mdx
+├── streaming-import-api.mdx
+├── testing/
+│   ├── ci.mdx
+│   ├── convex-backend.mdx
+│   └── convex-test.mdx
+├── testing.mdx
+├── tutorial/
+│   ├── actions.mdx
+│   ├── index.mdx
+│   └── scale.mdx
+├── understanding/
+│   ├── basic-overview.tldr
+│   ├── best-practices/
+│   │   ├── best-practices.mdx
+│   │   ├── other-recommendations.mdx
+│   │   └── typescript.mdx
+│   ├── convex-query-subscription.tldr
+│   ├── index.mdx
+│   ├── workflow.mdx
+│   └── zen.mdx
+└── urls.ts

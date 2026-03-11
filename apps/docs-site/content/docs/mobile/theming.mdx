@@ -1,0 +1,100 @@
+---
+title: Theming
+description: How colors, radius, and dark mode work in the mobile app.
+---
+
+## Overview
+
+The mobile app uses **Uniwind** (Tailwind v4 for React Native) with **HeroUI Native** for theming. Colors are defined in `src/global.css` using CSS custom properties and OKLCH color values.
+
+The theme automatically follows the device's system setting (light or dark).
+
+## global.css
+
+Located at `src/global.css`, the file has three imports and one `@layer theme` block:
+
+```css
+@import "tailwindcss";
+@import "uniwind";
+@import "heroui-native/styles";
+@source "../../../node_modules/heroui-native/lib";
+
+@layer theme {
+  @variant light {
+    --background: oklch(1 0 0);
+    --accent: oklch(0.646 0.222 41.116);
+    --accent-foreground: oklch(0.98 0.016 73.684);
+    --radius: 4;
+    --surface-shadow: 0 0 0 1px oklch(92% 0 0);
+  }
+
+  @variant dark {
+    --accent: oklch(0.705 0.213 47.604);
+    --accent-foreground: oklch(0.98 0.016 73.684);
+    --radius: 4;
+    --surface-shadow: 0 0 0 1px oklch(25% 0 0);
+  }
+}
+```
+
+### Imports explained
+
+| Import | Purpose |
+|--------|---------|
+| `tailwindcss` | Tailwind v4 core |
+| `uniwind` | Tailwind v4 adapter for React Native |
+| `heroui-native/styles` | HeroUI Native default theme tokens |
+| `@source ...heroui-native/lib` | Scans HeroUI Native components for class names |
+
+### Color tokens
+
+| Token | Light | Dark | Used for |
+|-------|-------|------|----------|
+| `--background` | White | _(HeroUI default)_ | Screen backgrounds |
+| `--accent` | Warm orange | Lighter orange | Primary buttons, active tab, dots |
+| `--accent-foreground` | Near-white | Near-white | Text on accent-colored elements |
+| `--radius` | `4` | `4` | Border radius for cards, inputs |
+| `--surface-shadow` | Light gray border | Dark gray border | Card/surface outlines |
+
+Colors use **OKLCH** format — the same perceptual color space used by the web app.
+
+## Using theme colors
+
+### In styles (Tailwind classes)
+
+Use Tailwind utility classes with HeroUI Native's color tokens:
+
+```tsx
+<Text className="text-foreground">Regular text</Text>
+<Text className="text-default-500">Muted text</Text>
+<View className="bg-background">Screen background</View>
+```
+
+### In JavaScript
+
+When you need a color value (for icons, charts, etc.), use the `useThemeColor` hook:
+
+```tsx
+import { useThemeColor } from "heroui-native";
+
+const accentColor = useThemeColor("accent");
+const mutedColor = useThemeColor("muted");
+
+<HugeiconsIcon icon={SomeIcon} color={accentColor} />
+```
+
+## Customizing the theme
+
+To change the app's primary color:
+
+1. Open `src/global.css`
+2. Change the `--accent` value in both `@variant light` and `@variant dark`
+3. The change applies to all HeroUI Native components automatically (buttons, chips, tabs, etc.)
+
+To find OKLCH values, use a tool like [oklch.com](https://oklch.com).
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `src/global.css` | Theme tokens (accent color, radius, shadows) |

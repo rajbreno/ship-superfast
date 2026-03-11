@@ -1,0 +1,85 @@
+---
+title: Profile
+description: The Profile tab — view and edit your name, email, and avatar.
+---
+
+## Overview
+
+The Profile screen shows the current user's info and lets them edit their display name. Located at `src/app/(tabs)/profile.tsx`.
+
+## What it shows
+
+### Profile card
+
+A centered card with:
+- **Avatar** — Google profile picture, or initials fallback
+- **Name** — display name
+- **Email** — from Google OAuth (read-only)
+
+### Profile details list
+
+A `ListGroup` showing three items:
+
+| Item | Editable | Description |
+|------|----------|-------------|
+| **Name** | Yes (tap to edit) | Opens a bottom sheet |
+| **Email** | No | From OAuth provider |
+| **Member since** | No | Account creation date |
+
+Each item has an icon prefix (`UserIcon`, `Mail01Icon`, `Calendar03Icon`) from Hugeicons.
+
+### Sign out button
+
+A red "Sign Out" button at the bottom:
+
+```ts
+<Button onPress={signOut} variant="danger">
+  Sign Out
+</Button>
+```
+
+## Editing the name
+
+Tapping the Name row opens a `BottomSheet` with a text input:
+
+```ts
+const updateProfile = useMutation(api.users.updateProfile);
+
+async function handleSave() {
+  await updateProfile({ name: name.trim() || undefined });
+  setEditOpen(false);
+}
+```
+
+The bottom sheet uses HeroUI Native's compound component pattern:
+
+```tsx
+<BottomSheet isOpen={editOpen} onOpenChange={setEditOpen}>
+  <BottomSheet.Portal>
+    <BottomSheet.Overlay />
+    <BottomSheet.Content>
+      <BottomSheet.Title>Edit Profile</BottomSheet.Title>
+      <BottomSheet.Description>
+        Update your display name.
+      </BottomSheet.Description>
+      {/* Input + buttons */}
+    </BottomSheet.Content>
+  </BottomSheet.Portal>
+</BottomSheet>
+```
+
+The change is reflected immediately across all screens because Convex queries are real-time.
+
+## Data flow
+
+```
+useSession() → currentUser → display name, email, avatar
+useMutation(api.users.updateProfile) → updates name in database
+```
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `src/app/(tabs)/profile.tsx` | Profile screen |
+| `src/providers/SessionProvider.tsx` | `useSession()` provides `currentUser` |

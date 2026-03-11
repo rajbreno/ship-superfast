@@ -1,0 +1,57 @@
+---
+title: HTTP Routes
+description: HTTP endpoints — auth callbacks, webhooks, and streaming.
+---
+
+## Overview
+
+HTTP routes are defined in `http.ts` using Convex's `httpRouter`. Three groups of routes are registered:
+
+```ts
+const http = httpRouter();
+
+// 1. Auth routes (OAuth callbacks, token endpoints)
+auth.addHttpRoutes(http);
+
+// 2. Dodo Payments webhook
+http.route({
+  path: "/dodopayments-webhook",
+  method: "POST",
+  handler: dodoWebhookHandler,
+});
+
+// 3. AI chat streaming
+http.route({ path: "/chat-stream", method: "POST", handler: streamChat });
+http.route({ path: "/chat-stream", method: "OPTIONS", handler: chatStreamOptions });
+
+export default http;
+```
+
+## Routes
+
+| Path | Method | Handler | Purpose |
+|------|--------|---------|---------|
+| `/api/auth/*` | Various | `auth.addHttpRoutes` | OAuth callbacks, token refresh |
+| `/dodopayments-webhook` | POST | `dodoWebhookHandler` | Dodo payment/subscription events |
+| `/chat-stream` | POST | `streamChat` | AI text streaming endpoint |
+| `/chat-stream` | OPTIONS | `chatStreamOptions` | CORS preflight for streaming |
+
+## Auth routes
+
+Added by `@convex-dev/auth`. These handle OAuth redirects from Google and token management. You don't need to configure these manually.
+
+## Webhook route
+
+The Dodo webhook handler validates the webhook signature and routes events to internal mutations. See [Billing](/docs/backend/billing) for details on event handling.
+
+Set the webhook URL in your Dodo dashboard to: `https://<your-convex-url>/dodopayments-webhook`
+
+## Streaming route
+
+The `/chat-stream` endpoint accepts POST requests with messages and streams AI responses. The OPTIONS handler provides CORS headers. See [Streaming](/docs/backend/streaming) for details.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `http.ts` | HTTP route definitions |

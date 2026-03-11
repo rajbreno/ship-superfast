@@ -1,0 +1,196 @@
+---
+title: Project Structure
+description: How the monorepo is organized and where to find things.
+---
+
+## Overview
+
+This is a **monorepo** — one repository that contains multiple apps and packages. They are managed by [Turborepo](https://turborepo.com) and linked together by [pnpm workspaces](https://pnpm.io/workspaces).
+
+```
+ship-superfast/
+├── apps/           ← Things users interact with
+│   ├── web/        ← Next.js website + dashboard
+│   ├── mobile/     ← Expo mobile app
+│   └── docs-site/  ← This documentation site
+│
+├── packages/       ← Shared code used by the apps
+│   ├── convex/     ← Backend (database, auth, APIs)
+│   └── shared/     ← Types and utilities
+│
+├── llm-txt/        ← AI-friendly documentation for each technology
+├── turbo.json      ← Turborepo task configuration
+└── pnpm-workspace.yaml
+```
+
+## Apps
+
+### `apps/web/` — Next.js website
+
+The web app uses **Next.js 16** with the App Router, **shadcn/ui** for components, and **Tailwind v4** for styling.
+
+```
+apps/web/
+├── app/                      ← Pages (Next.js App Router)
+│   ├── layout.tsx            ← Root layout: Convex + Auth + Theme providers
+│   ├── page.tsx              ← Landing page
+│   ├── sign-in/page.tsx      ← Sign-in page
+│   └── dashboard/
+│       ├── layout.tsx        ← Auth guard + sidebar layout
+│       ├── page.tsx          ← Dashboard overview
+│       ├── profile/page.tsx  ← User profile
+│       ├── team/page.tsx     ← Team management
+│       └── billing/page.tsx  ← Billing & subscriptions
+│
+├── components/
+│   ├── ui/                   ← shadcn/ui components (55 installed)
+│   ├── providers/            ← Convex, session, team, theme providers
+│   ├── navigation/           ← Sidebar, navbar, theme toggle
+│   ├── landing/              ← Landing page components
+│   └── team/                 ← Team-specific components
+│
+├── lib/
+│   ├── utils.ts              ← cn() helper for class names
+│   └── config.ts             ← App name, nav items, page titles
+│
+├── app/globals.css           ← Theme colors (light + dark)
+└── next.config.mjs           ← Security headers
+```
+
+**Key points:**
+- Pages live in `app/` — each folder with a `page.tsx` becomes a route
+- Components are organized by feature, not by type
+- No `src/` directory — Next.js default structure
+
+### `apps/mobile/` — Expo app
+
+The mobile app uses **Expo 54** with **Expo Router**, **HeroUI Native** for components, and **Uniwind** (Tailwind v4 for React Native).
+
+```
+apps/mobile/
+└── src/
+    ├── app/                          ← Screens (Expo Router)
+    │   ├── _layout.tsx               ← Root: providers stack
+    │   ├── (auth)/
+    │   │   └── sign-in.tsx           ← Sign-in screen
+    │   ├── (onboarding)/
+    │   │   └── index.tsx             ← Onboarding screen
+    │   └── (tabs)/
+    │       ├── _layout.tsx           ← Tab bar configuration
+    │       ├── index.tsx             ← Home tab
+    │       ├── profile.tsx           ← Profile tab
+    │       ├── team.tsx              ← Team tab
+    │       └── billing.tsx           ← Billing tab
+    │
+    ├── components/                   ← Reusable components
+    ├── providers/                    ← Session, recovery providers
+    ├── hooks/                        ← Push notifications, pagination, updates
+    ├── assets/                       ← App icon, logos, images
+    └── global.css                    ← Tailwind + Uniwind + HeroUI styles
+```
+
+**Key points:**
+- Uses `src/` directory (required by Uniwind template)
+- Route groups: `(auth)` for sign-in, `(tabs)` for the main app, `(onboarding)` for first-time setup
+- `_layout.tsx` files define navigation structure (stacks, tabs)
+
+### `apps/docs-site/` — Documentation site
+
+This site! Built with **Fumadocs**, a documentation framework for Next.js.
+
+```
+apps/docs-site/
+├── content/docs/     ← MDX content files (what you're reading)
+├── app/              ← Fumadocs page routes
+├── source.config.ts  ← Content source configuration
+└── lib/              ← Layout and source helpers
+```
+
+## Packages
+
+### `packages/convex/` — Backend
+
+All server-side code lives here. Both the web and mobile apps import from the same backend.
+
+```
+packages/convex/convex/
+├── schema.ts              ← Database tables and fields
+├── convex.config.ts       ← Component registrations (R2, push, payments, etc.)
+├── auth.config.ts         ← JWT/JWKS configuration
+├── auth.ts                ← Google OAuth + Magic Link setup
+│
+├── users.ts               ← User queries and mutations
+├── teams.ts               ← Team CRUD, invites, membership
+├── payments.ts            ← Checkout, customer portal
+├── customers.ts           ← Customer lookup helpers
+├── webhooks.ts            ← Dodo payment webhook handlers
+├── storage.ts             ← R2 file upload/download
+├── email.ts               ← Send emails via Resend
+├── agent.ts               ← AI agent threads
+├── rag.ts                 ← Vector search, document embeddings
+├── streaming.ts           ← AI text streaming
+├── pushNotifications.ts   ← Device registration, broadcast
+├── http.ts                ← HTTP endpoints (auth, webhooks, streaming)
+├── crons.ts               ← Scheduled jobs
+│
+└── lib/                   ← Shared helper functions
+    ├── users.ts           ← getCurrentUser, getUserById, isAdmin
+    ├── teams.ts           ← Team membership lookups, role checks
+    ├── billing.ts         ← Customer upsert, plan management
+    ├── plans.ts           ← Plan definitions, pricing
+    ├── storage.ts         ← Upload, signed URLs, delete
+    ├── pushNotifications.ts ← Token management, send helpers
+    ├── constants.ts       ← APP_NAME, DEFAULT_FROM_EMAIL
+    └── dodoWebhooks.ts    ← Webhook handler config
+```
+
+**Key points:**
+- Top-level files (`users.ts`, `teams.ts`, etc.) are the **public API** — functions that apps call directly
+- `lib/` files are **internal helpers** — reusable logic that top-level functions share
+- `convex.config.ts` registers all Convex components (R2, push notifications, payments, etc.)
+
+### `packages/shared/` — Shared types
+
+Small package with TypeScript types and utilities used by both apps.
+
+```
+packages/shared/src/
+├── types.ts       ← UserRole, TeamRole, PlanTier, User interface
+├── constants.ts   ← APP_NAME
+├── utils.ts       ← getInitials()
+└── index.ts       ← Re-exports everything
+```
+
+Import from either app like this:
+
+```ts
+import { type UserRole, type TeamRole, getInitials, APP_NAME } from "@repo/shared";
+```
+
+## How packages link together
+
+The monorepo uses pnpm workspaces. Each app has `"@repo/shared": "workspace:*"` in its `package.json`, which means it imports directly from the local `packages/shared/` folder — no publishing needed.
+
+```
+apps/web/        →  imports from  →  @repo/shared
+apps/mobile/     →  imports from  →  @repo/shared
+apps/web/        →  imports from  →  @repo/convex (generated types)
+apps/mobile/     →  imports from  →  @repo/convex (generated types)
+```
+
+## Turborepo tasks
+
+The root `turbo.json` defines what happens when you run commands:
+
+| Command | What it does |
+|---------|-------------|
+| `pnpm dev` | Starts all apps in parallel (web + mobile + docs) |
+| `pnpm build` | Builds all apps (runs Convex codegen first) |
+| `pnpm lint` | Lints all apps |
+| `pnpm check-types` | Type-checks all apps (runs Convex codegen first) |
+
+Turborepo handles running tasks in the right order — for example, `build` automatically runs Convex codegen before building the web app, because the web app depends on generated types.
+
+## Next steps
+
+See [Environment Variables](/docs/guide/environment-variables) for a complete reference of every variable used across the project.

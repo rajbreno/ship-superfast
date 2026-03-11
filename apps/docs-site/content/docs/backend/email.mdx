@@ -1,0 +1,93 @@
+---
+title: Email
+description: Transactional email via Resend — templates and sending.
+---
+
+## Overview
+
+Email uses `@convex-dev/resend` for sending transactional emails. The setup is in `email.ts`.
+
+## Setup
+
+```ts
+import { Resend } from "@convex-dev/resend";
+export const resend = new Resend(components.resend, { testMode: false });
+```
+
+## Email templates
+
+All emails use a shared `emailLayout()` wrapper that adds the brand logo and consistent formatting:
+
+```ts
+export function emailLayout(body: string): string {
+  return `<!DOCTYPE html>
+<html>
+<body>
+  <table>
+    <tr><td><img src="${logoUrl}" width="32" height="32" /></td></tr>
+    <tr><td>${body}</td></tr>
+    <tr><td>${APP_NAME}</td></tr>
+  </table>
+</body>
+</html>`;
+}
+```
+
+### Built-in templates
+
+| Template | Used for |
+|----------|----------|
+| `emailLayout(body)` | Base wrapper for all emails |
+| `paymentSuccessEmailTemplate(product, amount, currency)` | Payment confirmation |
+| `refundSuccessEmailTemplate(amount, currency)` | Refund confirmation |
+| Magic link template (in `auth.ts`) | Sign-in link |
+| Invite template (in `teams.ts`) | Team invitation |
+
+## Sending emails
+
+The `sendEmail` internal mutation wraps `resend.sendEmail`:
+
+```ts
+export const sendEmail = internalMutation({
+  args: {
+    from: v.string(),
+    to: v.string(),
+    subject: v.string(),
+    html: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await resend.sendEmail(ctx, {
+      from: args.from,
+      to: args.to,
+      subject: args.subject,
+      html: args.html,
+    });
+  },
+});
+```
+
+Other functions call this via `internal.email.sendEmail`:
+
+```ts
+// From teams.ts (invite action)
+await ctx.runMutation(internal.email.sendEmail, {
+  from: DEFAULT_FROM_EMAIL,
+  to: args.email,
+  subject: `You've been invited to join ${teamName}`,
+  html: inviteEmailTemplate(...),
+});
+```
+
+## Environment variables
+
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `AUTH_RESEND_KEY` | Convex dashboard | Resend API key |
+| `AUTH_RESEND_FROM` | Convex dashboard | Default sender email |
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `email.ts` | Resend setup, templates, sendEmail mutation |
+| `lib/constants.ts` | `DEFAULT_FROM_EMAIL` |
