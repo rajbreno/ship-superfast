@@ -1,29 +1,24 @@
 # Ship Superfast
 
-A ready-to-go monorepo starter for building cross-platform apps with **Convex + Next.js + Expo**.
+![Ship Superfast](apps/web/public/github.png)
 
-## Features
+Production-ready monorepo starter kit. **Convex + Next.js + Expo** with auth, teams, payments, storage, email, AI, and push notifications pre-wired.
 
-- **Auth** — Google OAuth + Magic Link email (Convex Auth)
-- **Teams** — Multi-user team management with roles and billing per team
-- **Payments** — Checkout, subscriptions, customer portal (Dodo Payments)
-- **Storage** — File uploads via Cloudflare R2
-- **Email** — Transactional emails (Resend)
-- **AI** — Agents, threads, tools, RAG, text streaming (OpenAI)
-- **Push Notifications** — Expo push for mobile
-- **Docs** — Full documentation site (Fumadocs)
+Made by [Raj Breno](https://rajbreno.com)
 
-## Prerequisites
+## Tech Stack
 
-- Node.js 20+
-- pnpm (`npm install -g pnpm`)
-- [Convex account](https://dashboard.convex.dev)
+| Layer | Tech |
+|-------|------|
+| Monorepo | Turborepo + pnpm |
+| Web | Next.js 16 + shadcn/ui + Tailwind v4 |
+| Mobile | Expo 54 + HeroUI Native + Uniwind |
+| Docs | Fumadocs |
+| Backend | Convex |
 
----
+**Built-in integrations:** Google OAuth, Magic Link, Cloudflare R2, Dodo Payments, Resend, OpenAI (agents + RAG), Expo Push Notifications.
 
-## Setup
-
-### 1. Clone and Install
+## Quick Start
 
 ```bash
 git clone https://github.com/rajbreno/ship-superfast.git my-app
@@ -31,48 +26,44 @@ cd my-app
 pnpm install
 ```
 
-### 2. Create Convex Project
+### 1. Convex Backend
 
 ```bash
 cd packages/convex
-npx convex dev
-# Follow prompts to create a new project
-# Note your deployment URL (e.g. https://your-deployment.convex.cloud)
+npx convex dev          # Creates project + generates .env.local
 ```
 
-### 3. Create Local Env Files
+### 2. Environment Files
 
 ```bash
-echo "CONVEX_DEPLOYMENT=dev:your-deployment-slug" > packages/convex/.env.local
 echo "NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud" > apps/web/.env.local
 echo "EXPO_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud" > apps/mobile/.env.local
 ```
 
-### 4. Google OAuth (Required)
+### 3. Auth Setup (Required)
 
-1. Go to [Google Cloud Console > Credentials](https://console.cloud.google.com/apis/credentials)
-2. Create **OAuth 2.0 Client ID** (Web application)
-3. Add redirect URI: `https://your-deployment.convex.site/api/auth/callback/google`
-4. Set credentials:
-   ```bash
-   cd packages/convex
-   npx convex env set AUTH_GOOGLE_ID "your-google-client-id"
-   npx convex env set AUTH_GOOGLE_SECRET "your-google-client-secret"
-   ```
+**Google OAuth** — [Cloud Console > Credentials](https://console.cloud.google.com/apis/credentials):
 
-### 5. JWT Keys (Required)
+```bash
+cd packages/convex
+npx convex env set AUTH_GOOGLE_ID "your-client-id"
+npx convex env set AUTH_GOOGLE_SECRET "your-client-secret"
+```
+
+Redirect URI: `https://your-deployment.convex.site/api/auth/callback/google`
+
+**JWT Keys:**
 
 ```bash
 openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /tmp/jwt_private.pem
 openssl pkey -in /tmp/jwt_private.pem -pubout -out /tmp/jwt_public.pem
 
-cd packages/convex
 npx convex env set JWT_PRIVATE_KEY -- "$(cat /tmp/jwt_private.pem)"
 
 node -e "
 const crypto = require('crypto');
-const publicKey = crypto.createPublicKey(require('fs').readFileSync('/tmp/jwt_public.pem'));
-const jwk = publicKey.export({ format: 'jwk' });
+const pub = crypto.createPublicKey(require('fs').readFileSync('/tmp/jwt_public.pem'));
+const jwk = pub.export({ format: 'jwk' });
 jwk.use = 'sig'; jwk.alg = 'RS256'; jwk.kid = 'convex-auth-key';
 console.log(JSON.stringify({ keys: [jwk] }));
 " > /tmp/jwks.json
@@ -81,225 +72,74 @@ npx convex env set JWKS -- "$(cat /tmp/jwks.json)"
 rm /tmp/jwt_private.pem /tmp/jwt_public.pem /tmp/jwks.json
 ```
 
-### 6. SITE_URL (Required)
+**Site URL:**
 
 ```bash
 npx convex env set SITE_URL "http://localhost:3000"
-# Production: npx convex env set SITE_URL "https://yourapp.com"
 ```
 
-### 7. Magic Link Auth (Optional)
-
-1. Get API key from [resend.com](https://resend.com)
-2. Set credential:
-   ```bash
-   npx convex env set AUTH_RESEND_KEY "re_your_resend_api_key"
-   ```
-
-> Without a verified domain, Resend only delivers to your signup email.
-
-### 8. Cloudflare R2 (Optional — File Storage)
-
-1. Create R2 bucket in [Cloudflare Dashboard](https://dash.cloudflare.com)
-2. Create R2 API token with read/write permissions
-3. Set credentials:
-   ```bash
-   npx convex env set R2_ACCESS_KEY_ID "your-access-key-id"
-   npx convex env set R2_SECRET_ACCESS_KEY "your-secret-access-key"
-   npx convex env set R2_ENDPOINT "https://your-account-id.r2.cloudflarestorage.com"
-   npx convex env set R2_BUCKET "your-bucket-name"
-   npx convex env set R2_TOKEN "your-r2-token"
-   ```
-
-### 9. Firebase (Optional — Android Push Notifications)
-
-1. Create project in [Firebase Console](https://console.firebase.google.com)
-2. Add **Android app** with your package name
-3. Download `google-services.json` → place at `apps/mobile/google-services.json`
-4. Update `apps/mobile/app.json`:
-   ```json
-   {
-     "expo": {
-       "android": {
-         "package": "com.yourcompany.app",
-         "googleServicesFile": "./google-services.json"
-       }
-     }
-   }
-   ```
-
-> iOS push works via APNs automatically with EAS Build — no Firebase needed.
-
-### 10. EAS Project (Optional — Mobile Builds)
+### 4. Optional Services
 
 ```bash
-cd apps/mobile
-npx eas init
-# Adds projectId to app.json — required for Expo push tokens
-```
+# Magic Link auth
+npx convex env set AUTH_RESEND_KEY "re_..."
 
-### 11. Other Optional Services
+# File storage (Cloudflare R2)
+npx convex env set R2_ACCESS_KEY_ID "..." R2_SECRET_ACCESS_KEY "..." R2_ENDPOINT "..." R2_BUCKET "..." R2_TOKEN "..."
 
-```bash
-# OpenAI (AI Agent + RAG)
+# AI (OpenAI)
 npx convex env set OPENAI_API_KEY "sk-..."
 
-# Dodo Payments
-npx convex env set DODO_PAYMENTS_API_KEY "your-api-key"
-npx convex env set DODO_PAYMENTS_ENVIRONMENT "test_mode"
-npx convex env set DODO_PAYMENTS_WEBHOOK_SECRET "your-webhook-secret"
+# Payments (Dodo)
+npx convex env set DODO_PAYMENTS_API_KEY "..." DODO_PAYMENTS_ENVIRONMENT "test_mode" DODO_PAYMENTS_WEBHOOK_SECRET "..."
 
-# Resend Email
+# Transactional email (Resend)
 npx convex env set RESEND_API_KEY "re_..."
 ```
-
----
 
 ## Running
 
 ```bash
-pnpm dev                              # All apps + backend
+pnpm dev                    # All apps + backend
 
 # Individual
-cd apps/web && pnpm dev               # Web (http://localhost:3000)
-cd apps/mobile && pnpm dev            # Mobile (Expo dev server)
-cd apps/docs-site && pnpm dev         # Docs (http://localhost:3001)
-cd packages/convex && pnpm dev        # Backend
+cd apps/web && pnpm dev     # http://localhost:3000
+cd apps/mobile && pnpm dev  # Expo dev server
+cd apps/docs-site && pnpm dev # http://localhost:3001
+cd packages/convex && pnpm dev
 
-pnpm build                            # Build all
-pnpm check-types                      # Type check all
+pnpm build                  # Build all
+pnpm check-types            # Type check all
 ```
-
-### Mobile
-
-```bash
-cd apps/mobile
-npx expo run:ios                      # iOS simulator
-npx expo run:android                  # Android emulator
-npx expo start --clear                # Clear cache and restart
-```
-
----
-
-## Environment Variables
-
-### Convex Dashboard — Required
-
-| Variable | Purpose |
-|----------|---------|
-| `AUTH_GOOGLE_ID` | Google OAuth client ID |
-| `AUTH_GOOGLE_SECRET` | Google OAuth client secret |
-| `JWT_PRIVATE_KEY` | RSA private key (PEM) |
-| `JWKS` | RSA public key (JWK JSON) |
-| `SITE_URL` | Web app URL |
-
-### Convex Dashboard — Optional
-
-| Variable | Feature |
-|----------|---------|
-| `AUTH_RESEND_KEY` | Magic link auth |
-| `AUTH_RESEND_FROM` | Magic link sender email (default: `onboarding@resend.dev`) |
-| `R2_TOKEN`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`, `R2_BUCKET` | File storage |
-| `OPENAI_API_KEY` | AI agent + RAG |
-| `AGENT_MODEL` | Chat model for agent + RAG (default: `gpt-4o-mini`) |
-| `RAG_EMBEDDING_MODEL` | Embedding model for RAG (default: `text-embedding-3-small`) |
-| `DODO_PAYMENTS_API_KEY`, `DODO_PAYMENTS_ENVIRONMENT`, `DODO_PAYMENTS_WEBHOOK_SECRET` | Payments |
-| `RESEND_API_KEY` | Transactional email |
-| `WEB_ORIGIN` | CORS origin for `/chat-stream` endpoint |
-| `CONVEX_DEPLOY_KEY` | CI/CD deployment |
-
-### Local `.env.local` Files
-
-| File | Variable |
-|------|----------|
-| `packages/convex/.env.local` | `CONVEX_DEPLOYMENT=dev:your-slug` |
-| `apps/web/.env.local` | `NEXT_PUBLIC_CONVEX_URL=https://...convex.cloud` |
-| `apps/mobile/.env.local` | `EXPO_PUBLIC_CONVEX_URL=https://...convex.cloud` |
-
----
 
 ## Project Structure
 
 ```
 apps/
-  web/               → Next.js 16 + shadcn/ui
-  mobile/            → Expo 54 + HeroUI Native + Uniwind
-  docs-site/         → Fumadocs documentation
+  web/            → Next.js + shadcn/ui
+  mobile/         → Expo + HeroUI Native
+  docs-site/      → Fumadocs
 
 packages/
-  convex/            → Backend (auth, storage, payments, email, AI)
-  shared/            → Shared types, constants, utils
-  eslint-config/     → ESLint config
+  convex/         → Backend (auth, storage, payments, email, AI)
+  shared/         → Shared types, constants, utils
 ```
-
-## Key Files
-
-| File | Purpose |
-|------|---------|
-| `packages/convex/convex/schema.ts` | Database schema |
-| `packages/convex/convex/auth.ts` | Auth config (Google OAuth + Magic Link) |
-| `packages/convex/convex/teams.ts` | Team management |
-| `packages/convex/convex/payments.ts` | Checkout + customer portal |
-| `packages/convex/convex/webhooks.ts` | Dodo payment webhook handlers |
-| `packages/convex/convex/customers.ts` | Dodo Payments customer management |
-| `packages/convex/convex/plans.ts` | Subscription plan management |
-| `packages/convex/convex/email.ts` | Send emails |
-| `packages/convex/convex/storage.ts` | R2 file upload/download |
-| `packages/convex/convex/agent.ts` | AI agent |
-| `packages/convex/convex/rag.ts` | Vector search |
-| `packages/convex/convex/streaming.ts` | AI text streaming |
-| `packages/convex/convex/pushNotifications.ts` | Push notifications |
-| `packages/convex/convex/http.ts` | HTTP routes (auth, webhooks, streaming) |
-| `packages/convex/convex/crons.ts` | Scheduled tasks |
-
-## Theming
-
-- **Web** → `apps/web/app/globals.css` — edit `--primary` in `:root` and `.dark`
-- **Mobile** → `apps/mobile/src/global.css` — edit `--accent` in `@variant light` and `@variant dark`
-- Use [oklch.com](https://oklch.com) to pick colors
-
-## Adding Components
-
-```bash
-# Web (shadcn/ui)
-cd apps/web && npx shadcn@latest add dialog
-
-# Mobile (HeroUI Native) — included with the package
-```
-
----
 
 ## Deployment
 
-### Backend (Convex) — deploy first
 ```bash
+# Backend — deploy first
 cd packages/convex && npx convex deploy
-```
 
-### Web (Vercel)
-1. Connect repo to [Vercel](https://vercel.com)
-2. Set root directory to `apps/web`
-3. Add `NEXT_PUBLIC_CONVEX_URL` env var
-4. Deploy
-
-### Mobile (EAS Build)
-```bash
+# Mobile
 cd apps/mobile
-npx eas build --platform ios
-npx eas build --platform android
-npx eas submit --platform ios
-npx eas submit --platform android
+npx eas build --platform ios && npx eas submit --platform ios
+npx eas build --platform android && npx eas submit --platform android
 ```
 
-### Docs (Vercel)
-1. Connect repo to [Vercel](https://vercel.com)
-2. Set root directory to `apps/docs-site`
-3. Deploy
+**Web & Docs** — connect repo to [Vercel](https://vercel.com), set root directory to `apps/web` or `apps/docs-site`, add `NEXT_PUBLIC_CONVEX_URL`, deploy.
 
----
+## Docs
 
-## Documentation
+Full documentation lives in `apps/docs-site/` — run `cd apps/docs-site && pnpm dev` to view locally.
 
-Full docs at `apps/docs-site/` — run `cd apps/docs-site && pnpm dev` to view locally at http://localhost:3001.
-
-Covers: Guide, Web, Mobile, Backend, Deployment, and Docs Site setup.
