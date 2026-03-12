@@ -5,10 +5,30 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useSession } from "@/components/providers/session-provider";
 import { ModeToggle } from "@/components/navigation/mode-toggle";
-import { APP_NAME } from "@/lib/config";
-import { cn } from "@/lib/utils";
+
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Carousel,
@@ -19,6 +39,7 @@ import {
   useCarousel,
 } from "@/components/ui/carousel";
 import CircularText from "@/components/landing/CircularText";
+import { Navbar } from "@/components/navigation/navbar";
 import {
   FingerPrintIcon,
   CloudUploadIcon,
@@ -29,7 +50,15 @@ import {
   ArrowRight01Icon,
   SmartPhone01Icon,
   BrowserIcon,
+  Copy01Icon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
+
+const EXPO_PROJECT_ID = "37103778-bef9-4f12-b132-b84a65630ace";
+const EXPO_UPDATE_GROUP_ID = "76380cdd-8969-4bc0-a1cf-9e7e7825ac46";
+const EXPO_PREVIEW_URL = `https://expo.dev/preview/update?projectId=${EXPO_PROJECT_ID}&group=${EXPO_UPDATE_GROUP_ID}`;
+const EXPO_QR_URL = `https://qr.expo.dev/eas-update?projectId=${EXPO_PROJECT_ID}&groupId=${EXPO_UPDATE_GROUP_ID}`;
+
 
 export default function LandingPage() {
   const { isSignedIn, isLoading } = useSession();
@@ -48,24 +77,7 @@ export default function LandingPage() {
 
   return (
     <div className="flex min-h-svh flex-col">
-      {/* ── Nav ── */}
-      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logos/brand-logo.png" alt={APP_NAME} className="h-8 w-auto object-contain" />
-            <span className="text-xl font-semibold">{APP_NAME}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <ModeToggle />
-            <Button asChild size="sm">
-              <Link href={ctaHref}>
-                {isSignedIn ? "Dashboard" : "Sign In"}
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* ── Hero ── */}
       <section className="mx-auto flex w-full max-w-6xl flex-col items-center px-6 pt-28 pb-20">
@@ -111,13 +123,11 @@ export default function LandingPage() {
         >
           <Button asChild size="lg">
             <Link href={ctaHref}>
-              Try Demo
-              <HugeiconsIcon
-                icon={ArrowRight01Icon}
-                className="ml-2 h-4 w-4"
-              />
+              Try Web Demo
+              <HugeiconsIcon icon={ArrowRight01Icon} />
             </Link>
           </Button>
+          <TryAppButton />
         </motion.div>
 
         <motion.div
@@ -323,23 +333,25 @@ export default function LandingPage() {
         <p className="max-w-md text-lg text-muted-foreground">
           Start building your web and mobile app today.
         </p>
-        <Button asChild size="lg">
-          <Link href={ctaHref}>
-            Try Demo
-            <HugeiconsIcon
-              icon={ArrowRight01Icon}
-              className="ml-2 h-4 w-4"
-            />
-          </Link>
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button asChild size="lg">
+            <Link href={ctaHref}>
+              Try Web Demo
+              <HugeiconsIcon icon={ArrowRight01Icon} />
+            </Link>
+          </Button>
+          <TryAppButton />
+        </div>
       </motion.section>
 
       {/* ── Footer ── */}
       <footer className="border-t">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 text-sm text-muted-foreground">
-          <span>
-            &copy; {new Date().getFullYear()} {APP_NAME}. All rights reserved.
-          </span>
+          <a href="https://rajbreno.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/rajbreno.png" alt="Raj Breno" className="h-6 w-6 rounded-full object-cover" />
+            <span>Made by <span className="underline underline-offset-2">Raj Breno</span></span>
+          </a>
           <ModeToggle />
         </div>
       </footer>
@@ -426,8 +438,12 @@ function CarouselDots() {
 
   useEffect(() => {
     if (!api) return;
-    setCount(api.scrollSnapList().length);
-    setSelected(api.selectedScrollSnap());
+    const snapCount = api.scrollSnapList().length;
+    const snapSelected = api.selectedScrollSnap();
+    queueMicrotask(() => {
+      setCount(snapCount);
+      setSelected(snapSelected);
+    });
     api.on("select", onSelect);
     return () => {
       api.off("select", onSelect);
@@ -457,6 +473,87 @@ function CarouselDots() {
           />
         </button>
       ))}
+    </div>
+  );
+}
+
+// ── Try App (Responsive Dialog / Drawer) ──────────────────────────
+
+function TryAppButton() {
+  const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerTrigger asChild>
+          <Button variant="outline" size="lg">
+            <HugeiconsIcon icon={SmartPhone01Icon} />
+            Try App
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Preview on your phone</DrawerTitle>
+            <DrawerDescription>
+              Scan the QR code with Expo Go or copy the link below.
+            </DrawerDescription>
+          </DrawerHeader>
+          <QRContent />
+          <DrawerFooter>
+            <DrawerClose asChild>
+              <Button variant="outline">Close</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="lg">
+          <HugeiconsIcon icon={SmartPhone01Icon} />
+          Try App
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Preview on your phone</DialogTitle>
+          <DialogDescription>
+            Scan the QR code with Expo Go or copy the link below.
+          </DialogDescription>
+        </DialogHeader>
+        <QRContent />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function QRContent() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(EXPO_PREVIEW_URL);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-6 px-4 py-2">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={EXPO_QR_URL}
+        alt="Scan to preview in Expo Go"
+        className="h-[180px] w-[180px] rounded-lg bg-white p-2"
+      />
+      <div className="flex w-full items-center gap-2">
+        <Input value={EXPO_PREVIEW_URL} readOnly />
+        <Button variant="outline" size="icon" onClick={handleCopy}>
+          <HugeiconsIcon icon={copied ? Tick02Icon : Copy01Icon} />
+        </Button>
+      </div>
     </div>
   );
 }

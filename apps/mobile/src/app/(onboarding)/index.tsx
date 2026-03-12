@@ -10,8 +10,7 @@ import {
   type ImageSourcePropType,
 } from "react-native";
 import { Button, Card, Separator, useThemeColor } from "heroui-native";
-import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useOnboarding } from "../_layout";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   FadeIn,
@@ -92,7 +91,7 @@ function Dot({ active }: { active: boolean }) {
 export default function OnboardingScreen() {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const router = useRouter();
+  const { completeOnboarding } = useOnboarding();
   const flatListRef = useRef<FlatList<SlideId>>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const accentColor = useThemeColor("accent");
@@ -109,11 +108,6 @@ export default function OnboardingScreen() {
   );
 
   const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 });
-
-  const completeOnboarding = useCallback(async () => {
-    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
-    router.replace("/(auth)/sign-in");
-  }, [router]);
 
   const handleNext = useCallback(() => {
     if (activeIndex < slideIds.length - 1) {

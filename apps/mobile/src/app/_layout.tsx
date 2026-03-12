@@ -1,6 +1,6 @@
 import "../global.css";
 
-import { useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -61,6 +61,14 @@ export default function RootLayout() {
   );
 }
 
+const OnboardingContext = createContext<{ completeOnboarding: () => void }>({
+  completeOnboarding: () => {},
+});
+
+export function useOnboarding() {
+  return useContext(OnboardingContext);
+}
+
 function RootNavigator() {
   const { isSignedIn } = useSession();
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(
@@ -73,6 +81,11 @@ function RootNavigator() {
     });
   }, []);
 
+  const completeOnboarding = useCallback(async () => {
+    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+    setHasSeenOnboarding(true);
+  }, []);
+
   // Wait until we know the onboarding state before rendering
   if (hasSeenOnboarding === null) return null;
 
@@ -80,25 +93,27 @@ function RootNavigator() {
   const showAuth = hasSeenOnboarding && !isSignedIn;
 
   return (
-    <Stack
-      screenOptions={{
-        headerBackTitle: "",
-        headerTitle: "",
-        animation: "default",
-        headerShadowVisible: false,
-      }}
-    >
-      <Stack.Protected guard={showOnboarding}>
-        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-      </Stack.Protected>
+    <OnboardingContext.Provider value={{ completeOnboarding }}>
+      <Stack
+        screenOptions={{
+          headerBackTitle: "",
+          headerTitle: "",
+          animation: "default",
+          headerShadowVisible: false,
+        }}
+      >
+        <Stack.Protected guard={showOnboarding}>
+          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+        </Stack.Protected>
 
-      <Stack.Protected guard={showAuth}>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      </Stack.Protected>
+        <Stack.Protected guard={showAuth}>
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        </Stack.Protected>
 
-      <Stack.Protected guard={!showOnboarding && !showAuth}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack.Protected>
-    </Stack>
+        <Stack.Protected guard={!showOnboarding && !showAuth}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack.Protected>
+      </Stack>
+    </OnboardingContext.Provider>
   );
 }

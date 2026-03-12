@@ -10,11 +10,11 @@
     "icon": "./src/assets/appicon.png",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.app",
+      "bundleIdentifier": "com.rajbreno.shipsuperfast",
       "icon": "./src/assets/appicon.png"
     },
     "android": {
-      "package": "com.yourcompany.app",
+      "package": "com.rajbreno.shipsuperfast",
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/appicon.png",
         "backgroundColor": "#F55A00"
@@ -40,6 +40,19 @@
         }
       ],
       "expo-notifications"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "37103778-bef9-4f12-b132-b84a65630ace"
+      }
+    },
+    "owner": "rajbreno",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/37103778-bef9-4f12-b132-b84a65630ace"
+    }
   }
 }
