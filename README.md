@@ -2,7 +2,7 @@
 
 ![Ship Superfast](apps/web/public/github.png)
 
-Production-ready monorepo starter kit. **Convex + Next.js + Expo** with auth, teams, payments, storage, email, AI, and push notifications pre-wired.
+Monorepo starter kit. **Convex + Next.js + Expo** with auth, teams, payments, storage, email, AI, and push notifications pre-wired.
 
 Made by [Raj Breno](https://rajbreno.com)
 
