@@ -65,11 +65,11 @@ export default function SignInPage() {
           className="absolute inset-0 h-full w-full object-cover opacity-80"
         />
         <div className="relative flex h-full flex-col justify-between p-10">
-          <div className="flex items-center gap-2 text-white">
+          <Link href="/" className="flex items-center gap-2 text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logos/light logo.png" alt={APP_NAME} className="h-8 w-auto object-contain" />
             <span className="text-lg font-semibold">{APP_NAME}</span>
-          </div>
+          </Link>
           <div className="max-w-md">
             <blockquote className="text-lg text-white">
               &quot;Build cross-platform apps in record time. Auth, storage,
@@ -82,10 +82,10 @@ export default function SignInPage() {
       {/* Right side - Sign in form */}
       <div className="flex flex-col items-center justify-center px-6 py-12">
         <div className="flex w-full max-w-sm flex-col gap-6">
-          <div className="flex flex-col items-center gap-3 lg:hidden">
+          <Link href="/" className="flex flex-col items-center gap-3 lg:hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logos/brand-logo.png" alt={APP_NAME} className="h-8 w-auto object-contain" />
-          </div>
+          </Link>
           <div className="text-center">
             <h1 className="text-2xl font-bold">Welcome back</h1>
             <p className="mt-1 text-sm text-muted-foreground">
