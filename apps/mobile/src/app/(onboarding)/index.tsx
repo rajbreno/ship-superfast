@@ -242,7 +242,7 @@ function WelcomeSlide() {
         <Text className="text-center text-4xl font-bold text-foreground">
           Ship Superfast
         </Text>
-        <Text className="px-4 text-center text-sm leading-6 text-default-500">
+        <Text className="px-4 text-center text-sm leading-6 text-muted">
           Your app comes packed with auth, storage, payments, email, AI, and
           push notifications — all ready to go.
         </Text>
@@ -263,7 +263,7 @@ function StackSlide() {
         <Text className="text-center text-3xl font-bold text-foreground">
           The Stack
         </Text>
-        <Text className="px-4 text-center text-sm leading-5 text-default-500">
+        <Text className="px-4 text-center text-sm leading-5 text-muted">
           Every technology powering your app.
         </Text>
       </Animated.View>
@@ -284,7 +284,7 @@ function StackSlide() {
                     <Text className="text-sm text-foreground">
                       {t.name}
                     </Text>
-                    <Text className="text-xs text-default-500">
+                    <Text className="text-xs text-muted">
                       {t.purpose}
                     </Text>
                   </View>
@@ -310,7 +310,7 @@ function FeaturesSlide({ accentColor }: { accentColor: string }) {
         <Text className="text-center text-3xl font-bold text-foreground">
           Everything Built In
         </Text>
-        <Text className="px-4 text-center text-sm leading-5 text-default-500">
+        <Text className="px-4 text-center text-sm leading-5 text-muted">
           Six production features, ready from day one.
         </Text>
       </Animated.View>

@@ -13,6 +13,9 @@
   }
 
   @variant dark {
+    --background: oklch(0.141 0.005 285.823);
+    --surface: oklch(0.24 0.006 285.885);
+    --muted: oklch(0.80 0.015 286.067);
     --accent: oklch(0.705 0.213 47.604);
     --accent-foreground: oklch(0.98 0.016 73.684);
     --radius: 4;

@@ -78,7 +78,7 @@ export default function HomeScreen() {
           <Text className="text-xl font-semibold text-foreground">
             Welcome back, {currentUser?.name?.split(" ")[0] ?? "User"}
           </Text>
-          <Text className="text-xs text-default-500">
+          <Text className="text-xs text-muted">
             {myTeam ? `${myTeam.name} · ${myTeam.role}` : "No team"}
           </Text>
         </View>
@@ -101,7 +101,7 @@ export default function HomeScreen() {
                       <Text className="text-sm text-foreground">
                         {invite.teamName}
                       </Text>
-                      <Text className="text-xs text-default-500">
+                      <Text className="text-xs text-muted">
                         Invited by {invite.invitedByName ?? "a member"} as{" "}
                         {invite.role}
                       </Text>
@@ -150,7 +150,7 @@ export default function HomeScreen() {
           <Card.Body>
             <View className="flex-row items-center justify-between">
               <View className="flex-1 gap-1">
-                <Text className="text-xs text-default-500">Team Plan</Text>
+                <Text className="text-xs text-muted">Team Plan</Text>
                 <Text className="text-lg font-medium capitalize text-foreground">
                   {myTeam?.plan ?? "Free"}
                 </Text>
@@ -169,7 +169,7 @@ export default function HomeScreen() {
           <Card.Body>
             <View className="flex-row items-center justify-between">
               <View className="flex-1 gap-1">
-                <Text className="text-xs text-default-500">Transactions</Text>
+                <Text className="text-xs text-muted">Transactions</Text>
                 <Text className="text-lg font-medium text-foreground">
                   {payments?.length ?? 0}
                 </Text>
@@ -188,7 +188,7 @@ export default function HomeScreen() {
           <Card.Body>
             <View className="flex-row items-center justify-between">
               <View className="flex-1 gap-1">
-                <Text className="text-xs text-default-500">Auth</Text>
+                <Text className="text-xs text-muted">Auth</Text>
                 <Text className="text-lg font-medium text-foreground">
                   Connected
                 </Text>

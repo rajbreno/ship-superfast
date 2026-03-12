@@ -1,6 +1,8 @@
 import React from "react";
 import { Tabs } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useThemeColor } from "heroui-native";
+import { useUniwind } from "uniwind";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import {
   Home01Icon,
@@ -31,10 +33,14 @@ const ProfileIcon = ({ color, size }: { color: string; size: number }) => (
 
 export default function TabsLayout() {
   const accentColor = useThemeColor("accent");
+  const backgroundColor = useThemeColor("background");
+  const foregroundColor = useThemeColor("foreground");
+  const { theme } = useUniwind();
   const activeTeamValue = useActiveTeamValue();
 
   return (
     <ActiveTeamContext.Provider value={activeTeamValue}>
+    <StatusBar style={theme === "dark" ? "light" : "dark"} />
     <Tabs
       screenOptions={{
         tabBarShowLabel: true,
@@ -42,6 +48,10 @@ export default function TabsLayout() {
         headerShown: true,
         headerShadowVisible: false,
         tabBarActiveTintColor: accentColor,
+        tabBarStyle: { backgroundColor },
+        tabBarInactiveTintColor: theme === "dark" ? "#a1a1aa" : "#71717a",
+        headerStyle: { backgroundColor },
+        headerTintColor: foregroundColor,
       }}
     >
       <Tabs.Screen

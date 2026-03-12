@@ -26,7 +26,7 @@ A ready-to-go monorepo starter for building cross-platform apps with **Convex + 
 ### 1. Clone and Install
 
 ```bash
-git clone <repo-url> my-app
+git clone https://github.com/rajbreno/ship-superfast.git my-app
 cd my-app
 pnpm install
 ```
@@ -198,10 +198,15 @@ npx expo start --clear                # Clear cache and restart
 | Variable | Feature |
 |----------|---------|
 | `AUTH_RESEND_KEY` | Magic link auth |
+| `AUTH_RESEND_FROM` | Magic link sender email (default: `onboarding@resend.dev`) |
 | `R2_TOKEN`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`, `R2_BUCKET` | File storage |
 | `OPENAI_API_KEY` | AI agent + RAG |
+| `AGENT_MODEL` | Chat model for agent + RAG (default: `gpt-4o-mini`) |
+| `RAG_EMBEDDING_MODEL` | Embedding model for RAG (default: `text-embedding-3-small`) |
 | `DODO_PAYMENTS_API_KEY`, `DODO_PAYMENTS_ENVIRONMENT`, `DODO_PAYMENTS_WEBHOOK_SECRET` | Payments |
-| `RESEND_API_KEY` | Email |
+| `RESEND_API_KEY` | Transactional email |
+| `WEB_ORIGIN` | CORS origin for `/chat-stream` endpoint |
+| `CONVEX_DEPLOY_KEY` | CI/CD deployment |
 
 ### Local `.env.local` Files
 

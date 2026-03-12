@@ -10,7 +10,7 @@ export const resend = new Resend(components.resend, { testMode: false });
 
 function getLogoUrl(): string {
   const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
-  return `${siteUrl}/logos/brand%20logo.png`;
+  return `${siteUrl}/logos/brand-logo.png`;
 }
 
 function formatAmount(amount: number, currency: string): string {

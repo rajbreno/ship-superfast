@@ -39,28 +39,28 @@ import type { PlanTier } from "@repo/shared";
 
 const PLAN_UI: Record<string, { description: string; features: string[] }> = {
   pro: {
-    description: "Priority support and continuous updates",
+    description: "For growing teams that need more power",
     features: [
-      "Full source code access",
-      "Convex backend with auth and storage",
-      "Next.js 16 + Expo 54 monorepo",
-      "AI agents with RAG and streaming",
-      "Push notifications (iOS + Android)",
-      "Transactional emails via Resend",
-      "Priority support",
-      "Monthly updates and patches",
+      "Unlimited projects",
+      "50 GB storage",
+      "Advanced analytics dashboard",
+      "Team collaboration tools",
+      "API access",
+      "Email support",
+      "Custom integrations",
+      "Priority queue",
     ],
   },
   max: {
-    description: "Everything in Pro plus premium features",
+    description: "Everything in Pro plus enterprise features",
     features: [
       "Everything in Pro",
-      "Early access to new features",
-      "Private Discord channel",
-      "1-on-1 onboarding call",
-      "Custom integrations support",
-      "Priority bug fixes",
+      "Unlimited storage",
       "Dedicated account manager",
+      "SSO & advanced security",
+      "Custom SLA",
+      "24/7 phone support",
+      "Audit logs & compliance",
     ],
   },
 };
@@ -122,11 +122,16 @@ export default function BillingPage() {
     api.payments.getTeamBillingSummary,
     activeTeam ? { teamId: activeTeam._id } : "skip",
   );
+  const subscription = useQuery(
+    api.payments.getSubscriptionStatus,
+    activeTeam ? { teamId: activeTeam._id } : "skip",
+  );
   const paymentHistory = useQuery(
     api.payments.getPaymentHistory,
     activeTeam ? { teamId: activeTeam._id } : "skip",
   );
   const hasBillingHistory = paymentHistory && paymentHistory.length > 0;
+  const isCancelled = subscription?.status === "cancelled";
 
   if (!activeTeam) {
     return (
@@ -175,6 +180,31 @@ export default function BillingPage() {
         </CardHeader>
       </Card>
 
+      {/* Cancellation notice */}
+      {isCancelled && (
+        <Card>
+          <CardContent>
+            <div className="flex items-start gap-3">
+              <HugeiconsIcon
+                icon={InformationCircleIcon}
+                strokeWidth={1.5}
+                className="mt-0.5 h-6 w-6 shrink-0 text-destructive"
+              />
+              <div>
+                <p className="text-sm font-medium">
+                  Your subscription has been cancelled
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {currentPlan !== "free"
+                    ? "You still have access to your current plan until the end of your billing period."
+                    : "Your plan has been downgraded to Free. Subscribe again to restore access."}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Non-owner notice */}
       {!isOwnerOrAdmin && (
         <Card>
@@ -204,6 +234,7 @@ export default function BillingPage() {
           plans={plans}
           currentPlan={currentPlan}
           teamId={activeTeam._id}
+          isCancelled={isCancelled}
         />
       )}
 
@@ -266,10 +297,12 @@ function PlansSection({
   plans,
   currentPlan,
   teamId,
+  isCancelled,
 }: {
   plans: PlanWithUI[];
   currentPlan: string;
   teamId: Id<"teams">;
+  isCancelled: boolean;
 }) {
   const createCheckout = useAction(api.payments.createCheckout);
   const getPortal = useAction(api.payments.getCustomerPortal);
@@ -338,7 +371,9 @@ function PlansSection({
               <CardDescription>{plan.description}</CardDescription>
               {isCurrentPlan && (
                 <CardAction>
-                  <Badge variant="secondary">Current</Badge>
+                  <Badge variant={isCancelled ? "destructive" : "secondary"}>
+                    {isCancelled ? "Cancelled" : "Current"}
+                  </Badge>
                 </CardAction>
               )}
             </CardHeader>
@@ -390,9 +425,20 @@ function PlansSection({
                     : `Upgrade to ${plan.name}`}
                 </Button>
               )}
-              {isCurrentPlan && (
+              {isCurrentPlan && !isCancelled && (
                 <Button className="w-full" disabled>
                   Current Plan
+                </Button>
+              )}
+              {isCurrentPlan && isCancelled && (
+                <Button
+                  className="w-full"
+                  onClick={() => handleSubscribe(plan.tier as PlanTier)}
+                  disabled={loading !== null}
+                >
+                  {loading === plan.tier
+                    ? "Redirecting..."
+                    : "Resubscribe"}
                 </Button>
               )}
               {isDowngrade && (

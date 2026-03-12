@@ -62,7 +62,7 @@ export default function TeamScreen() {
         <Text className="mb-2 text-xl font-semibold text-foreground">
           No Team
         </Text>
-        <Text className="text-center text-sm text-default-500">
+        <Text className="text-center text-sm text-muted">
           You don't belong to any team yet.
         </Text>
       </View>
@@ -92,7 +92,7 @@ export default function TeamScreen() {
                       <Text className="text-sm text-foreground">
                         {invite.teamName}
                       </Text>
-                      <Text className="text-xs text-default-500">
+                      <Text className="text-xs text-muted">
                         Invited by {invite.invitedByName ?? "a member"} as{" "}
                         {invite.role}
                       </Text>
@@ -178,6 +178,7 @@ function TeamHeader({
 }) {
   const updateName = useMutation(api.teams.updateTeamName);
   const accentColor = useThemeColor("accent");
+  const foregroundColor = useThemeColor("foreground");
   const [editOpen, setEditOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
   const [nameValue, setNameValue] = useState("");
@@ -214,7 +215,7 @@ function TeamHeader({
           <Card.Body>
             <View className="flex-row items-center justify-between">
               <View className="flex-1 gap-1">
-                <Text className="text-xs text-default-500">Team</Text>
+                <Text className="text-xs text-muted">Team</Text>
                 <View className="flex-row items-center gap-2">
                   <Text className="text-lg font-medium text-foreground">
                     {team.name}
@@ -229,7 +230,7 @@ function TeamHeader({
                         setEditOpen(true);
                       }}
                     >
-                      <HugeiconsIcon icon={Edit03Icon} size={16} />
+                      <HugeiconsIcon icon={Edit03Icon} size={16} color={foregroundColor} />
                     </Button>
                   )}
                 </View>
@@ -356,6 +357,7 @@ function MembersList({
   const members = useQuery(api.teams.getTeamMembers, { teamId });
   const removeMember = useMutation(api.teams.removeMember);
   const changeRole = useMutation(api.teams.changeMemberRole);
+  const foregroundColor = useThemeColor("foreground");
 
   const isOwner = currentRole === "owner";
   const canManage = ["owner", "admin"].includes(currentRole);
@@ -382,7 +384,7 @@ function MembersList({
                 size="sm"
                 onPress={() => setInviteOpen(true)}
               >
-                <HugeiconsIcon icon={PlusSignIcon} size={18} />
+                <HugeiconsIcon icon={PlusSignIcon} size={18} color={foregroundColor} />
               </Button>
             </ListGroup.ItemSuffix>
           )}
@@ -612,7 +614,7 @@ function InviteSheet({
               </View>
             </View>
 
-            <Text className="text-xs text-default-500">
+            <Text className="text-xs text-muted">
               {role === "admin"
                 ? "Can invite and remove members, manage team settings, and access billing."
                 : "Can access and use team features only."}

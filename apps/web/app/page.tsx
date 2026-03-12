@@ -2,13 +2,22 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/components/providers/session-provider";
 import { ModeToggle } from "@/components/navigation/mode-toggle";
 import { APP_NAME } from "@/lib/config";
+import { cn } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+  useCarousel,
+} from "@/components/ui/carousel";
 import CircularText from "@/components/landing/CircularText";
 import {
   FingerPrintIcon,
@@ -44,7 +53,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logos/brand logo.png" alt={APP_NAME} className="h-8 w-auto object-contain" />
+            <img src="/logos/brand-logo.png" alt={APP_NAME} className="h-8 w-auto object-contain" />
             <span className="text-xl font-semibold">{APP_NAME}</span>
           </div>
           <div className="flex items-center gap-3">
@@ -88,10 +97,10 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="mt-6 max-w-2xl text-center text-lg text-muted-foreground"
+          className="mt-6 max-w-2xl text-center text-lg text-foreground/70"
         >
-          Build and ship cross-platform apps with Convex, Next.js, and Expo.
-          Auth, payments, storage, and AI all wired up.
+          A <span className="font-medium">monorepo</span> starter kit for web and mobile apps.
+          Convex, Next.js, and Expo with auth, payments, storage, and AI all wired up.
         </motion.p>
 
         <motion.div
@@ -102,7 +111,7 @@ export default function LandingPage() {
         >
           <Button asChild size="lg">
             <Link href={ctaHref}>
-              Get Started
+              Try Demo
               <HugeiconsIcon
                 icon={ArrowRight01Icon}
                 className="ml-2 h-4 w-4"
@@ -140,6 +149,42 @@ export default function LandingPage() {
           </div>
         </motion.div>
       </section>
+
+      {/* ── Platform Mockups Carousel ── */}
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+        className="mx-auto w-full max-w-6xl px-6 py-24"
+      >
+        <Carousel opts={{ align: "start", loop: true }}>
+          <CarouselContent>
+            {[
+              { src: "/platform-mocks/d1.jpeg", alt: "Web sign-in page" },
+              { src: "/platform-mocks/d2.jpeg", alt: "Web dashboard" },
+              { src: "/platform-mocks/d3.jpeg", alt: "Web billing" },
+              { src: "/platform-mocks/d4.jpeg", alt: "Web team management" },
+              { src: "/platform-mocks/d5.jpeg", alt: "Web profile" },
+              { src: "/platform-mocks/m1.jpeg", alt: "Mobile onboarding and sign-in" },
+              { src: "/platform-mocks/m2.jpeg", alt: "Mobile dashboard and billing" },
+            ].map((mock) => (
+              <CarouselItem key={mock.src}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={mock.src}
+                  alt={mock.alt}
+                  className="w-full rounded-2xl border border-border/50 object-cover"
+                  loading="lazy"
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+          <CarouselDots />
+        </Carousel>
+      </motion.section>
 
       {/* ── Stack Bento ── */}
       <motion.section
@@ -280,7 +325,7 @@ export default function LandingPage() {
         </p>
         <Button asChild size="lg">
           <Link href={ctaHref}>
-            Get Started
+            Try Demo
             <HugeiconsIcon
               icon={ArrowRight01Icon}
               className="ml-2 h-4 w-4"
@@ -363,6 +408,55 @@ function BentoFeature({
           {f.description}
         </p>
       </div>
+    </div>
+  );
+}
+
+// ── Carousel Dots ─────────────────────────────────────────────────
+
+function CarouselDots() {
+  const { api } = useCarousel();
+  const [selected, setSelected] = useState(0);
+  const [count, setCount] = useState(0);
+
+  const onSelect = useCallback(() => {
+    if (!api) return;
+    setSelected(api.selectedScrollSnap());
+  }, [api]);
+
+  useEffect(() => {
+    if (!api) return;
+    setCount(api.scrollSnapList().length);
+    setSelected(api.selectedScrollSnap());
+    api.on("select", onSelect);
+    return () => {
+      api.off("select", onSelect);
+    };
+  }, [api, onSelect]);
+
+  if (count <= 1) return null;
+
+  return (
+    <div className="mt-4 flex items-center justify-center gap-2">
+      {Array.from({ length: count }).map((_, i) => (
+        <button
+          key={i}
+          aria-label={`Go to slide ${i + 1}`}
+          onClick={() => api?.scrollTo(i)}
+          className="relative flex items-center justify-center p-1"
+        >
+          <motion.div
+            className="rounded-full bg-muted-foreground/30"
+            animate={{
+              width: i === selected ? 24 : 8,
+              height: 8,
+              backgroundColor: i === selected ? "var(--color-primary)" : undefined,
+              opacity: i === selected ? 1 : 0.4,
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          />
+        </button>
+      ))}
     </div>
   );
 }

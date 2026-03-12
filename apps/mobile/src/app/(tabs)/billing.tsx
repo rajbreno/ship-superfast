@@ -26,28 +26,28 @@ import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 
 const PLAN_UI: Record<string, { description: string; features: string[] }> = {
   pro: {
-    description: "Priority support and continuous updates",
+    description: "For growing teams that need more power",
     features: [
-      "Full source code access",
-      "Convex backend with auth and storage",
-      "Next.js 16 + Expo 54 monorepo",
-      "AI agents with RAG and streaming",
-      "Push notifications (iOS + Android)",
-      "Transactional emails via Resend",
-      "Priority support",
-      "Monthly updates and patches",
+      "Unlimited projects",
+      "50 GB storage",
+      "Advanced analytics dashboard",
+      "Team collaboration tools",
+      "API access",
+      "Email support",
+      "Custom integrations",
+      "Priority queue",
     ],
   },
   max: {
-    description: "Everything in Pro plus premium features",
+    description: "Everything in Pro plus enterprise features",
     features: [
       "Everything in Pro",
-      "Early access to new features",
-      "Private Discord channel",
-      "1-on-1 onboarding call",
-      "Custom integrations support",
-      "Priority bug fixes",
+      "Unlimited storage",
       "Dedicated account manager",
+      "SSO & advanced security",
+      "Custom SLA",
+      "24/7 phone support",
+      "Audit logs & compliance",
     ],
   },
 };
@@ -78,6 +78,7 @@ const STATUS_CONFIG: Record<
 export default function BillingScreen() {
   const { isSignedIn, isLoading } = useSession();
   const mutedColor = useThemeColor("muted");
+  const dangerColor = useThemeColor("danger");
   const { activeTeam } = useActiveTeam();
 
   const isOwnerOrAdmin =
@@ -93,11 +94,16 @@ export default function BillingScreen() {
     api.payments.getTeamBillingSummary,
     activeTeam ? { teamId: activeTeam._id } : "skip",
   );
+  const subscription = useQuery(
+    api.payments.getSubscriptionStatus,
+    activeTeam ? { teamId: activeTeam._id } : "skip",
+  );
   const paymentHistory = useQuery(
     api.payments.getPaymentHistory,
     activeTeam ? { teamId: activeTeam._id } : "skip",
   );
   const hasBillingHistory = paymentHistory && paymentHistory.length > 0;
+  const isCancelled = subscription?.status === "cancelled";
 
   if (isLoading || !isSignedIn) {
     return (
@@ -113,7 +119,7 @@ export default function BillingScreen() {
         <Text className="mb-2 text-xl font-semibold text-foreground">
           No Team
         </Text>
-        <Text className="text-center text-sm text-default-500">
+        <Text className="text-center text-sm text-muted">
           Create or join a team to manage billing.
         </Text>
       </View>
@@ -142,6 +148,31 @@ export default function BillingScreen() {
           teamId={activeTeam._id}
         />
 
+        {/* Cancellation notice */}
+        {isCancelled && (
+          <Card>
+            <Card.Body>
+              <View className="flex-row items-start gap-3">
+                <HugeiconsIcon
+                  icon={InformationCircleIcon}
+                  size={22}
+                  color={dangerColor}
+                />
+                <View className="flex-1 gap-1">
+                  <Text className="text-sm font-medium text-foreground">
+                    Your subscription has been cancelled
+                  </Text>
+                  <Text className="text-sm text-muted">
+                    {currentPlan !== "free"
+                      ? "You still have access until the end of your billing period."
+                      : "Your plan has been downgraded to Free. Subscribe again to restore access."}
+                  </Text>
+                </View>
+              </View>
+            </Card.Body>
+          </Card>
+        )}
+
         {/* Non-owner notice */}
         {!isOwnerOrAdmin && (
           <Card>
@@ -157,7 +188,7 @@ export default function BillingScreen() {
                     Team plan:{" "}
                     <Text className="capitalize">{currentPlan}</Text>
                   </Text>
-                  <Text className="text-sm text-default-500">
+                  <Text className="text-sm text-muted">
                     Plan upgrades are managed by your team owner or admin.
                   </Text>
                 </View>
@@ -172,6 +203,7 @@ export default function BillingScreen() {
             plans={plans}
             currentPlan={currentPlan}
             teamId={activeTeam._id}
+            isCancelled={isCancelled}
           />
         )}
 
@@ -209,7 +241,7 @@ function BillingSummary({
         <View className="gap-3">
           <View className="flex-row items-center justify-between">
             <View className="flex-1 gap-1">
-              <Text className="text-xs text-default-500">Team</Text>
+              <Text className="text-xs text-muted">Team</Text>
               <Text className="text-lg font-medium text-foreground">
                 {teamName}
               </Text>
@@ -217,7 +249,7 @@ function BillingSummary({
             <PlanChip plan={plan} />
           </View>
           {totalMembers !== undefined && (
-            <Text className="text-sm text-default-500">
+            <Text className="text-sm text-muted">
               {totalMembers} member{totalMembers !== 1 ? "s" : ""}
             </Text>
           )}
@@ -309,10 +341,12 @@ function PlansSection({
   plans,
   currentPlan,
   teamId,
+  isCancelled,
 }: {
   plans: PlanWithUI[];
   currentPlan: string;
   teamId: Id<"teams">;
+  isCancelled: boolean;
 }) {
   const createCheckout = useAction(api.payments.createCheckout);
   const getPortal = useAction(api.payments.getCustomerPortal);
@@ -378,13 +412,13 @@ function PlansSection({
                     <Text className="text-xl font-semibold text-foreground">
                       {plan.name}
                     </Text>
-                    <Text className="text-sm text-default-500">
+                    <Text className="text-sm text-muted">
                       {plan.description}
                     </Text>
                   </View>
                   {isCurrentPlan && (
-                    <Chip size="sm" variant="primary" color="accent">
-                      <Chip.Label>Current</Chip.Label>
+                    <Chip size="sm" variant="primary" color={isCancelled ? "danger" : "accent"}>
+                      <Chip.Label>{isCancelled ? "Cancelled" : "Current"}</Chip.Label>
                     </Chip>
                   )}
                 </View>
@@ -395,7 +429,7 @@ function PlansSection({
                     {plan.priceDisplay}
                   </Text>
                   {plan.period ? (
-                    <Text className="text-sm text-default-500">
+                    <Text className="text-sm text-muted">
                       {plan.period}
                     </Text>
                   ) : null}
@@ -446,8 +480,20 @@ function PlansSection({
                         : `Upgrade to ${plan.name}`}
                     </Button>
                   )}
-                  {isCurrentPlan && (
+                  {isCurrentPlan && !isCancelled && (
                     <Button isDisabled>Current Plan</Button>
+                  )}
+                  {isCurrentPlan && isCancelled && (
+                    <Button
+                      onPress={() =>
+                        handleSubscribe(plan.tier as PlanTier)
+                      }
+                      isDisabled={loading !== null}
+                    >
+                      {loading === plan.tier
+                        ? "Redirecting..."
+                        : "Resubscribe"}
+                    </Button>
                   )}
                   {isDowngrade && (
                     <Button
@@ -505,7 +551,7 @@ function BillingHistory({
                   {(payment.amount / 100).toFixed(2)}
                 </Text>
               </View>
-              <Text className="text-xs text-default-500">
+              <Text className="text-xs text-muted">
                 {new Date(payment.createdAt).toLocaleDateString()}
               </Text>
             </View>

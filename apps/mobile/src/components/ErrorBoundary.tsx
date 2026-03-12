@@ -25,7 +25,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <View className="flex-1 items-center justify-center bg-background px-8">
-          <Text className="mb-4 text-lg text-default-500">
+          <Text className="mb-4 text-lg text-muted">
             Something went wrong
           </Text>
           <Button onPress={() => this.setState({ hasError: false })} size="lg">

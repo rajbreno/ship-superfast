@@ -84,7 +84,7 @@ export default function SignInPage() {
         <div className="flex w-full max-w-sm flex-col gap-6">
           <div className="flex flex-col items-center gap-3 lg:hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logos/brand logo.png" alt={APP_NAME} className="h-8 w-auto object-contain" />
+            <img src="/logos/brand-logo.png" alt={APP_NAME} className="h-8 w-auto object-contain" />
           </div>
           <div className="text-center">
             <h1 className="text-2xl font-bold">Welcome back</h1>

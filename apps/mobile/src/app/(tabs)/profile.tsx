@@ -9,9 +9,11 @@ import {
   ListGroup,
   Separator,
   Spinner,
+  Switch,
   TextField,
   useThemeColor,
 } from "heroui-native";
+import { Uniwind, useUniwind } from "uniwind";
 import { useMutation } from "convex/react";
 import { api } from "../../../../../packages/convex/convex/_generated/api";
 import { useSession } from "../../providers/SessionProvider";
@@ -22,6 +24,7 @@ import {
   UserIcon,
   Mail01Icon,
   Calendar03Icon,
+  Moon02Icon,
 } from "@hugeicons/core-free-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 
@@ -30,6 +33,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const updateProfile = useMutation(api.users.updateProfile);
   const mutedColor = useThemeColor("muted");
+  const { theme } = useUniwind();
 
   const [editOpen, setEditOpen] = useState(false);
   const [name, setName] = useState("");
@@ -61,7 +65,7 @@ export default function ProfileScreen() {
         <Text className="mb-2 text-xl font-semibold text-foreground">
           Not Signed In
         </Text>
-        <Text className="mb-6 text-center text-default-500">
+        <Text className="mb-6 text-center text-muted">
           Sign in to access your profile.
         </Text>
         <Button onPress={() => router.push("/(auth)/sign-in")} size="lg">
@@ -96,7 +100,7 @@ export default function ProfileScreen() {
               <Text className="text-xl font-medium text-foreground">
                 {currentUser?.name ?? "User"}
               </Text>
-              <Text className="text-sm text-default-500">
+              <Text className="text-sm text-muted">
                 {currentUser?.email}
               </Text>
             </View>
@@ -165,6 +169,35 @@ export default function ProfileScreen() {
                   : "\u2014"}
               </Text>
             </ListGroup.ItemContent>
+          </ListGroup.Item>
+        </ListGroup>
+
+        <ListGroup>
+          <ListGroup.Item disabled>
+            <ListGroup.ItemContent>
+              <ListGroup.ItemTitle>
+                <Text className="text-lg font-medium text-foreground">
+                  Preferences
+                </Text>
+              </ListGroup.ItemTitle>
+            </ListGroup.ItemContent>
+          </ListGroup.Item>
+
+          <ListGroup.Item disabled>
+            <ListGroup.ItemPrefix>
+              <HugeiconsIcon icon={Moon02Icon} size={22} color={mutedColor} />
+            </ListGroup.ItemPrefix>
+            <ListGroup.ItemContent>
+              <ListGroup.ItemTitle>Dark Mode</ListGroup.ItemTitle>
+            </ListGroup.ItemContent>
+            <ListGroup.ItemSuffix>
+              <Switch
+                isSelected={theme === "dark"}
+                onSelectedChange={() =>
+                  Uniwind.setTheme(theme === "light" ? "dark" : "light")
+                }
+              />
+            </ListGroup.ItemSuffix>
           </ListGroup.Item>
         </ListGroup>
 

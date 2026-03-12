@@ -113,7 +113,7 @@ export default function SignInScreen() {
           <Text className="text-center text-3xl font-bold text-foreground">
             Welcome back
           </Text>
-          <Text className="text-center text-sm text-default-500">
+          <Text className="text-center text-sm text-muted">
             Sign in to your account
           </Text>
         </Animated.View>
@@ -142,7 +142,7 @@ export default function SignInScreen() {
             <View className="flex-1">
               <Separator />
             </View>
-            <Text className="text-xs text-default-500">or</Text>
+            <Text className="text-xs text-muted">or</Text>
             <View className="flex-1">
               <Separator />
             </View>
@@ -161,7 +161,7 @@ export default function SignInScreen() {
                   <Text className="text-center text-base text-foreground">
                     Check your email
                   </Text>
-                  <Text className="text-center text-xs text-default-500">
+                  <Text className="text-center text-xs text-muted">
                     We sent a sign-in link to your inbox.
                   </Text>
                   <Button
