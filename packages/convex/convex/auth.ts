@@ -12,7 +12,6 @@ const ALLOWED_REDIRECT_PREFIXES = [
   "myapp://",         // Update to match your app scheme in app.json
   "http://localhost",  // Local development
   "https://ship.rajbreno.com", // Production custom domain
-  "https://ship-superfast-rajbreno-project.vercel.app", // Vercel domain
 ];
 
 function magicLinkEmail(url: string) {
