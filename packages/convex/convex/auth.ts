@@ -34,7 +34,7 @@ export const { auth, signIn, signOut, store } = convexAuth({
   providers: [
     Google,
     Resend({
-      from: process.env.AUTH_RESEND_FROM ?? "onboarding@resend.dev",
+      from: process.env.AUTH_RESEND_FROM ?? "noreply@mail.rajbreno.com",
       async sendVerificationRequest({ identifier: email, url, provider }) {
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",

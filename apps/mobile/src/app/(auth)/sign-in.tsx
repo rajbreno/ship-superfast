@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Image, Alert, Platform } from "react-native";
+import { View, Text, Image, Alert, Platform, KeyboardAvoidingView } from "react-native";
 import {
   Button,
   Card,
@@ -88,9 +88,10 @@ export default function SignInScreen() {
   };
 
   return (
-    <View
+    <KeyboardAvoidingView
       className="flex-1 bg-background"
       style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View className="flex-1 justify-center px-7">
         {/* Logo */}
@@ -216,6 +217,6 @@ export default function SignInScreen() {
           </Text>
         </Animated.View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }

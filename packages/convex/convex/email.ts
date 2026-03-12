@@ -9,8 +9,7 @@ export const resend = new Resend(components.resend, { testMode: false });
 // ── Email templates ──────────────────────────────────────────────────
 
 function getLogoUrl(): string {
-  const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
-  return `${siteUrl}/logos/brand-logo.png`;
+  return "https://ship.rajbreno.com/logos/brand-logo.png";
 }
 
 function formatAmount(amount: number, currency: string): string {

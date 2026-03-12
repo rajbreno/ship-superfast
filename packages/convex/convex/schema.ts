@@ -16,7 +16,7 @@ export default defineSchema({
     isAnonymous: v.optional(v.boolean()),
     // Custom fields
     role: v.optional(v.union(v.literal("user"), v.literal("admin"))),
-  }).index("by_email", ["email"]),
+  }).index("email", ["email"]),
 
   registeredDevices: defineTable({
     deviceId: v.string(),

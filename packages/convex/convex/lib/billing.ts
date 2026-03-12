@@ -163,7 +163,7 @@ export async function resolveTeamIdFromEmail(
   // Find the user by email
   const user = await ctx.db
     .query("users")
-    .withIndex("by_email", (q) => q.eq("email", customerEmail))
+    .withIndex("email", (q) => q.eq("email", customerEmail))
     .first();
   if (!user) return undefined;
 

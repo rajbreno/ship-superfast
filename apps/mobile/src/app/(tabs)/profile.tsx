@@ -8,6 +8,7 @@ import {
   Input,
   ListGroup,
   Separator,
+  SkeletonGroup,
   Spinner,
   Switch,
   TextField,
@@ -51,15 +52,7 @@ export default function ProfileScreen() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <Spinner size="lg" />
-      </View>
-    );
-  }
-
-  if (!isSignedIn) {
+  if (!isLoading && !isSignedIn) {
     return (
       <View className="flex-1 items-center justify-center bg-background px-8">
         <Text className="mb-2 text-xl font-semibold text-foreground">
@@ -75,13 +68,42 @@ export default function ProfileScreen() {
     );
   }
 
+  const isDataLoading = isLoading || !currentUser;
+
   return (
     <ScrollView
       className="flex-1 bg-background"
       contentContainerClassName="pb-8"
       showsVerticalScrollIndicator={false}
     >
+      {/* Skeleton loading */}
+      <SkeletonGroup
+        isLoading={isDataLoading}
+        isSkeletonOnly
+        className="gap-5 px-6 pt-6"
+      >
+        <Card>
+          <Card.Body>
+            <View className="items-center gap-3">
+              <SkeletonGroup.Item className="h-12 w-12 rounded-full" />
+              <SkeletonGroup.Item className="h-5 w-32 rounded-md" />
+              <SkeletonGroup.Item className="h-3 w-40 rounded-md" />
+            </View>
+          </Card.Body>
+        </Card>
+        {[1, 2, 3].map((i) => (
+          <View key={i} className="flex-row items-center gap-3 px-4">
+            <SkeletonGroup.Item className="h-5 w-5 rounded-md" />
+            <View className="flex-1 gap-1">
+              <SkeletonGroup.Item className="h-3 w-16 rounded-md" />
+              <SkeletonGroup.Item className="h-4 w-36 rounded-md" />
+            </View>
+          </View>
+        ))}
+      </SkeletonGroup>
+
       {/* Profile */}
+      {!isDataLoading && (
       <Animated.View
         entering={FadeInDown.duration(500).delay(100)}
         className="gap-5 px-6 pt-6"
@@ -206,6 +228,7 @@ export default function ProfileScreen() {
           Sign Out
         </Button>
       </Animated.View>
+      )}
 
       {/* Edit profile bottom sheet */}
       <BottomSheet isOpen={editOpen} onOpenChange={setEditOpen}>
@@ -224,7 +247,6 @@ export default function ProfileScreen() {
                   placeholder="Your name"
                   value={name}
                   onChangeText={setName}
-                  autoFocus
                 />
               </TextField>
 

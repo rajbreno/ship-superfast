@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   Separator,
+  SkeletonGroup,
   Spinner,
   useThemeColor,
 } from "heroui-native";
@@ -47,13 +48,7 @@ export default function HomeScreen() {
   const acceptInvite = useMutation(api.teams.acceptInvite);
   const declineInvite = useMutation(api.teams.declineInvite);
 
-  if (isLoading || !isSignedIn) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <Spinner size="lg" />
-      </View>
-    );
-  }
+  const isDataLoading = isLoading || !isSignedIn;
 
   return (
     <ScrollView
@@ -62,6 +57,39 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* Welcome header */}
+      <SkeletonGroup
+        isLoading={isDataLoading}
+        isSkeletonOnly
+        className="flex-row items-center gap-4 px-6 pt-6 pb-2"
+      >
+        <SkeletonGroup.Item className="h-12 w-12 rounded-full" />
+        <View className="flex-1 gap-2">
+          <SkeletonGroup.Item className="h-5 w-48 rounded-md" />
+          <SkeletonGroup.Item className="h-3 w-32 rounded-md" />
+        </View>
+      </SkeletonGroup>
+
+      <SkeletonGroup
+        isLoading={isDataLoading}
+        isSkeletonOnly
+        className="gap-3 px-6 pt-6"
+      >
+        {[1, 2, 3].map((i) => (
+          <Card key={i}>
+            <Card.Body>
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1 gap-2">
+                  <SkeletonGroup.Item className="h-3 w-20 rounded-md" />
+                  <SkeletonGroup.Item className="h-5 w-16 rounded-md" />
+                </View>
+                <SkeletonGroup.Item className="h-8 w-8 rounded-lg" />
+              </View>
+            </Card.Body>
+          </Card>
+        ))}
+      </SkeletonGroup>
+
+      {!isDataLoading && (<>
       <Animated.View
         entering={FadeInDown.duration(500).delay(100)}
         className="flex-row items-center gap-4 px-6 pt-6 pb-2"
@@ -202,6 +230,7 @@ export default function HomeScreen() {
           </Card.Body>
         </Card>
       </Animated.View>
+      </>)}
     </ScrollView>
   );
 }

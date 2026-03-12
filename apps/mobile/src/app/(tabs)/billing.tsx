@@ -5,6 +5,7 @@ import {
   Card,
   Chip,
   Separator,
+  SkeletonGroup,
   Spinner,
   useThemeColor,
 } from "heroui-native";
@@ -64,7 +65,7 @@ const STATUS_CONFIG: Record<
 > = {
   active: { label: "Active", color: "success", variant: "tertiary" },
   renewed: { label: "Renewed", color: "success", variant: "tertiary" },
-  succeeded: { label: "Succeeded", color: "success", variant: "tertiary" },
+  succeeded: { label: "Succeeded", color: "default", variant: "tertiary" },
   on_hold: { label: "On Hold", color: "warning", variant: "tertiary" },
   processing: { label: "Processing", color: "warning", variant: "tertiary" },
   refunded: { label: "Refunded", color: "default", variant: "tertiary" },
@@ -105,15 +106,9 @@ export default function BillingScreen() {
   const hasBillingHistory = paymentHistory && paymentHistory.length > 0;
   const isCancelled = subscription?.status === "cancelled";
 
-  if (isLoading || !isSignedIn) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <Spinner size="lg" />
-      </View>
-    );
-  }
+  const isDataLoading = isLoading || !isSignedIn;
 
-  if (!activeTeam) {
+  if (!isDataLoading && !activeTeam) {
     return (
       <View className="flex-1 items-center justify-center bg-background px-8">
         <Text className="mb-2 text-xl font-semibold text-foreground">
@@ -126,7 +121,7 @@ export default function BillingScreen() {
     );
   }
 
-  const currentPlan = billingSummary?.plan ?? activeTeam.plan ?? "free";
+  const currentPlan = billingSummary?.plan ?? activeTeam?.plan ?? "free";
 
   return (
     <ScrollView
@@ -134,6 +129,50 @@ export default function BillingScreen() {
       contentContainerClassName="pb-8"
       showsVerticalScrollIndicator={false}
     >
+      {/* Skeleton loading */}
+      <SkeletonGroup
+        isLoading={isDataLoading}
+        isSkeletonOnly
+        className="gap-5 px-6 pt-6"
+      >
+        <Card>
+          <Card.Body>
+            <View className="gap-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1 gap-2">
+                  <SkeletonGroup.Item className="h-3 w-16 rounded-md" />
+                  <SkeletonGroup.Item className="h-5 w-32 rounded-md" />
+                </View>
+                <SkeletonGroup.Item className="h-6 w-14 rounded-full" />
+              </View>
+              <SkeletonGroup.Item className="h-3 w-24 rounded-md" />
+            </View>
+          </Card.Body>
+        </Card>
+        {[1, 2].map((i) => (
+          <Card key={i}>
+            <Card.Body>
+              <View className="gap-4">
+                <View className="gap-2">
+                  <SkeletonGroup.Item className="h-5 w-24 rounded-md" />
+                  <SkeletonGroup.Item className="h-3 w-48 rounded-md" />
+                </View>
+                <SkeletonGroup.Item className="h-8 w-28 rounded-md" />
+                <SkeletonGroup.Item className="h-[1px] w-full rounded-md" />
+                {[1, 2, 3].map((j) => (
+                  <View key={j} className="flex-row items-center gap-3">
+                    <SkeletonGroup.Item className="h-4 w-4 rounded-full" />
+                    <SkeletonGroup.Item className="h-3 w-40 rounded-md" />
+                  </View>
+                ))}
+                <SkeletonGroup.Item className="mt-2 h-10 w-full rounded-lg" />
+              </View>
+            </Card.Body>
+          </Card>
+        ))}
+      </SkeletonGroup>
+
+      {!isDataLoading && activeTeam && (
       <Animated.View
         entering={FadeInDown.duration(500).delay(100)}
         className="gap-5 px-6 pt-6"
@@ -214,6 +253,7 @@ export default function BillingScreen() {
           </Animated.View>
         )}
       </Animated.View>
+      )}
     </ScrollView>
   );
 }
@@ -408,7 +448,7 @@ function PlansSection({
               <View className="gap-4">
                 {/* Header */}
                 <View className="flex-row items-center justify-between">
-                  <View className="gap-1">
+                  <View className="flex-1 shrink gap-1">
                     <Text className="text-xl font-semibold text-foreground">
                       {plan.name}
                     </Text>
@@ -537,27 +577,30 @@ function BillingHistory({
         Billing History
       </Text>
 
-      {payments.map((payment) => (
-        <Card key={payment._id}>
-          <Card.Body>
-            <View className="flex-row items-center justify-between">
-              <View className="gap-2">
-                <View className="flex-row items-center gap-2">
-                  <PlanChip plan={payment.plan} />
-                  <StatusChip status={payment.status} />
+      {payments.map((payment) => {
+        const statusLabel = STATUS_CONFIG[payment.status]?.label ?? payment.status;
+        return (
+          <Card key={payment._id}>
+            <Card.Body>
+              <View className="flex-row items-center justify-between">
+                <View className="gap-2">
+                  <View className="flex-row items-center gap-2">
+                    <PlanChip plan={payment.plan} />
+                    <Text className="text-xs text-muted">{statusLabel}</Text>
+                  </View>
+                  <Text className="text-lg font-semibold text-foreground">
+                    {payment.currency.toUpperCase()}{" "}
+                    {(payment.amount / 100).toFixed(2)}
+                  </Text>
                 </View>
-                <Text className="text-lg font-semibold text-foreground">
-                  {payment.currency.toUpperCase()}{" "}
-                  {(payment.amount / 100).toFixed(2)}
+                <Text className="text-xs text-muted">
+                  {new Date(payment.createdAt).toLocaleDateString()}
                 </Text>
               </View>
-              <Text className="text-xs text-muted">
-                {new Date(payment.createdAt).toLocaleDateString()}
-              </Text>
-            </View>
-          </Card.Body>
-        </Card>
-      ))}
+            </Card.Body>
+          </Card>
+        );
+      })}
     </View>
   );
 }

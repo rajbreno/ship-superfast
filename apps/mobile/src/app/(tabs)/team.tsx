@@ -11,6 +11,7 @@ import {
   ListGroup,
   Menu,
   Separator,
+  SkeletonGroup,
   Spinner,
   TextField,
   useThemeColor,
@@ -48,15 +49,9 @@ export default function TeamScreen() {
   const mutedColor = useThemeColor("muted");
   const accentForegroundColor = useThemeColor("accent-foreground");
 
-  if (isLoading || !isSignedIn) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <Spinner size="lg" />
-      </View>
-    );
-  }
+  const isDataLoading = isLoading || !isSignedIn;
 
-  if (!activeTeam) {
+  if (!isDataLoading && !activeTeam) {
     return (
       <View className="flex-1 items-center justify-center bg-background px-8">
         <Text className="mb-2 text-xl font-semibold text-foreground">
@@ -75,6 +70,38 @@ export default function TeamScreen() {
       contentContainerClassName="pb-8"
       showsVerticalScrollIndicator={false}
     >
+      {/* Skeleton loading */}
+      <SkeletonGroup
+        isLoading={isDataLoading}
+        isSkeletonOnly
+        className="gap-5 px-6 pt-6"
+      >
+        <Card>
+          <Card.Body>
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1 gap-2">
+                <SkeletonGroup.Item className="h-3 w-16 rounded-md" />
+                <SkeletonGroup.Item className="h-5 w-32 rounded-md" />
+              </View>
+              <SkeletonGroup.Item className="h-8 w-8 rounded-lg" />
+            </View>
+            <View className="pt-2">
+              <SkeletonGroup.Item className="h-6 w-16 rounded-full" />
+            </View>
+          </Card.Body>
+        </Card>
+        {[1, 2, 3].map((i) => (
+          <View key={i} className="flex-row items-center gap-3 px-2">
+            <SkeletonGroup.Item className="h-9 w-9 rounded-full" />
+            <View className="flex-1 gap-1">
+              <SkeletonGroup.Item className="h-4 w-28 rounded-md" />
+              <SkeletonGroup.Item className="h-3 w-40 rounded-md" />
+            </View>
+          </View>
+        ))}
+      </SkeletonGroup>
+
+      {!isDataLoading && activeTeam && (
       <Animated.View
         entering={FadeInDown.duration(500).delay(100)}
         className="gap-5 px-6 pt-6"
@@ -154,6 +181,7 @@ export default function TeamScreen() {
           <LeaveTeam teamId={activeTeam._id} currentUserId={currentUser._id} />
         )}
       </Animated.View>
+      )}
     </ScrollView>
   );
 }
@@ -266,7 +294,6 @@ function TeamHeader({
                   placeholder="Team name"
                   value={nameValue}
                   onChangeText={setNameValue}
-                  autoFocus
                 />
               </TextField>
               <View className="flex-row gap-3">
@@ -590,7 +617,6 @@ function InviteSheet({
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                autoFocus
               />
             </TextField>
 
