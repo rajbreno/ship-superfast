@@ -11,7 +11,7 @@ const ALLOWED_REDIRECT_PREFIXES = [
   "exp://",           // Expo dev client
   "myapp://",         // Update to match your app scheme in app.json
   "http://localhost",  // Local development
-  // "https://yourapp.com",  // Add your production web domain before deploying
+  "https://ship.rajbreno.com", // Production web domain
 ];
 
 function magicLinkEmail(url: string) {
