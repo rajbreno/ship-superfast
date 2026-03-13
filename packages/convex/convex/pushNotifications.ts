@@ -32,6 +32,8 @@ export const linkUserDevice = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
     await PushHelpers.linkDevice(ctx, args.deviceId, args.token);
     return null;
   },
@@ -47,6 +49,8 @@ export const unlinkUserDevice = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
     await PushHelpers.unlinkDevice(ctx, args.deviceId);
     return null;
   },

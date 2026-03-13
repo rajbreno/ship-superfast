@@ -21,6 +21,9 @@ export const { generateUploadUrl, syncMetadata } = r2.clientApi({
  * Get a signed URL for accessing a stored file.
  * Default expiration: 7 days.
  */
+const MAX_KEY_LENGTH = 512;
+const MAX_EXPIRES_IN = 60 * 60 * 24 * 7; // 7 days
+
 export const getFileUrl = query({
   args: {
     key: v.string(),
@@ -30,7 +33,20 @@ export const getFileUrl = query({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthorized");
-    const expiresIn = args.expiresIn ?? 60 * 60 * 24 * 7; // 7 days
-    return await r2.getUrl(args.key, { expiresIn });
+
+    // Validate key format
+    const key = args.key.trim();
+    if (!key || key.length > MAX_KEY_LENGTH) {
+      throw new Error("Invalid file key");
+    }
+    if (key.includes("..") || key.startsWith("/")) {
+      throw new Error("Invalid file key");
+    }
+
+    const expiresIn = Math.min(
+      Math.max(args.expiresIn ?? MAX_EXPIRES_IN, 1),
+      MAX_EXPIRES_IN,
+    );
+    return await r2.getUrl(key, { expiresIn });
   },
 });

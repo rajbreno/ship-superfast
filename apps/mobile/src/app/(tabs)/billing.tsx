@@ -23,6 +23,21 @@ import {
 } from "@hugeicons/core-free-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 
+// ── URL validation ──────────────────────────────────────────────────
+
+function isAllowedRedirectUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.protocol === "https:" &&
+      (parsed.hostname.endsWith("dodopayments.com") ||
+        parsed.hostname.endsWith("dfrnt.com"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 // ── Plan UI config ───────────────────────────────────────────────────
 
 const PLAN_UI: Record<string, { description: string; features: string[] }> = {
@@ -315,7 +330,7 @@ function ManageBillingButton({ teamId }: { teamId: Id<"teams"> }) {
     setLoading(true);
     try {
       const result = await getPortal({ send_email: false, teamId });
-      if (result?.portal_url) {
+      if (result?.portal_url && isAllowedRedirectUrl(result.portal_url)) {
         await Linking.openURL(result.portal_url);
       } else {
         Alert.alert("Error", "Unable to open billing portal.");
@@ -406,7 +421,7 @@ function PlansSection({
         product_cart: [{ product_id: plan.productId, quantity: 1 }],
         teamId,
       });
-      if (result?.checkout_url) {
+      if (result?.checkout_url && isAllowedRedirectUrl(result.checkout_url)) {
         await Linking.openURL(result.checkout_url);
       } else {
         Alert.alert("Error", "Checkout failed. Please try again.");
@@ -422,7 +437,7 @@ function PlansSection({
     setLoading("portal");
     try {
       const result = await getPortal({ send_email: false, teamId });
-      if (result?.portal_url) {
+      if (result?.portal_url && isAllowedRedirectUrl(result.portal_url)) {
         await Linking.openURL(result.portal_url);
       } else {
         Alert.alert("Error", "Unable to open billing portal.");

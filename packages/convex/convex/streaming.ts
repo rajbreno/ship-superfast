@@ -39,6 +39,31 @@ export const getStreamBody = query({
   },
 });
 
+const MAX_MESSAGES = 100;
+const MAX_MESSAGE_LENGTH = 32_000;
+
+function getAllowedOrigins(): string[] {
+  const origins: string[] = [];
+  if (process.env.WEB_ORIGIN) origins.push(process.env.WEB_ORIGIN);
+  origins.push("http://localhost:3000", "http://localhost:3001");
+  return origins;
+}
+
+function isAllowedOrigin(origin: string | null): string | null {
+  if (!origin) return null;
+  const allowed = getAllowedOrigins();
+  return allowed.includes(origin) ? origin : null;
+}
+
+function setCorsHeaders(response: Response, origin: string | null): Response {
+  const allowedOrigin = isAllowedOrigin(origin);
+  if (allowedOrigin) {
+    response.headers.set("Access-Control-Allow-Origin", allowedOrigin);
+    response.headers.set("Vary", "Origin");
+  }
+  return response;
+}
+
 // HTTP action for streaming AI chat responses
 export const streamChat = httpAction(async (ctx, request) => {
   const userId = await auth.getUserId(ctx);
@@ -52,6 +77,17 @@ export const streamChat = httpAction(async (ctx, request) => {
     system?: string;
   };
 
+  // Validate message array
+  const messages = body.messages ?? [];
+  if (messages.length > MAX_MESSAGES) {
+    return new Response("Too many messages", { status: 400 });
+  }
+  for (const msg of messages) {
+    if (typeof msg.content !== "string" || msg.content.length > MAX_MESSAGE_LENGTH) {
+      return new Response("Message content too large", { status: 400 });
+    }
+  }
+
   const response = await persistentTextStreaming.stream(
     ctx,
     request,
@@ -62,7 +98,7 @@ export const streamChat = httpAction(async (ctx, request) => {
         system:
           body.system ??
           "You are a helpful assistant. Provide your response in markdown format.",
-        messages: body.messages ?? [],
+        messages,
       });
 
       for await (const chunk of result.textStream) {
@@ -71,32 +107,28 @@ export const streamChat = httpAction(async (ctx, request) => {
     },
   );
 
-  const allowedOrigin = process.env.WEB_ORIGIN ?? "*";
-  const requestOrigin = request.headers.get("Origin");
-  response.headers.set(
-    "Access-Control-Allow-Origin",
-    requestOrigin ?? allowedOrigin,
-  );
-  response.headers.set("Vary", "Origin");
-  return response;
+  return setCorsHeaders(response, request.headers.get("Origin"));
 });
 
 // CORS preflight handler for /chat-stream
 export const chatStreamOptions = httpAction(async (_, request) => {
-  const headers = request.headers;
+  const origin = request.headers.get("Origin");
+  const allowedOrigin = isAllowedOrigin(origin);
   if (
-    headers.get("Origin") !== null &&
-    headers.get("Access-Control-Request-Method") !== null &&
-    headers.get("Access-Control-Request-Headers") !== null
+    origin !== null &&
+    allowedOrigin &&
+    request.headers.get("Access-Control-Request-Method") !== null &&
+    request.headers.get("Access-Control-Request-Headers") !== null
   ) {
     return new Response(null, {
       headers: new Headers({
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": allowedOrigin,
         "Access-Control-Allow-Methods": "POST",
         "Access-Control-Allow-Headers": "Content-Type, Digest, Authorization",
         "Access-Control-Max-Age": "86400",
+        Vary: "Origin",
       }),
     });
   }
-  return new Response();
+  return new Response(null, { status: 403 });
 });

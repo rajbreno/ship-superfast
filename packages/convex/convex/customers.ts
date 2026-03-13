@@ -73,17 +73,14 @@ export const identifyCustomer = internalQuery({
   returns: v.union(v.object({ dodoCustomerId: v.string() }), v.null()),
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    console.log("identifyCustomer: identity =", identity ? { email: identity.email, subject: identity.subject } : null);
     if (!identity) return null;
 
     // 1. Try by auth identity email
     if (identity.email) {
-      console.log("identifyCustomer: looking up by email:", identity.email);
       const byEmail = await ctx.db
         .query("customers")
         .withIndex("by_email", (q) => q.eq("email", identity.email!))
         .first();
-      console.log("identifyCustomer: byEmail result:", byEmail ? { email: byEmail.email, dodoCustomerId: byEmail.dodoCustomerId } : null);
       if (byEmail) return { dodoCustomerId: byEmail.dodoCustomerId };
     }
 

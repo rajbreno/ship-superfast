@@ -566,6 +566,19 @@ export const validateAndCreateInvite = internalMutation({
 
 // ── Invite action (sends email) ──────────────────────────────────────
 
+const EMAIL_REGEX = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+const MAX_EMAIL_LENGTH = 254;
+
+function isValidEmail(email: string): boolean {
+  return (
+    email.length > 0 &&
+    email.length <= MAX_EMAIL_LENGTH &&
+    EMAIL_REGEX.test(email) &&
+    !email.includes("\n") &&
+    !email.includes("\r")
+  );
+}
+
 function escapeHtml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
@@ -605,10 +618,15 @@ export const inviteMember = action({
     if (!currentUser) throw new Error("Unauthorized");
     const userId = currentUser._id;
 
+    const email = args.email.trim().toLowerCase();
+    if (!isValidEmail(email)) {
+      return { success: false, error: "Invalid email address" };
+    }
+
     const result = await ctx.runMutation(internal.teams.validateAndCreateInvite, {
       teamId: args.teamId,
       callerId: userId,
-      email: args.email,
+      email,
       role: args.role,
     });
 
@@ -624,7 +642,7 @@ export const inviteMember = action({
     try {
       await ctx.runMutation(internal.email.sendEmail, {
         from,
-        to: args.email,
+        to: email,
         subject: `You've been invited to join ${validation.teamName}`,
         html: inviteEmailTemplate(
           validation.teamName!,

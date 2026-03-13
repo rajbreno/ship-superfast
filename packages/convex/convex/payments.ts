@@ -128,30 +128,19 @@ const enrichedPaymentValidator = v.object({
 
 export const getSubscriptionStatus = query({
   args: {
-    teamId: v.optional(v.id("teams")),
+    teamId: v.id("teams"),
   },
   returns: v.union(subscriptionValidator, v.null()),
   handler: async (ctx, args) => {
     const user = await Users.getCurrentUser(ctx);
     if (!user?.email) return null;
 
-    let subscriptions;
-    if (args.teamId) {
-      await Teams.requireTeamMembership(ctx, args.teamId, user._id);
-      subscriptions = await ctx.db
-        .query("subscriptions")
-        .withIndex("by_teamId", (q) => q.eq("teamId", args.teamId!))
-        .order("desc")
-        .collect();
-    } else {
-      subscriptions = await ctx.db
-        .query("subscriptions")
-        .withIndex("by_customerEmail", (q) =>
-          q.eq("customerEmail", user.email!),
-        )
-        .order("desc")
-        .collect();
-    }
+    await Teams.requireTeamMembership(ctx, args.teamId, user._id);
+    const subscriptions = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_teamId", (q) => q.eq("teamId", args.teamId))
+      .order("desc")
+      .collect();
 
     const active = subscriptions.find((s) =>
       ["active", "renewed", "on_hold"].includes(s.status),
@@ -167,30 +156,19 @@ export const getSubscriptionStatus = query({
 
 export const getAllSubscriptions = query({
   args: {
-    teamId: v.optional(v.id("teams")),
+    teamId: v.id("teams"),
   },
   returns: v.array(subscriptionValidator),
   handler: async (ctx, args) => {
     const user = await Users.getCurrentUser(ctx);
     if (!user?.email) return [];
 
-    let subscriptions;
-    if (args.teamId) {
-      await Teams.requireTeamMembership(ctx, args.teamId, user._id);
-      subscriptions = await ctx.db
-        .query("subscriptions")
-        .withIndex("by_teamId", (q) => q.eq("teamId", args.teamId!))
-        .order("desc")
-        .collect();
-    } else {
-      subscriptions = await ctx.db
-        .query("subscriptions")
-        .withIndex("by_customerEmail", (q) =>
-          q.eq("customerEmail", user.email!),
-        )
-        .order("desc")
-        .collect();
-    }
+    await Teams.requireTeamMembership(ctx, args.teamId, user._id);
+    const subscriptions = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_teamId", (q) => q.eq("teamId", args.teamId))
+      .order("desc")
+      .collect();
 
     return subscriptions.map((sub) => ({
       ...sub,
@@ -203,30 +181,19 @@ export const getAllSubscriptions = query({
 
 export const getPaymentHistory = query({
   args: {
-    teamId: v.optional(v.id("teams")),
+    teamId: v.id("teams"),
   },
   returns: v.array(enrichedPaymentValidator),
   handler: async (ctx, args) => {
     const user = await Users.getCurrentUser(ctx);
     if (!user?.email) return [];
 
-    let payments;
-    if (args.teamId) {
-      await Teams.requireTeamMembership(ctx, args.teamId, user._id);
-      payments = await ctx.db
-        .query("payments")
-        .withIndex("by_teamId", (q) => q.eq("teamId", args.teamId!))
-        .order("desc")
-        .collect();
-    } else {
-      payments = await ctx.db
-        .query("payments")
-        .withIndex("by_customerEmail", (q) =>
-          q.eq("customerEmail", user.email!),
-        )
-        .order("desc")
-        .collect();
-    }
+    await Teams.requireTeamMembership(ctx, args.teamId, user._id);
+    const payments = await ctx.db
+      .query("payments")
+      .withIndex("by_teamId", (q) => q.eq("teamId", args.teamId))
+      .order("desc")
+      .collect();
 
     return payments.map((p) => ({
       ...p,

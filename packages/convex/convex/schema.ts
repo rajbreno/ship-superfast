@@ -49,7 +49,6 @@ export default defineSchema({
     teamId: v.optional(v.id("teams")),
   })
     .index("by_paymentId", ["paymentId"])
-    .index("by_customerEmail", ["customerEmail"])
     .index("by_teamId", ["teamId"]),
 
   subscriptions: defineTable({
@@ -63,7 +62,6 @@ export default defineSchema({
     teamId: v.optional(v.id("teams")),
   })
     .index("by_subscriptionId", ["subscriptionId"])
-    .index("by_customerEmail", ["customerEmail"])
     .index("by_teamId", ["teamId"]),
 
   // Team tables

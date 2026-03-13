@@ -34,6 +34,21 @@ import {
 import { useTeam } from "@/components/providers/team-provider";
 import type { PlanTier } from "@repo/shared";
 
+// ── URL validation ──
+
+function isAllowedRedirectUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.protocol === "https:" &&
+      (parsed.hostname.endsWith("dodopayments.com") ||
+        parsed.hostname.endsWith("dfrnt.com"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 // ── Plans UI config ──
 // Descriptions and feature lists for each plan tier.
 
@@ -256,8 +271,8 @@ function ManageBillingButton({ teamId }: { teamId: Id<"teams"> }) {
     setLoading(true);
     try {
       const result = await getPortal({ send_email: false, teamId });
-      if (result?.portal_url) {
-        window.open(result.portal_url, "_blank");
+      if (result?.portal_url && isAllowedRedirectUrl(result.portal_url)) {
+        window.open(result.portal_url, "_blank", "noopener,noreferrer");
       } else {
         toast.error("Unable to open billing portal.");
       }
@@ -321,7 +336,7 @@ function PlansSection({
         returnUrl: window.location.origin + "/dashboard/billing",
         teamId,
       });
-      if (result?.checkout_url) {
+      if (result?.checkout_url && isAllowedRedirectUrl(result.checkout_url)) {
         window.location.href = result.checkout_url;
       } else {
         toast.error("Checkout failed. Please try again.");
@@ -339,8 +354,8 @@ function PlansSection({
       // Customer Portal handles plan upgrades/downgrades with proration.
       // Requires: products in a Product Collection + "Allow Subscription Updates" enabled in Dodo dashboard.
       const result = await getPortal({ send_email: false, teamId });
-      if (result?.portal_url) {
-        window.open(result.portal_url, "_blank");
+      if (result?.portal_url && isAllowedRedirectUrl(result.portal_url)) {
+        window.open(result.portal_url, "_blank", "noopener,noreferrer");
       } else {
         toast.error("Unable to open billing portal.");
       }

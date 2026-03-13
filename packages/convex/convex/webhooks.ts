@@ -4,6 +4,15 @@ import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import * as Billing from "./lib/billing";
 
+const MAX_WEBHOOK_PAYLOAD_LENGTH = 1_000_000; // 1MB
+
+function validateWebhookPayload(payload: string): string {
+  if (payload.length > MAX_WEBHOOK_PAYLOAD_LENGTH) {
+    throw new Error("Webhook payload too large");
+  }
+  return payload;
+}
+
 const optionalCustomerArgs = {
   customerEmail: v.optional(v.string()),
   dodoCustomerId: v.optional(v.string()),
@@ -52,6 +61,7 @@ export const handlePaymentEvent = internalMutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const webhookPayload = validateWebhookPayload(args.webhookPayload);
     await maybeUpsertCustomer(ctx, args.customerEmail, args.dodoCustomerId);
 
     const teamId = await resolveTeamId(ctx, args.teamId, args.customerEmail);
@@ -63,7 +73,7 @@ export const handlePaymentEvent = internalMutation({
     if (existing) {
       await ctx.db.patch(existing._id, {
         status: args.status,
-        webhookPayload: args.webhookPayload,
+        webhookPayload,
         ...(teamId && !existing.teamId ? { teamId } : {}),
       });
     } else {
@@ -75,7 +85,7 @@ export const handlePaymentEvent = internalMutation({
         amount: args.amount,
         currency: args.currency,
         status: args.status,
-        webhookPayload: args.webhookPayload,
+        webhookPayload,
         createdAt: Date.now(),
         teamId,
       });
@@ -103,6 +113,7 @@ export const handleSubscriptionEvent = internalMutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const webhookPayload = validateWebhookPayload(args.webhookPayload);
     await maybeUpsertCustomer(ctx, args.customerEmail, args.dodoCustomerId);
 
     const teamId = await resolveTeamId(ctx, args.teamId, args.customerEmail);
@@ -118,7 +129,7 @@ export const handleSubscriptionEvent = internalMutation({
     if (existing) {
       await ctx.db.patch(existing._id, {
         status: args.status,
-        webhookPayload: args.webhookPayload,
+        webhookPayload,
         ...(args.planName ? { planName: args.planName } : {}),
         ...(teamId && !existing.teamId ? { teamId } : {}),
       });
@@ -137,7 +148,7 @@ export const handleSubscriptionEvent = internalMutation({
         customerEmail: args.customerEmail ?? "",
         planName: args.planName,
         status: args.status,
-        webhookPayload: args.webhookPayload,
+        webhookPayload,
         createdAt: Date.now(),
         teamId,
       });
@@ -201,6 +212,7 @@ export const handlePaymentStatusEvent = internalMutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const webhookPayload = validateWebhookPayload(args.webhookPayload);
     await maybeUpsertCustomer(ctx, args.customerEmail, args.dodoCustomerId);
 
     const teamId = await resolveTeamId(ctx, args.teamId, args.customerEmail);
@@ -212,7 +224,7 @@ export const handlePaymentStatusEvent = internalMutation({
     if (existing) {
       await ctx.db.patch(existing._id, {
         status: args.status,
-        webhookPayload: args.webhookPayload,
+        webhookPayload,
         ...(teamId && !existing.teamId ? { teamId } : {}),
       });
     } else {

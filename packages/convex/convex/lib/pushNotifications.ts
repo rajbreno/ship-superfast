@@ -129,14 +129,16 @@ export async function sendToDevice(
   }
 }
 
+const MAX_BROADCAST_BATCH = 500;
+
 /**
- * Broadcast notification to ALL registered devices
+ * Broadcast notification to ALL registered devices (capped at MAX_BROADCAST_BATCH)
  */
 export async function broadcastToAll(
   ctx: MutationCtx,
   notification: NotificationPayload,
 ): Promise<number> {
-  const devices = await ctx.db.query("registeredDevices").take(1000);
+  const devices = await ctx.db.query("registeredDevices").take(MAX_BROADCAST_BATCH);
   let sentCount = 0;
   for (const device of devices) {
     const sent = await sendToDevice(ctx, device.deviceId, notification);

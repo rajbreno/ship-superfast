@@ -11,13 +11,25 @@ export const rag = new RAG(components.rag, {
   embeddingDimension: 1536,
 });
 
+const MAX_QUERY_LENGTH = 5_000;
+const MAX_NAMESPACE_LENGTH = 64;
+const ALLOWED_NAMESPACE_PATTERN = /^[a-zA-Z0-9_-]+$/;
+
+function validateNamespace(namespace: string | undefined): string {
+  const ns = namespace ?? "global";
+  if (ns.length > MAX_NAMESPACE_LENGTH || !ALLOWED_NAMESPACE_PATTERN.test(ns)) {
+    throw new Error("Invalid namespace");
+  }
+  return ns;
+}
+
 // Add a document to the knowledge base (internal-only to prevent data poisoning)
 export const addDocument = internalAction({
   args: { text: v.string(), namespace: v.optional(v.string()) },
   returns: v.null(),
   handler: async (ctx, args) => {
     await rag.add(ctx, {
-      namespace: args.namespace ?? "global",
+      namespace: validateNamespace(args.namespace),
       text: args.text,
     });
     return null;
@@ -32,8 +44,11 @@ export const search = action({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Unauthorized");
+    if (!args.query.trim() || args.query.length > MAX_QUERY_LENGTH) {
+      throw new Error("Query must be between 1 and 5000 characters");
+    }
     const { results, text } = await rag.search(ctx, {
-      namespace: args.namespace ?? "global",
+      namespace: validateNamespace(args.namespace),
       query: args.query,
       limit: 10,
     });
@@ -49,8 +64,11 @@ export const askQuestion = action({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Unauthorized");
+    if (!args.prompt.trim() || args.prompt.length > MAX_QUERY_LENGTH) {
+      throw new Error("Prompt must be between 1 and 5000 characters");
+    }
     const { text, context } = await rag.generateText(ctx, {
-      search: { namespace: args.namespace ?? "global", limit: 10 },
+      search: { namespace: validateNamespace(args.namespace), limit: 10 },
       prompt: args.prompt,
       model: openai.chat(process.env.AGENT_MODEL ?? "gpt-4o-mini"),
     });
