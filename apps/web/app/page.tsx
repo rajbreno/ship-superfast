@@ -55,7 +55,7 @@ import {
 } from "@hugeicons/core-free-icons";
 
 const EXPO_PROJECT_ID = "37103778-bef9-4f12-b132-b84a65630ace";
-const EXPO_UPDATE_GROUP_ID = "76380cdd-8969-4bc0-a1cf-9e7e7825ac46";
+const EXPO_UPDATE_GROUP_ID = "1683e4d6-ccee-48b1-ba5d-9de66e3be9bc";
 const EXPO_PREVIEW_URL = `https://expo.dev/preview/update?projectId=${EXPO_PROJECT_ID}&group=${EXPO_UPDATE_GROUP_ID}`;
 const EXPO_QR_URL = `https://qr.expo.dev/eas-update?projectId=${EXPO_PROJECT_ID}&groupId=${EXPO_UPDATE_GROUP_ID}`;
 
