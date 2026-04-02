@@ -97,12 +97,14 @@ export const identifyCustomer = internalQuery({
       if (byUserEmail) return { dodoCustomerId: byUserEmail.dodoCustomerId };
     }
 
-    // 3. Fallback: find customer via a payment linked to this user's team
-    const membership = await ctx.db
+    // 3. Fallback: find customer via payment or subscription linked to this user's teams
+    const memberships = await ctx.db
       .query("teamMembers")
       .withIndex("by_userId", (q) => q.eq("userId", userId))
-      .first();
-    if (membership) {
+      .collect();
+
+    for (const membership of memberships) {
+      // Check payments for this team
       const payment = await ctx.db
         .query("payments")
         .withIndex("by_teamId", (q) => q.eq("teamId", membership.teamId))
@@ -113,6 +115,19 @@ export const identifyCustomer = internalQuery({
           .withIndex("by_email", (q) => q.eq("email", payment.customerEmail))
           .first();
         if (byPaymentEmail) return { dodoCustomerId: byPaymentEmail.dodoCustomerId };
+      }
+
+      // Check subscriptions for this team
+      const subscription = await ctx.db
+        .query("subscriptions")
+        .withIndex("by_teamId", (q) => q.eq("teamId", membership.teamId))
+        .first();
+      if (subscription?.customerEmail) {
+        const bySubEmail = await ctx.db
+          .query("customers")
+          .withIndex("by_email", (q) => q.eq("email", subscription.customerEmail))
+          .first();
+        if (bySubEmail) return { dodoCustomerId: bySubEmail.dodoCustomerId };
       }
     }
 

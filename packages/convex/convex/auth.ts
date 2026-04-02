@@ -2,6 +2,7 @@ import Google from "@auth/core/providers/google";
 import Resend from "@auth/core/providers/resend";
 import { convexAuth } from "@convex-dev/auth/server";
 import { emailLayout } from "./email";
+import { APP_NAME } from "./lib/constants";
 
 // Base URL for resolving relative redirects — update for production
 const SITE_URL = process.env.SITE_URL ?? "http://localhost:3000";
@@ -34,7 +35,7 @@ export const { auth, signIn, signOut, store } = convexAuth({
   providers: [
     Google,
     Resend({
-      from: process.env.AUTH_RESEND_FROM ?? "noreply@mail.rajbreno.com",
+      from: process.env.AUTH_RESEND_FROM ?? `${APP_NAME} <noreply@mail.rajbreno.com>`,
       async sendVerificationRequest({ identifier: email, url, provider }) {
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",
@@ -45,9 +46,9 @@ export const { auth, signIn, signOut, store } = convexAuth({
           body: JSON.stringify({
             from: provider.from,
             to: email,
-            subject: "Sign in to Convex Kit",
+            subject: `Sign in to ${APP_NAME}`,
             html: magicLinkEmail(url),
-            text: `Sign in to Convex Kit: ${url}`,
+            text: `Sign in to ${APP_NAME}: ${url}`,
           }),
         });
         if (!res.ok) {

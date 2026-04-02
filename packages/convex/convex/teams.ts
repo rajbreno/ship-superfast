@@ -262,6 +262,14 @@ export const ensureTeam = mutation({
       joinedAt: now,
     });
 
+    // Initialize free trial credits
+    await ctx.db.insert("teamCredits", {
+      teamId,
+      balance: 10,
+      totalPurchased: 10,
+      totalUsed: 0,
+    });
+
     return teamId;
   },
 });
@@ -358,6 +366,9 @@ export const acceptInvite = mutation({
     if (invite.email.toLowerCase() !== user.email.toLowerCase()) {
       throw new Error("This invite is for a different email");
     }
+
+    const team = await ctx.db.get(invite.teamId);
+    if (!team) throw new Error("This team no longer exists");
 
     const existing = await Teams.getTeamMembership(ctx, invite.teamId, userId);
     if (existing) {
@@ -470,6 +481,16 @@ export const updateTeamName = mutation({
 
 // ── Internal functions ───────────────────────────────────────────────
 
+/** Get team plan (used by webhook handlers to detect upgrade vs downgrade). */
+export const getTeamPlan = internalQuery({
+  args: { teamId: v.id("teams") },
+  returns: v.union(v.literal("free"), v.literal("pro"), v.literal("max"), v.null()),
+  handler: async (ctx, args) => {
+    const team = await ctx.db.get(args.teamId);
+    return team?.plan ?? "free";
+  },
+});
+
 /** Used by actions (e.g. createCheckout) to verify the caller's team role. */
 export const getMyTeamRole = internalQuery({
   args: { teamId: v.id("teams") },
@@ -566,7 +587,7 @@ export const validateAndCreateInvite = internalMutation({
 
 // ── Invite action (sends email) ──────────────────────────────────────
 
-const EMAIL_REGEX = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 const MAX_EMAIL_LENGTH = 254;
 
 function isValidEmail(email: string): boolean {

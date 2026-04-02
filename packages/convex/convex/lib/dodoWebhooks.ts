@@ -3,6 +3,7 @@ import { internal } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
 import { PRODUCT_PLAN_MAP, resolvePlanFromProductId } from "./billing";
 import { DEFAULT_FROM_EMAIL } from "./constants";
+import { PLAN_CREDITS } from "./plans";
 import {
   paymentSuccessEmailTemplate,
   refundSuccessEmailTemplate,
@@ -35,10 +36,13 @@ function extractTeamMeta(payload: any): {
         typeof metadata.teamId === "string"
           ? (metadata.teamId as Id<"teams">)
           : undefined;
+      if (!teamId && metadata.teamId !== undefined) {
+        console.warn("[Billing] extractTeamMeta: teamId present but not a string:", metadata.teamId);
+      }
       return { teamId };
     }
-  } catch {
-    // Best-effort extraction
+  } catch (e) {
+    console.warn("[Billing] extractTeamMeta failed:", e);
   }
   return {};
 }
@@ -51,7 +55,7 @@ function extractProductName(payload: any): string | undefined {
         .map((item: any) => item.product?.name ?? item.name)
         .filter(Boolean)
         .join(", ");
-      return name || undefined;
+      return name ? name.slice(0, 500) : undefined;
     }
   } catch {
     // Best-effort extraction
@@ -80,7 +84,10 @@ function resolvePlanFromPayload(payload: any): "pro" | "max" {
     const firstProductId = items[0]?.product_id;
     return resolvePlanFromProductId(firstProductId);
   }
-  return "pro";
+  console.warn(
+    `[Billing] Could not resolve plan from webhook payload. product_id=${productId}. Defaulting to "pro".`,
+  );
+  return "pro"; // Safe default: Dodo only sends known product IDs; unknown means env var mismatch
 }
 
 // ── Shared arg builders ───────────────────────────────────────────────
@@ -141,6 +148,8 @@ export const dodoWebhookHandler = createDodoWebhookHandler({
       ...args,
       status: payload.data.status,
     });
+
+    // Credits are NOT provisioned here — onSubscriptionActive handles all credit provisioning
 
     if (args.customerEmail) {
       try {
@@ -223,29 +232,93 @@ export const dodoWebhookHandler = createDodoWebhookHandler({
 
   onSubscriptionActive: async (ctx, payload) => {
     const { teamId } = extractTeamMeta(payload);
+    const plan = resolvePlanFromPayload(payload);
+    const subscriptionId = payload.data.subscription_id;
+
     await ctx.runMutation(internal.webhooks.handleSubscriptionEvent, {
       ...buildSubscriptionArgs(payload, teamId),
       status: payload.data.status,
-      plan: resolvePlanFromPayload(payload),
+      plan,
     });
+
+    // Atomically check provisioning flag + add credits in one mutation.
+    // This prevents the TOCTOU race where duplicate webhooks both pass
+    // a query-based check before either marks it as provisioned.
+    const planCredits = PLAN_CREDITS[plan] ?? 0;
+    if (planCredits > 0 && teamId) {
+      const provisioned = await ctx.runMutation(internal.credits.provisionCreditsOnce, {
+        teamId,
+        amount: planCredits,
+        subscriptionId,
+      });
+      if (!provisioned) {
+        console.log(`[Billing] Credits already provisioned for subscription ${subscriptionId}, skipping`);
+      }
+    }
   },
 
   onSubscriptionRenewed: async (ctx, payload) => {
     const { teamId } = extractTeamMeta(payload);
+    const plan = resolvePlanFromPayload(payload);
+    const subscriptionId = payload.data.subscription_id;
+
     await ctx.runMutation(internal.webhooks.handleSubscriptionEvent, {
       ...buildSubscriptionArgs(payload, teamId),
       status: "renewed",
-      plan: resolvePlanFromPayload(payload),
+      plan,
     });
+
+    // Reset credits only on actual renewals, not on initial subscription.
+    // On first subscription, both active + renewed fire together.
+    // provisionCreditsOnce (called by onSubscriptionActive) handles initial credits.
+    // We detect "actual renewal" by checking if credits were already provisioned
+    // (set by onSubscriptionActive). This is safe because it's a single mutation read.
+    if (teamId) {
+      const alreadyProvisioned = await ctx.runQuery(
+        internal.webhooks.wasSubscriptionProvisioned,
+        { subscriptionId },
+      );
+      // If not yet provisioned, this is the initial subscription — skip
+      // (onSubscriptionActive will handle credits via provisionCreditsOnce)
+      if (!alreadyProvisioned) {
+        console.log(`[Billing] Renewal skipped for ${subscriptionId} — initial subscription, active handler will provision`);
+        return;
+      }
+      const planCredits = PLAN_CREDITS[plan] ?? 0;
+      if (planCredits > 0) {
+        await ctx.runMutation(internal.credits.resetCredits, {
+          teamId,
+          planCredits,
+        });
+      }
+    }
   },
 
   onSubscriptionPlanChanged: async (ctx, payload) => {
     const { teamId } = extractTeamMeta(payload);
+    const newPlan = resolvePlanFromPayload(payload);
+
+    // Detect upgrade vs downgrade
+    const PLAN_RANK: Record<string, number> = { free: 0, pro: 1, max: 2 };
+    let isUpgrade = true;
+    if (teamId) {
+      const team = await ctx.runQuery(internal.teams.getTeamPlan, { teamId });
+      const currentRank = PLAN_RANK[team ?? "free"] ?? 0;
+      const newRank = PLAN_RANK[newPlan] ?? 0;
+      isUpgrade = newRank > currentRank;
+    }
+
+    // For upgrades: update subscription record but don't change team plan yet
+    //   → plan + credits will be applied when subscription.active fires after payment
+    // For downgrades: update subscription record but keep current plan until renewal
+    //   → plan + credits will be applied on next subscription.renewed
     await ctx.runMutation(internal.webhooks.handleSubscriptionEvent, {
       ...buildSubscriptionArgs(payload, teamId),
       status: payload.data.status,
-      plan: resolvePlanFromPayload(payload),
+      // Don't pass plan — prevents immediate team plan change
     });
+
+    console.log(`[Billing] Plan ${isUpgrade ? "upgrade" : "downgrade"} to ${newPlan} — will take effect ${isUpgrade ? "when subscription.active fires" : "on next renewal"}`);
   },
 
   onSubscriptionCancelled: async (ctx, payload) => {

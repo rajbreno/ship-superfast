@@ -10,4 +10,11 @@ crons.cron(
   internal.inviteCleanup.cleanupExpiredInvites,
 );
 
+// Reset free plan credits monthly on the 1st at 00:00 UTC
+crons.cron(
+  "reset-free-plan-credits",
+  "0 0 1 * *",
+  internal.credits.resetFreePlanCredits,
+);
+
 export default crons;

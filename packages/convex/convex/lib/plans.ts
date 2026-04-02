@@ -14,23 +14,34 @@ export type PlanDefinition = {
   period: string; // e.g., "/mo"
 };
 
-// Create your own products in the Dodo dashboard and replace the IDs below.
+// Product IDs resolve from env vars so test and live mode work automatically.
+// Fallbacks are the default test mode IDs — replace with your own from the Dodo dashboard.
+const PRO_PRODUCT_ID = process.env.DODO_PRO_PRODUCT_ID ?? "pdt_0Na80F8DAxolISwHgq98f";
+const MAX_PRODUCT_ID = process.env.DODO_MAX_PRODUCT_ID ?? "pdt_0Na80GkE51ZnB71TzmzM3";
+
 export const PLANS: PlanDefinition[] = [
   {
     tier: "pro",
-    productId: "pdt_0Na80F8DAxolISwHgq98f",
+    productId: PRO_PRODUCT_ID,
     name: "Pro",
     priceDisplay: "$9.90",
     period: "/mo",
   },
   {
     tier: "max",
-    productId: "pdt_0Na80GkE51ZnB71TzmzM3",
+    productId: MAX_PRODUCT_ID,
     name: "Max",
     priceDisplay: "$19.90",
     period: "/mo",
   },
 ];
+
+// Credit allocation per plan tier
+export const PLAN_CREDITS: Record<string, number> = {
+  free: 10,
+  pro: 100,
+  max: 300,
+};
 
 // ── Derived maps ─────────────────────────────────────────────────────
 

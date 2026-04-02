@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../../packages/convex/convex/_generated/api";
 import { Spinner } from "@/components/ui/spinner";
@@ -38,9 +38,11 @@ export default function DashboardLayout({
     }
   }, [isLoading, isSignedIn, router]);
 
-  // Auto-create team on first sign-in (safe to remove if teams feature is disabled)
+  // Auto-create team on first sign-in (runs once per session)
+  const hasEnsuredRef = useRef(false);
   useEffect(() => {
-    if (isSignedIn) {
+    if (isSignedIn && !hasEnsuredRef.current) {
+      hasEnsuredRef.current = true;
       ensureTeam().catch((err) => {
         console.warn("ensureTeam failed (teams module may be removed):", err);
       });
@@ -64,9 +66,9 @@ export default function DashboardLayout({
       <SidebarProvider>
         <TeamProvider>
           <AppSidebar />
-          <SidebarInset>
+          <SidebarInset className="overflow-x-hidden">
             <DashboardHeader pageTitle={pageTitle} />
-            <main className="flex-1 px-6 py-8">{children}</main>
+            <main className="min-w-0 flex-1 px-6 py-8">{children}</main>
           </SidebarInset>
         </TeamProvider>
       </SidebarProvider>

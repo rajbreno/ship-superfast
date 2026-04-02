@@ -60,6 +60,7 @@ export default defineSchema({
     webhookPayload: v.string(),
     createdAt: v.number(),
     teamId: v.optional(v.id("teams")),
+    creditsProvisioned: v.optional(v.boolean()),
   })
     .index("by_subscriptionId", ["subscriptionId"])
     .index("by_teamId", ["teamId"]),
@@ -70,7 +71,9 @@ export default defineSchema({
     ownerId: v.id("users"),
     plan: v.optional(v.union(v.literal("free"), v.literal("pro"), v.literal("max"))),
     createdAt: v.number(),
-  }).index("by_ownerId", ["ownerId"]),
+  })
+    .index("by_ownerId", ["ownerId"])
+    .index("by_plan", ["plan"]),
 
   teamMembers: defineTable({
     teamId: v.id("teams"),
@@ -98,5 +101,13 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_teamId", ["teamId"])
-    .index("by_email", ["email"]),
+    .index("by_email", ["email"])
+    .index("by_status_and_createdAt", ["status", "createdAt"]),
+
+  teamCredits: defineTable({
+    teamId: v.id("teams"),
+    balance: v.number(),
+    totalPurchased: v.number(),
+    totalUsed: v.number(),
+  }).index("by_teamId", ["teamId"]),
 });

@@ -26,13 +26,14 @@ export default function DashboardPage() {
   const { currentUser, isAdmin } = useSession();
   const { activeTeam } = useTeam();
   const myInvites = useQuery(api.teams.getMyPendingInvites);
-  const payments = useQuery(
-    api.payments.getPaymentHistory,
+
+  const credits = useQuery(
+    api.credits.getTeamCredits,
     activeTeam ? { teamId: activeTeam._id } : "skip",
   );
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
+    <div className="mx-auto max-w-6xl space-y-8">
       {/* Welcome header */}
       <div className="flex items-center gap-4">
         <Avatar className="h-14 w-14">
@@ -68,6 +69,52 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
+              <CardDescription>Credits Balance</CardDescription>
+              <div className="rounded-lg bg-primary/10 p-2">
+                <HugeiconsIcon
+                  icon={Invoice02Icon}
+                  strokeWidth={1.5}
+                  className="h-5 w-5 text-primary"
+                />
+              </div>
+            </div>
+            <CardTitle className="text-2xl">
+              {credits?.balance ?? 0}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">
+              Available credits
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardDescription>Credits Used</CardDescription>
+              <div className="rounded-lg bg-primary/10 p-2">
+                <HugeiconsIcon
+                  icon={FingerPrintIcon}
+                  strokeWidth={1.5}
+                  className="h-5 w-5 text-primary"
+                />
+              </div>
+            </div>
+            <CardTitle className="text-2xl">
+              {credits?.totalUsed ?? 0}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">
+              Total credits consumed
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
               <CardDescription>Team Plan</CardDescription>
               <div className="rounded-lg bg-primary/10 p-2">
                 <HugeiconsIcon
@@ -84,48 +131,6 @@ export default function DashboardPage() {
           <CardContent>
             <p className="text-xs text-muted-foreground">
               Shared across all team members
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardDescription>Transactions</CardDescription>
-              <div className="rounded-lg bg-primary/10 p-2">
-                <HugeiconsIcon
-                  icon={Invoice02Icon}
-                  strokeWidth={1.5}
-                  className="h-5 w-5 text-primary"
-                />
-              </div>
-            </div>
-            <CardTitle className="text-2xl">
-              {payments?.length ?? 0}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">Total payments</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardDescription>Auth</CardDescription>
-              <div className="rounded-lg bg-primary/10 p-2">
-                <HugeiconsIcon
-                  icon={FingerPrintIcon}
-                  strokeWidth={1.5}
-                  className="h-5 w-5 text-primary"
-                />
-              </div>
-            </div>
-            <CardTitle className="text-2xl">Connected</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">
-              Google OAuth via Convex Auth
             </p>
           </CardContent>
         </Card>

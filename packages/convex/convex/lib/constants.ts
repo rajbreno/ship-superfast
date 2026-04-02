@@ -2,4 +2,4 @@
 export const APP_NAME = "Ship Superfast";
 
 export const DEFAULT_FROM_EMAIL =
-  process.env.AUTH_RESEND_FROM ?? "noreply@mail.rajbreno.com";
+  process.env.AUTH_RESEND_FROM ?? `${APP_NAME} <noreply@mail.rajbreno.com>`;

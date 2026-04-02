@@ -9,12 +9,22 @@ export const resend = new Resend(components.resend, { testMode: false });
 // ── Email templates ──────────────────────────────────────────────────
 
 function getLogoUrl(): string {
-  return "https://ship.rajbreno.com/logos/brand-logo.png";
+  const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
+  return `${siteUrl}/icon.png`;
 }
 
 function formatAmount(amount: number, currency: string): string {
   const dollars = (amount / 100).toFixed(2);
   return `${dollars} ${currency.toUpperCase()}`;
+}
+
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 /** Plain email wrapper — hosted logo + message + footer. Minimal HTML to avoid spam filters. */
@@ -46,9 +56,10 @@ export function paymentSuccessEmailTemplate(
   amount: number,
   currency: string,
 ): string {
+  const safeProductName = escapeHtml(productName);
   return emailLayout(
-    `<p style="margin:0 0 8px;">Payment confirmed</p>
-<p style="margin:0;color:#3f3f46;">Your payment of <strong>${formatAmount(amount, currency)}</strong> for <strong>${productName}</strong> was successful.</p>`,
+    `<p style="margin:0 0 8px;font-size:16px;font-weight:600;">Payment confirmed</p>
+<p style="margin:0;color:#3f3f46;">Your payment of <strong>${formatAmount(amount, currency)}</strong> for <strong>${safeProductName}</strong> was successful.</p>`,
   );
 }
 
@@ -57,7 +68,7 @@ export function refundSuccessEmailTemplate(
   currency: string,
 ): string {
   return emailLayout(
-    `<p style="margin:0 0 8px;">Refund processed</p>
+    `<p style="margin:0 0 8px;font-size:16px;font-weight:600;">Refund processed</p>
 <p style="margin:0;color:#3f3f46;">Your refund of <strong>${formatAmount(amount, currency)}</strong> has been processed. It may take a few business days to appear on your statement.</p>`,
   );
 }

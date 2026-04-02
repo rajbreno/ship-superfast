@@ -4,7 +4,7 @@ import { internal } from "./_generated/api";
 import { checkout, customerPortal } from "./dodo";
 import * as Users from "./lib/users";
 import * as Teams from "./lib/teams";
-import { resolveProductName, resolveSubscriptionPlanName, resolvePlanFromWebhookPayload } from "./lib/billing";
+import { resolveProductName, resolveSubscriptionPlanName, resolvePlanFromWebhookPayload, PRODUCT_PLAN_MAP } from "./lib/billing";
 
 // --- Actions ---
 
@@ -23,6 +23,24 @@ export const createCheckout = action({
   handler: async (ctx, args): Promise<{ checkout_url: string }> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Unauthorized");
+
+    // Validate product IDs against known products
+    for (const item of args.product_cart) {
+      if (!PRODUCT_PLAN_MAP[item.product_id]) {
+        throw new Error("Invalid product selected.");
+      }
+      if (item.quantity !== 1) {
+        throw new Error("Invalid quantity.");
+      }
+    }
+
+    // Validate returnUrl to prevent open redirect
+    if (args.returnUrl) {
+      const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
+      if (!args.returnUrl.startsWith(siteUrl) && !args.returnUrl.startsWith("/")) {
+        throw new Error("Invalid return URL.");
+      }
+    }
 
     // Verify caller is owner/admin
     const membership = await ctx.runQuery(internal.teams.getMyTeamRole, {
@@ -97,31 +115,23 @@ const subscriptionValidator = v.object({
   _id: v.id("subscriptions"),
   _creationTime: v.number(),
   subscriptionId: v.string(),
-  businessId: v.string(),
-  customerEmail: v.string(),
   planName: v.string(),
   status: v.string(),
-  webhookPayload: v.string(),
   createdAt: v.number(),
   teamId: v.optional(v.id("teams")),
+  creditsProvisioned: v.optional(v.boolean()),
 });
 
 // Enriched payment with resolved display name
 const enrichedPaymentValidator = v.object({
   _id: v.id("payments"),
   _creationTime: v.number(),
-  paymentId: v.string(),
-  businessId: v.string(),
-  customerEmail: v.string(),
-  productName: v.optional(v.string()),
   displayName: v.string(),
   plan: v.string(),
   amount: v.number(),
   currency: v.string(),
   status: v.string(),
-  webhookPayload: v.string(),
   createdAt: v.number(),
-  teamId: v.optional(v.id("teams")),
 });
 
 // --- Subscription Queries ---
@@ -147,8 +157,9 @@ export const getSubscriptionStatus = query({
     );
     const sub = active ?? subscriptions[0] ?? null;
     if (!sub) return null;
+    const { webhookPayload: _, businessId: _b, customerEmail: _c, ...safe } = sub;
     return {
-      ...sub,
+      ...safe,
       planName: sub.planName ?? resolveSubscriptionPlanName(sub.webhookPayload),
     };
   },
@@ -170,10 +181,13 @@ export const getAllSubscriptions = query({
       .order("desc")
       .collect();
 
-    return subscriptions.map((sub) => ({
-      ...sub,
-      planName: sub.planName ?? resolveSubscriptionPlanName(sub.webhookPayload),
-    }));
+    return subscriptions.map((sub) => {
+      const { webhookPayload: _, businessId: _b, customerEmail: _c, ...safe } = sub;
+      return {
+        ...safe,
+        planName: sub.planName ?? resolveSubscriptionPlanName(sub.webhookPayload),
+      };
+    });
   },
 });
 
@@ -196,9 +210,14 @@ export const getPaymentHistory = query({
       .collect();
 
     return payments.map((p) => ({
-      ...p,
+      _id: p._id,
+      _creationTime: p._creationTime,
       displayName: resolveProductName(p.productName, p.amount, p.webhookPayload),
       plan: resolvePlanFromWebhookPayload(p.webhookPayload),
+      amount: p.amount,
+      currency: p.currency,
+      status: p.status,
+      createdAt: p.createdAt,
     }));
   },
 });

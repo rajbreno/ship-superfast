@@ -99,7 +99,7 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       {/* Pending invitations for current user */}
       {myInvites && myInvites.length > 0 && (
         <IncomingInvites invites={myInvites} />

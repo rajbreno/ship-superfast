@@ -80,7 +80,7 @@ export default function LandingPage() {
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="mx-auto flex w-full max-w-6xl flex-col items-center px-6 pt-28 pb-20">
+      <section className="mx-auto flex w-full max-w-7xl flex-col items-center px-6 pt-28 pb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -166,7 +166,7 @@ export default function LandingPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6 }}
-        className="mx-auto w-full max-w-6xl px-6 py-24"
+        className="mx-auto w-full max-w-7xl px-6 py-24"
       >
         <Carousel opts={{ align: "start", loop: true }}>
           <CarouselContent>
@@ -202,7 +202,7 @@ export default function LandingPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6 }}
-        className="mx-auto w-full max-w-6xl px-6 py-24"
+        className="mx-auto w-full max-w-7xl px-6 py-24"
       >
         <div className="mb-14 text-center">
           <h2 className="text-4xl font-semibold tracking-tight">The Stack</h2>
@@ -249,7 +249,7 @@ export default function LandingPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6 }}
-        className="mx-auto w-full max-w-6xl px-6 py-24"
+        className="mx-auto w-full max-w-7xl px-6 py-24"
       >
         <div className="mb-14 text-center">
           <h2 className="text-4xl font-semibold tracking-tight">
@@ -293,7 +293,7 @@ export default function LandingPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6 }}
-        className="mx-auto w-full max-w-6xl px-6 py-24"
+        className="mx-auto w-full max-w-7xl px-6 py-24"
       >
         <div className="mb-14 text-center">
           <h2 className="text-4xl font-semibold tracking-tight">
@@ -327,7 +327,7 @@ export default function LandingPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6 }}
-        className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 py-20 text-center"
+        className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 py-20 text-center"
       >
         <h2 className="text-3xl font-semibold">Ready to ship?</h2>
         <p className="max-w-md text-lg text-muted-foreground">
@@ -346,7 +346,7 @@ export default function LandingPage() {
 
       {/* ── Footer ── */}
       <footer className="border-t">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 text-sm text-muted-foreground">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:justify-between sm:px-6">
           <a href="https://rajbreno.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/rajbreno.png" alt="Raj Breno" className="h-6 w-6 rounded-full object-cover" />

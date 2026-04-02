@@ -36,13 +36,29 @@ import type { PlanTier } from "@repo/shared";
 
 // ── URL validation ──
 
+const ALLOWED_REDIRECT_HOSTS = [
+  "checkout.dodopayments.com",
+  "manage.dodopayments.com",
+  "test-checkout.dodopayments.com",
+  "test-manage.dodopayments.com",
+  "portal.dfrnt.com",
+  "dodopayments.com",
+  "customer.dodopayments.com",
+  "billing.dodopayments.com",
+  "test-customer.dodopayments.com",
+  "test-billing.dodopayments.com",
+];
+
 function isAllowedRedirectUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
     return (
       parsed.protocol === "https:" &&
-      (parsed.hostname.endsWith("dodopayments.com") ||
-        parsed.hostname.endsWith("dfrnt.com"))
+      ALLOWED_REDIRECT_HOSTS.some(
+        (host) =>
+          parsed.hostname === host ||
+          parsed.hostname.endsWith(`.${host}`),
+      )
     );
   } catch {
     return false;
@@ -150,7 +166,7 @@ export default function BillingPage() {
 
   if (!activeTeam) {
     return (
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-6xl">
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-12">
             <HugeiconsIcon
@@ -170,7 +186,7 @@ export default function BillingPage() {
   const currentPlan = billingSummary?.plan ?? activeTeam.plan ?? "free";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       {/* Team billing summary */}
       <Card>
         <CardHeader>
@@ -187,7 +203,7 @@ export default function BillingPage() {
             )}
           </CardDescription>
           {/* Manage Billing button — invoices, receipts, and subscription management */}
-          {isOwnerOrAdmin && hasBillingHistory && (
+          {isOwnerOrAdmin && (hasBillingHistory || (subscription && ["active", "renewed", "on_hold"].includes(subscription.status))) && (
             <CardAction>
               <ManageBillingButton teamId={activeTeam._id} />
             </CardAction>
@@ -432,11 +448,14 @@ function PlansSection({
               {isUpgrade && !isFreePlan && (
                 <Button
                   className="w-full"
-                  onClick={handleChangePlan}
+                  onClick={isCancelled
+                    ? () => handleSubscribe(plan.tier as PlanTier)
+                    : handleChangePlan
+                  }
                   disabled={loading !== null}
                 >
-                  {loading === "portal"
-                    ? "Opening..."
+                  {(isCancelled ? loading === plan.tier : loading === "portal")
+                    ? "Redirecting..."
                     : `Upgrade to ${plan.name}`}
                 </Button>
               )}
@@ -460,11 +479,14 @@ function PlansSection({
                 <Button
                   variant="secondary"
                   className="w-full"
-                  onClick={handleChangePlan}
+                  onClick={isCancelled
+                    ? () => handleSubscribe(plan.tier as PlanTier)
+                    : handleChangePlan
+                  }
                   disabled={loading !== null}
                 >
-                  {loading === "portal"
-                    ? "Opening..."
+                  {(isCancelled ? loading === plan.tier : loading === "portal")
+                    ? "Redirecting..."
                     : `Switch to ${plan.name}`}
                 </Button>
               )}

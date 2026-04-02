@@ -1,4 +1,4 @@
-import { internalMutation, MutationCtx } from "./_generated/server";
+import { internalMutation, internalQuery, MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
@@ -44,6 +44,55 @@ async function resolveTeamId(
   return undefined;
 }
 
+
+// ── Subscription lookup (used by renewal to detect initial vs actual renewal) ──
+
+export const getSubscriptionById = internalQuery({
+  args: { subscriptionId: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_subscriptionId", (q) =>
+        q.eq("subscriptionId", args.subscriptionId),
+      )
+      .first();
+    return !!sub;
+  },
+});
+
+// ── Idempotency: track whether credits were provisioned for a subscription ──
+
+export const wasSubscriptionProvisioned = internalQuery({
+  args: { subscriptionId: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_subscriptionId", (q) =>
+        q.eq("subscriptionId", args.subscriptionId),
+      )
+      .first();
+    return !!(sub && (sub as Record<string, unknown>).creditsProvisioned);
+  },
+});
+
+export const markSubscriptionProvisioned = internalMutation({
+  args: { subscriptionId: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_subscriptionId", (q) =>
+        q.eq("subscriptionId", args.subscriptionId),
+      )
+      .first();
+    if (sub) {
+      await ctx.db.patch(sub._id, { creditsProvisioned: true } as Record<string, unknown>);
+    }
+    return null;
+  },
+});
 
 // ── Combined: customer upsert + payment create/upsert ─────────────────
 
@@ -241,6 +290,15 @@ export const handlePaymentStatusEvent = internalMutation({
         !["active", "renewed"].includes(activeSub.status)
       ) {
         await Billing.updateTeamPlan(ctx, teamId, "free");
+      }
+
+      // Revoke remaining paid credits on refund/downgrade
+      const credits = await ctx.db
+        .query("teamCredits")
+        .withIndex("by_teamId", (q) => q.eq("teamId", teamId))
+        .unique();
+      if (credits && credits.balance > 0) {
+        await ctx.db.patch(credits._id, { balance: 0 });
       }
     }
     return null;

@@ -51,7 +51,12 @@ export const updateProfile = mutation({
     if (!userId) throw new Error("Unauthorized");
 
     const updates: Partial<Doc<"users">> = {};
-    if (args.name !== undefined) updates.name = args.name;
+    if (args.name !== undefined) {
+      const trimmed = args.name.trim().replace(/<[^>]*>/g, "");
+      if (!trimmed) throw new Error("Name cannot be empty");
+      if (trimmed.length > 100) throw new Error("Name must be 100 characters or fewer");
+      updates.name = trimmed;
+    }
 
     if (Object.keys(updates).length > 0) {
       await ctx.db.patch(userId, updates);

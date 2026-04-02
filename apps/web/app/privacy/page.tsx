@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/navigation/navbar";
+import { Footer } from "@/components/navigation/footer";
 
 const APP_NAME = "Ship Superfast";
 const CONTACT_EMAIL = "rajbreno1@gmail.com";
@@ -14,8 +15,8 @@ export default function PrivacyPage() {
     <div className="flex min-h-svh flex-col">
       <Navbar />
 
-      <div className="mx-auto max-w-3xl px-6 py-16">
-        <h1 className="text-4xl font-semibold tracking-tight">Privacy Policy</h1>
+      <main className="mx-auto max-w-3xl px-6 py-16">
+        <h1 className="text-2xl font-medium tracking-tight sm:text-4xl">Privacy Policy</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Last updated: {LAST_UPDATED}
         </p>
@@ -231,7 +232,9 @@ export default function PrivacyPage() {
             </p>
           </section>
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

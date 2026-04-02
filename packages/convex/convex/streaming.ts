@@ -15,6 +15,9 @@ const persistentTextStreaming = new PersistentTextStreaming(
 const streamModel = process.env.STREAM_MODEL ?? "gpt-4o-mini";
 
 // Create a new stream (call this from your chat mutation)
+// NOTE: Streams are user-authenticated but not team-scoped.
+// Any authenticated user can create streams and read any stream by ID.
+// If team-scoping is needed, add teamId tracking to stream creation.
 export const createStream = mutation({
   args: {},
   returns: StreamIdValidator,
