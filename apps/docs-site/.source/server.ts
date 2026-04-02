@@ -25,11 +25,11 @@ import * as __fd_glob_30 from "../content/docs/guide/installation.mdx?collection
 import * as __fd_glob_29 from "../content/docs/guide/index.mdx?collection=docs"
 import * as __fd_glob_28 from "../content/docs/guide/environment-variables.mdx?collection=docs"
 import * as __fd_glob_27 from "../content/docs/guide/billing-and-app-stores.mdx?collection=docs"
-import * as __fd_glob_26 from "../content/docs/docs-site/index.mdx?collection=docs"
-import * as __fd_glob_25 from "../content/docs/deployment/web.mdx?collection=docs"
-import * as __fd_glob_24 from "../content/docs/deployment/mobile.mdx?collection=docs"
-import * as __fd_glob_23 from "../content/docs/deployment/index.mdx?collection=docs"
-import * as __fd_glob_22 from "../content/docs/deployment/convex.mdx?collection=docs"
+import * as __fd_glob_26 from "../content/docs/deployment/web.mdx?collection=docs"
+import * as __fd_glob_25 from "../content/docs/deployment/mobile.mdx?collection=docs"
+import * as __fd_glob_24 from "../content/docs/deployment/index.mdx?collection=docs"
+import * as __fd_glob_23 from "../content/docs/deployment/convex.mdx?collection=docs"
+import * as __fd_glob_22 from "../content/docs/docs-site/index.mdx?collection=docs"
 import * as __fd_glob_21 from "../content/docs/backend/users.mdx?collection=docs"
 import * as __fd_glob_20 from "../content/docs/backend/teams.mdx?collection=docs"
 import * as __fd_glob_19 from "../content/docs/backend/streaming.mdx?collection=docs"
@@ -45,11 +45,11 @@ import * as __fd_glob_10 from "../content/docs/backend/credits.mdx?collection=do
 import * as __fd_glob_9 from "../content/docs/backend/billing.mdx?collection=docs"
 import * as __fd_glob_8 from "../content/docs/backend/authentication.mdx?collection=docs"
 import * as __fd_glob_7 from "../content/docs/backend/ai-agent.mdx?collection=docs"
-import { default as __fd_glob_6 } from "../content/docs/guide/meta.json?collection=docs"
-import { default as __fd_glob_5 } from "../content/docs/web/meta.json?collection=docs"
-import { default as __fd_glob_4 } from "../content/docs/mobile/meta.json?collection=docs"
-import { default as __fd_glob_3 } from "../content/docs/deployment/meta.json?collection=docs"
-import { default as __fd_glob_2 } from "../content/docs/docs-site/meta.json?collection=docs"
+import { default as __fd_glob_6 } from "../content/docs/web/meta.json?collection=docs"
+import { default as __fd_glob_5 } from "../content/docs/mobile/meta.json?collection=docs"
+import { default as __fd_glob_4 } from "../content/docs/docs-site/meta.json?collection=docs"
+import { default as __fd_glob_3 } from "../content/docs/guide/meta.json?collection=docs"
+import { default as __fd_glob_2 } from "../content/docs/deployment/meta.json?collection=docs"
 import { default as __fd_glob_1 } from "../content/docs/backend/meta.json?collection=docs"
 import { default as __fd_glob_0 } from "../content/docs/meta.json?collection=docs"
 import { server } from 'fumadocs-mdx/runtime/server';
@@ -60,4 +60,4 @@ const create = server<typeof Config, import("fumadocs-mdx/runtime/types").Intern
   }
 }>({"doc":{"passthroughs":["extractedReferences"]}});
 
-export const docs = await create.docs("docs", "content/docs", {"meta.json": __fd_glob_0, "backend/meta.json": __fd_glob_1, "docs-site/meta.json": __fd_glob_2, "deployment/meta.json": __fd_glob_3, "mobile/meta.json": __fd_glob_4, "web/meta.json": __fd_glob_5, "guide/meta.json": __fd_glob_6, }, {"backend/ai-agent.mdx": __fd_glob_7, "backend/authentication.mdx": __fd_glob_8, "backend/billing.mdx": __fd_glob_9, "backend/credits.mdx": __fd_glob_10, "backend/cron-jobs.mdx": __fd_glob_11, "backend/email.mdx": __fd_glob_12, "backend/http-routes.mdx": __fd_glob_13, "backend/index.mdx": __fd_glob_14, "backend/push-notifications.mdx": __fd_glob_15, "backend/rag.mdx": __fd_glob_16, "backend/schema.mdx": __fd_glob_17, "backend/storage.mdx": __fd_glob_18, "backend/streaming.mdx": __fd_glob_19, "backend/teams.mdx": __fd_glob_20, "backend/users.mdx": __fd_glob_21, "deployment/convex.mdx": __fd_glob_22, "deployment/index.mdx": __fd_glob_23, "deployment/mobile.mdx": __fd_glob_24, "deployment/web.mdx": __fd_glob_25, "docs-site/index.mdx": __fd_glob_26, "guide/billing-and-app-stores.mdx": __fd_glob_27, "guide/environment-variables.mdx": __fd_glob_28, "guide/index.mdx": __fd_glob_29, "guide/installation.mdx": __fd_glob_30, "guide/prerequisites.mdx": __fd_glob_31, "guide/project-structure.mdx": __fd_glob_32, "guide/shared-packages.mdx": __fd_glob_33, "mobile/authentication.mdx": __fd_glob_34, "mobile/billing.mdx": __fd_glob_35, "mobile/home.mdx": __fd_glob_36, "mobile/in-app-updates.mdx": __fd_glob_37, "mobile/index.mdx": __fd_glob_38, "mobile/onboarding.mdx": __fd_glob_39, "mobile/profile.mdx": __fd_glob_40, "mobile/push-notifications.mdx": __fd_glob_41, "mobile/team.mdx": __fd_glob_42, "mobile/theming.mdx": __fd_glob_43, "web/authentication.mdx": __fd_glob_44, "web/billing.mdx": __fd_glob_45, "web/components.mdx": __fd_glob_46, "web/dashboard.mdx": __fd_glob_47, "web/index.mdx": __fd_glob_48, "web/landing-page.mdx": __fd_glob_49, "web/profile.mdx": __fd_glob_50, "web/team.mdx": __fd_glob_51, "web/theming.mdx": __fd_glob_52, });
+export const docs = await create.docs("docs", "content/docs", {"meta.json": __fd_glob_0, "backend/meta.json": __fd_glob_1, "deployment/meta.json": __fd_glob_2, "guide/meta.json": __fd_glob_3, "docs-site/meta.json": __fd_glob_4, "mobile/meta.json": __fd_glob_5, "web/meta.json": __fd_glob_6, }, {"backend/ai-agent.mdx": __fd_glob_7, "backend/authentication.mdx": __fd_glob_8, "backend/billing.mdx": __fd_glob_9, "backend/credits.mdx": __fd_glob_10, "backend/cron-jobs.mdx": __fd_glob_11, "backend/email.mdx": __fd_glob_12, "backend/http-routes.mdx": __fd_glob_13, "backend/index.mdx": __fd_glob_14, "backend/push-notifications.mdx": __fd_glob_15, "backend/rag.mdx": __fd_glob_16, "backend/schema.mdx": __fd_glob_17, "backend/storage.mdx": __fd_glob_18, "backend/streaming.mdx": __fd_glob_19, "backend/teams.mdx": __fd_glob_20, "backend/users.mdx": __fd_glob_21, "docs-site/index.mdx": __fd_glob_22, "deployment/convex.mdx": __fd_glob_23, "deployment/index.mdx": __fd_glob_24, "deployment/mobile.mdx": __fd_glob_25, "deployment/web.mdx": __fd_glob_26, "guide/billing-and-app-stores.mdx": __fd_glob_27, "guide/environment-variables.mdx": __fd_glob_28, "guide/index.mdx": __fd_glob_29, "guide/installation.mdx": __fd_glob_30, "guide/prerequisites.mdx": __fd_glob_31, "guide/project-structure.mdx": __fd_glob_32, "guide/shared-packages.mdx": __fd_glob_33, "mobile/authentication.mdx": __fd_glob_34, "mobile/billing.mdx": __fd_glob_35, "mobile/home.mdx": __fd_glob_36, "mobile/in-app-updates.mdx": __fd_glob_37, "mobile/index.mdx": __fd_glob_38, "mobile/onboarding.mdx": __fd_glob_39, "mobile/profile.mdx": __fd_glob_40, "mobile/push-notifications.mdx": __fd_glob_41, "mobile/team.mdx": __fd_glob_42, "mobile/theming.mdx": __fd_glob_43, "web/authentication.mdx": __fd_glob_44, "web/billing.mdx": __fd_glob_45, "web/components.mdx": __fd_glob_46, "web/dashboard.mdx": __fd_glob_47, "web/index.mdx": __fd_glob_48, "web/landing-page.mdx": __fd_glob_49, "web/profile.mdx": __fd_glob_50, "web/team.mdx": __fd_glob_51, "web/theming.mdx": __fd_glob_52, });
