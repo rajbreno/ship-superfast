@@ -78,9 +78,11 @@ Three cards in a grid:
 
 | Card | Shows |
 |------|-------|
+| **Credits Balance** | Available credits for the active team |
+| **Credits Used** | Total credits consumed by the active team |
 | **Team Plan** | The active team's plan (Free, Pro, or Max) |
-| **Transactions** | Total payment count for the active team |
-| **Auth** | Connection status (Google OAuth) |
+
+Credit data is fetched via `api.credits.getTeamCredits`.
 
 All data is fetched in real time from Convex — cards update automatically when data changes.
 

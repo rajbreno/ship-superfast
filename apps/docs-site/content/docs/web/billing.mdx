@@ -23,7 +23,7 @@ Members see a notice saying "Plan upgrades are managed by your team owner or adm
 
 ### Team billing summary
 
-A card showing the team name, current plan badge (Free / Pro / Max), and member count. Owners and admins also see a "Manage Billing" button that opens the Dodo customer portal.
+A card showing the team name, current plan badge (Free / Pro / Max), and member count. Owners and admins see a "Manage Billing" button that opens the Dodo customer portal. The button appears when the team has billing history (past payments) or an active subscription.
 
 ### Plan cards
 
@@ -71,6 +71,14 @@ window.open(result.portal_url, "_blank");
 ```
 
 The portal handles proration, plan switching, and cancellation.
+
+### Cancelled subscription handling
+
+When a subscription has been cancelled, the plan card shows a "Resubscribe" button that routes to a fresh checkout session instead of the customer portal. This creates a new subscription rather than reactivating the old one.
+
+### Redirect URL validation
+
+The `returnUrl` passed to `createCheckout` is validated against an `ALLOWED_REDIRECT_HOSTS` array that whitelists Dodo-related domains. This prevents open redirect attacks through the checkout flow.
 
 ### Billing history
 

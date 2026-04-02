@@ -1,0 +1,77 @@
+---
+title: Credits
+description: Credit system — allocation, tracking, provisioning, and monthly resets.
+---
+
+## Overview
+
+The credit system tracks usage allowances per team. Each plan tier includes a monthly credit allocation. Credits are stored in the `teamCredits` table and managed through internal mutations.
+
+## Plan credit allocations (`lib/plans.ts`)
+
+```ts
+export const PLAN_CREDITS: Record<string, number> = {
+  free: 10,
+  pro: 100,
+  max: 300,
+};
+```
+
+## How credits are initialized
+
+When a team is first created via `ensureTeam`, it receives 10 free credits through `initializeCredits`. This is a no-op if the team already has a credit record.
+
+## Public query
+
+### `getTeamCredits`
+
+Returns the credit balance for a team. Requires authentication and team membership.
+
+```ts
+const credits = useQuery(api.credits.getTeamCredits, { teamId });
+// → { balance: 8, totalPurchased: 10, totalUsed: 2 }
+```
+
+## Internal functions
+
+### Queries
+
+| Function | Description |
+|----------|-------------|
+| `getTeamCreditsInternal` | Same as `getTeamCredits` but no auth check — for server-side use |
+
+### Mutations
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `reserveCredit` | `teamId` | Deducts 1 credit. Returns `false` if balance is 0. |
+| `refundCredit` | `teamId` | Restores 1 credit and decrements `totalUsed`. |
+| `addCredits` | `teamId`, `amount` | Adds credits to the balance. Creates the record if missing. |
+| `initializeCredits` | `teamId`, `initialBalance` | Creates a credit record if one doesn't exist. No-op otherwise. |
+| `resetCredits` | `teamId`, `planCredits` | Sets balance to the plan allocation. Idempotent — skips `totalPurchased` increment if balance is already correct. |
+| `revokeCredits` | `teamId` | Zeros the credit balance (used on refund). |
+| `provisionCreditsOnce` | `teamId`, `amount`, `subscriptionId` | Atomically checks the `creditsProvisioned` flag and adds credits in a single transaction. Prevents double-crediting on webhook retries. |
+| `resetFreePlanCredits` | — | Resets all free-plan teams (including teams with no plan set) to 10 credits. Called monthly by cron. |
+
+## Idempotent provisioning
+
+`provisionCreditsOnce` solves a TOCTOU race condition where duplicate webhooks could both pass an idempotency check before either marks credits as provisioned. It reads the `creditsProvisioned` flag on the subscription record and sets it to `true` within the same Convex mutation (single transaction), then adds credits.
+
+```
+Webhook A arrives → reads creditsProvisioned=false → sets true + adds credits → returns true
+Webhook B arrives → reads creditsProvisioned=true → returns false (no-op)
+```
+
+## Monthly credit reset
+
+A cron job runs on the 1st of each month at 00:00 UTC. It queries all teams on the free plan (including teams with `plan: undefined`) using the `by_plan` index and resets their balance to 10 credits.
+
+See [Cron Jobs](/docs/backend/cron-jobs) for the schedule configuration.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `credits.ts` | Public query + internal mutations |
+| `lib/plans.ts` | `PLAN_CREDITS` allocation config |
+| `crons.ts` | Monthly reset schedule |

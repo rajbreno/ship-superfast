@@ -31,7 +31,11 @@ Returns `true` if the current user has `role: "admin"`.
 
 ### `updateProfile` (mutation)
 
-Updates the current user's display name.
+Updates the current user's display name. The name is sanitized before saving:
+- Trimmed of leading/trailing whitespace
+- HTML tags stripped (`<[^>]*>` removed)
+- Rejected if empty after trimming
+- Truncated to 100 characters max
 
 ```ts
 const updateProfile = useMutation(api.users.updateProfile);

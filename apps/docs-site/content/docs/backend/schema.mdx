@@ -31,7 +31,7 @@ Extended from `@convex-dev/auth`'s default user table with a custom `role` field
 | `plan` | `"free" \| "pro" \| "max"?` | Current billing plan |
 | `createdAt` | `number` | Creation timestamp |
 
-**Index**: `by_ownerId` — find teams owned by a user.
+**Indexes**: `by_ownerId` — find teams owned by a user. `by_plan` — query teams by billing plan.
 
 ### teamMembers
 
@@ -57,7 +57,7 @@ Join table connecting users to teams with roles.
 | `status` | `"pending" \| "accepted" \| "declined"` | Current state |
 | `createdAt` | `number` | When it was sent |
 
-**Indexes**: `by_teamId`, `by_email`.
+**Indexes**: `by_teamId`, `by_email`, `by_status_and_createdAt` (compound — for filtering by invite status and age).
 
 ### customers
 
@@ -100,6 +100,7 @@ Maps users to Dodo Payments customer IDs.
 | `webhookPayload` | `string` | Raw webhook JSON |
 | `teamId` | `Id<"teams">?` | Linked team |
 | `createdAt` | `number` | Timestamp |
+| `creditsProvisioned` | `boolean?` | Flag to prevent double credit provisioning on webhook retries |
 
 **Indexes**: `by_subscriptionId`, `by_customerEmail`, `by_teamId`.
 
@@ -114,6 +115,19 @@ Tracks push notification tokens.
 | `registeredAt` | `number` | When the token was registered |
 
 **Indexes**: `by_deviceId`, `by_userId`.
+
+### teamCredits
+
+Tracks credit balances per team.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `teamId` | `Id<"teams">` | The team |
+| `balance` | `number` | Current available credits |
+| `totalPurchased` | `number` | Lifetime credits added |
+| `totalUsed` | `number` | Lifetime credits consumed |
+
+**Index**: `by_teamId` — look up credits for a team (unique per team).
 
 ## Key files
 

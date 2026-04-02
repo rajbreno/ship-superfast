@@ -5,7 +5,7 @@ description: Scheduled tasks that run automatically.
 
 ## Overview
 
-Cron jobs are defined in `crons.ts` using Convex's `cronJobs()`. Currently there is one scheduled job.
+Cron jobs are defined in `crons.ts` using Convex's `cronJobs()`.
 
 ## Configured jobs
 
@@ -48,6 +48,22 @@ export const cleanupExpiredInvites = internalMutation({
 });
 ```
 
+### Reset free plan credits
+
+Runs monthly on the 1st at 00:00 UTC. Resets all free-plan teams (including teams with `plan: undefined`) to 10 credits.
+
+```ts
+crons.cron(
+  "reset-free-plan-credits",
+  "0 0 1 * *",
+  internal.credits.resetFreePlanCredits,
+);
+```
+
+The handler queries teams using the `by_plan` index for both `"free"` and `undefined` plan values, then resets or creates a `teamCredits` record for each. Returns `{ teamsReset: number }` for logging.
+
+See [Credits](/docs/backend/credits) for more on the credit system.
+
 ## Adding a new cron job
 
 1. Create your internal function in a new file or existing one
@@ -67,3 +83,4 @@ crons.cron("my-job", "0 */6 * * *", internal.myModule.myFunction);
 |------|---------|
 | `crons.ts` | Cron job definitions |
 | `inviteCleanup.ts` | Expired invite cleanup logic |
+| `credits.ts` | `resetFreePlanCredits` handler |

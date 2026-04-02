@@ -33,6 +33,16 @@ export function emailLayout(body: string): string {
 }
 ```
 
+The logo URL is set dynamically from `process.env.SITE_URL + "/icon.png"`, and the `DEFAULT_FROM_EMAIL` uses the `APP_NAME <email>` format for branded sender addresses.
+
+### `escapeHtml()`
+
+A utility function exported from `email.ts` for sanitizing user-provided input before embedding it in HTML email templates:
+
+```ts
+export function escapeHtml(str: string): string { ... }
+```
+
 ### Built-in templates
 
 | Template | Used for |
@@ -40,7 +50,7 @@ export function emailLayout(body: string): string {
 | `emailLayout(body)` | Base wrapper for all emails |
 | `paymentSuccessEmailTemplate(product, amount, currency)` | Payment confirmation |
 | `refundSuccessEmailTemplate(amount, currency)` | Refund confirmation |
-| Magic link template (in `auth.ts`) | Sign-in link |
+| Magic link template (in `auth.ts`) | Sign-in link (subject/text uses `APP_NAME` variable) |
 | Invite template (in `teams.ts`) | Team invitation |
 
 ## Sending emails

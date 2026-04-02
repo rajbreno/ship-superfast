@@ -24,6 +24,8 @@ Team functions live in `teams.ts` with shared logic in `lib/teams.ts`. Teams are
 
 Auto-creates a personal team on first sign-in. If the user already owns a team, returns its ID. Called from the dashboard layout (web) and home screen (mobile).
 
+On team creation, `ensureTeam` also initializes a `teamCredits` record with 10 free credits via `initializeCredits`.
+
 ```ts
 const ensureTeam = useMutation(api.teams.ensureTeam);
 useEffect(() => {
@@ -44,7 +46,7 @@ Owner-only. Changes a member's role between `"admin"` and `"member"`. Cannot cha
 
 ### `acceptInvite` / `declineInvite`
 
-Accept or decline a pending team invitation. Validates that the invite matches the caller's email and is still pending.
+Accept or decline a pending team invitation. Validates that the invite matches the caller's email and is still pending. `acceptInvite` also verifies the team still exists before creating the membership.
 
 ### `cancelInvite`
 
@@ -64,7 +66,7 @@ Owner only. Transfers ownership to another team member. The old owner becomes an
 
 Creates an invite and sends a notification email via Resend. This is an `action` (not a mutation) because it makes an external HTTP call to send the email.
 
-The invite creation happens in an `internalMutation` (`validateAndCreateInvite`) for atomicity — it validates permissions, checks for duplicates, and inserts the invite in a single transaction.
+The invite creation happens in an `internalMutation` (`validateAndCreateInvite`) for atomicity — it validates permissions, checks for duplicates, and inserts the invite in a single transaction. Email addresses are validated against an RFC 5321 regex before processing.
 
 ```ts
 const inviteMember = useAction(api.teams.inviteMember);

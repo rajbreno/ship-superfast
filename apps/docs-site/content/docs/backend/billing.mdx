@@ -43,6 +43,8 @@ The `identify` function looks up the caller's Dodo customer ID so returning cust
 
 Creates a Dodo checkout session. Only team owners and admins can call this. Passes the `teamId` in metadata so webhooks can link payments to the correct team.
 
+The action validates that the `product_id` in the cart matches a known plan from `PLANS` before calling the Dodo API. The `returnUrl` is checked against an allowlist of permitted redirect hosts to prevent open redirect attacks.
+
 ### `getCustomerPortal`
 
 Returns a Dodo customer portal URL. Opens in the browser for managing subscriptions, invoices, and cancellations.
@@ -55,7 +57,7 @@ Returns a Dodo customer portal URL. Opens in the browser for managing subscripti
 | `getAllSubscriptions` | All subscriptions for a team |
 | `getPaymentHistory` | All payments for a team (with enriched display names) |
 | `isCustomer` | Whether the current user has a customer record |
-| `getTeamBillingSummary` | Team plan + member count |
+| `getTeamBillingSummary` | Team plan + member count (sensitive fields stripped) |
 
 ## Plan definitions (`lib/plans.ts`)
 
@@ -90,17 +92,29 @@ Webhooks arrive at `POST /dodopayments-webhook` and are handled by `lib/dodoWebh
 |-------|---------|--------|
 | `payment.succeeded` | `handlePaymentEvent` | Create payment record + send confirmation email |
 | `payment.failed` | `handlePaymentEvent` | Record failed payment |
-| `subscription.active` | `handleSubscriptionEvent` | Create subscription + upgrade team plan |
-| `subscription.renewed` | `handleSubscriptionEvent` | Update status to renewed |
-| `subscription.plan_changed` | `handleSubscriptionEvent` | Update plan tier |
+| `subscription.active` | `handleSubscriptionEvent` | Create subscription + upgrade team plan + provision credits via `provisionCreditsOnce` |
+| `subscription.renewed` | `handleSubscriptionEvent` | Reset credits for the billing cycle (skips initial activation using `creditsProvisioned` flag) |
+| `subscription.plan_changed` | `handleSubscriptionEvent` | Query current plan, detect upgrade/downgrade, defer tier change |
 | `subscription.cancelled` | `handleSubscriptionEvent` | Schedule deferred downgrade |
 | `subscription.expired` | `handleSubscriptionEvent` | Downgrade to free |
-| `refund.succeeded` | `handlePaymentStatusEvent` | Mark refunded + downgrade plan |
+| `refund.succeeded` | `handlePaymentStatusEvent` | Mark refunded + downgrade plan + revoke all credits |
 | `dispute.*` | `handlePaymentStatusEvent` | Track dispute status |
 
 ### Deferred downgrades
 
 When a subscription is cancelled, the user keeps access until the billing period ends. The webhook schedules a `scheduledPlanDowngrade` mutation at the `next_billing_date`. If the user re-subscribes before then, the downgrade is skipped.
+
+### Credit provisioning and idempotency
+
+When a subscription becomes active, `onSubscriptionActive` calls `provisionCreditsOnce` which atomically checks the `creditsProvisioned` flag on the subscription record and adds plan credits in a single transaction. This prevents duplicate webhooks from double-crediting.
+
+On renewal, `onSubscriptionRenewed` distinguishes between the initial activation (where credits were already provisioned) and actual monthly renewals using the same `creditsProvisioned` flag. Only true renewals reset the credit balance via `resetCredits`.
+
+On plan change, `onSubscriptionPlanChanged` queries the team's current plan to detect the direction of change (upgrade vs downgrade) and defers the tier update accordingly.
+
+On refund, `revokeCredits` zeros the team's credit balance alongside the plan downgrade.
+
+See [Credits](/docs/backend/credits) for the full credit system documentation.
 
 ### Team resolution
 

@@ -57,7 +57,7 @@ const features = [
 
 ### 6. CTA + Footer
 
-A final call-to-action ("Ready to ship?") and a footer with the copyright and theme toggle.
+A final call-to-action ("Ready to ship?") and a `Footer` component (`components/navigation/footer.tsx`) with the copyright, theme toggle, and links to Privacy Policy and Terms of Service pages. The footer uses a responsive `flex-col sm:flex-row` layout. The Terms and Privacy pages also include the `<Footer />` component.
 
 ## Custom components
 
@@ -85,6 +85,10 @@ Props:
 | `direction` | `string` | `"left"` | `"left"`, `"right"`, `"up"`, or `"down"` |
 | `pauseOnHover` | `boolean` | `false` | Pause scrolling on hover |
 | `fadeOut` | `boolean` | `false` | Fade edges for a smooth look |
+
+## Layout
+
+All page sections use `max-w-7xl` for consistent content width.
 
 ## Animations
 
@@ -120,3 +124,4 @@ All sections use Motion's `whileInView` for scroll-triggered fade-in animations:
 | `app/page.tsx` | Landing page (all sections + data arrays) |
 | `components/landing/CircularText.tsx` | Spinning text circle component |
 | `components/landing/LogoLoop.tsx` | Infinite scrolling logo marquee |
+| `components/navigation/footer.tsx` | Footer with copyright, theme toggle, and legal links |
